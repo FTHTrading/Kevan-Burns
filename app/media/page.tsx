@@ -8,6 +8,7 @@ import {
   Check, AlertTriangle, Radio, BarChart2, MessageSquare, Layers, FileText, Info
 } from "lucide-react";
 import { JsonLd } from "../components/JsonLd";
+import { REGISTRY_SITES, REGISTRY_DOMAINS } from "@/lib/registryArchive";
 
 // Ecosystem Asset Data
 const DEPLOYED_APPS = [
@@ -62,8 +63,28 @@ const SENTIMENT_TARGETS = [
 
 export default function MediaDashboard() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [activeTab, setActiveTab] = useState<"portfolio" | "shield" | "persona" | "swarm">("portfolio");
+  const [activeTab, setActiveTab] = useState<"portfolio" | "shield" | "persona" | "swarm" | "registry">("portfolio");
   
+  // Master Registry Search/Filters
+  const [registrySearch, setRegistrySearch] = useState("");
+  const [systemFilter, setSystemFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const filteredRegistrySites = useMemo(() => {
+    return REGISTRY_SITES.filter(site => {
+      const matchesSearch = 
+        site.name.toLowerCase().includes(registrySearch.toLowerCase()) ||
+        site.id.toLowerCase().includes(registrySearch.toLowerCase()) ||
+        (site.url && site.url.toLowerCase().includes(registrySearch.toLowerCase())) ||
+        site.system.toLowerCase().includes(registrySearch.toLowerCase());
+      
+      const matchesSystem = !systemFilter || site.system === systemFilter;
+      const matchesStatus = !statusFilter || site.status === statusFilter;
+      
+      return matchesSearch && matchesSystem && matchesStatus;
+    });
+  }, [registrySearch, systemFilter, statusFilter]);
+
   // AI Sentiment simulator states
   const [sentimentScore, setSentimentScore] = useState(98.4);
   const [isShieldActive, setIsShieldActive] = useState(true);
@@ -290,6 +311,7 @@ export default function MediaDashboard() {
         <div className="flex border-b border-rose-500/10 gap-2 overflow-x-auto pb-1.5 scrollbar-none">
           {[
             { id: "portfolio", label: "Asset Portfolio", icon: Layers },
+            { id: "registry", label: "Sovereign Build Monitor", icon: Database },
             { id: "shield", label: "AI Sentiment Shield", icon: Shield },
             { id: "persona", label: "Man Behind Curtain", icon: Lock },
             { id: "swarm", label: "Publishing Swarm", icon: Cpu }
@@ -385,6 +407,105 @@ export default function MediaDashboard() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 1.5: MASTER REGISTRY MONITOR */}
+            {activeTab === "registry" && (
+              <div className="space-y-6">
+                <div className={`p-6 rounded-3xl border ${cardBg} space-y-4`}>
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-rose-500/5 pb-4">
+                    <div>
+                      <h3 className={`text-lg font-bold ${titleColor} orbitron-title flex items-center gap-2`}>
+                        <Database className="h-5 w-5 text-red-500" />
+                        Unykorn Master Build Registry ({REGISTRY_SITES.length} Deployed Properties)
+                      </h3>
+                      <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
+                        Enterprise index tracking all namespaces, edge nodes, APIs, and micro-applications deployed across Google Cloud Platform, AWS, and Cloudflare Pages.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {/* Search bar */}
+                      <input
+                        type="text"
+                        placeholder="Search registry..."
+                        value={registrySearch}
+                        onChange={(e) => setRegistrySearch(e.target.value)}
+                        className={`px-3 py-1.5 rounded-xl text-xs outline-none focus:border-red-500/40 ${inputBg}`}
+                      />
+                      {/* System filter */}
+                      <select
+                        value={systemFilter}
+                        onChange={(e) => setSystemFilter(e.target.value)}
+                        className={`px-3 py-1.5 rounded-xl text-xs outline-none focus:border-red-500/40 ${inputBg}`}
+                      >
+                        <option value="">All Systems</option>
+                        {Array.from(new Set(REGISTRY_SITES.map(s => s.system))).sort().map(sys => (
+                          <option key={sys} value={sys}>{sys}</option>
+                        ))}
+                      </select>
+                      {/* Status filter */}
+                      <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className={`px-3 py-1.5 rounded-xl text-xs outline-none focus:border-red-500/40 ${inputBg}`}
+                      >
+                        <option value="">All Statuses</option>
+                        <option value="live">Live</option>
+                        <option value="preview">Staging / Preview</option>
+                        <option value="down">Down</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Grid of registry sites */}
+                  <div className="max-h-[500px] overflow-y-auto pr-1 space-y-2.5 scrollbar-thin text-xs">
+                    {filteredRegistrySites.map((site) => (
+                      <div key={site.id} className="p-3.5 rounded-2xl bg-black/10 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-red-500/20 transition-all">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-bold ${titleColor}`}>{site.name}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider border font-mono ${
+                              site.status === "live" 
+                                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" 
+                                : site.status === "preview" 
+                                  ? "bg-blue-500/10 border-blue-500/30 text-blue-400" 
+                                  : "bg-slate-500/10 border-white/5 text-slate-400"
+                            }`}>
+                              {site.status}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500">
+                            <span>System: <strong className="text-slate-400">{site.system}</strong></span>
+                            <span>•</span>
+                            <span>Category: <strong className="text-slate-400">{site.category}</strong></span>
+                            {site.web3 && site.web3 !== "unknown" && (
+                              <>
+                                <span>•</span>
+                                <span>Web3 Status: <strong className="text-red-400">{site.web3}</strong></span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        {site.url && (
+                          <a
+                            href={site.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] font-mono text-red-500 hover:text-red-400 break-all self-start sm:self-center"
+                          >
+                            {site.url.replace("https://", "").replace("http://", "")}
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                    {filteredRegistrySites.length === 0 && (
+                      <div className="text-center py-8 text-slate-500 font-mono text-xs">
+                        No properties matching search filters.
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

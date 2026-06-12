@@ -13,9 +13,9 @@ Here is the internal documentation, portfolio, and system architecture you groun
 - Unykorn is a pre-funded, high-utility autonomous financial operating system.
 - Ecosystem Valuation: Supported by a total build investment of $15.4M – $28.5M.
 - Deployed Assets:
-  * 17 Deployed Production Apps: including Mint Cockpit (ai-troptionsmint.pages.dev) for voice-operated capital ops, Nano Bana 3D (os.troptionsmint.com) for 3D shell, Apostle Node (:7332) edge inference, and Jarvis/Hail Storm Law (hail.unykorn.org) legal attestation engine.
+  * 343 Deployed Properties/Builds: Organized across systems like Misc/Legacy (62), UnyKorn Core (34), Genesis/SUPER-S (20), Education (20), and NEED AI/Phone (19). Of these, 144 builds are currently LIVE online (such as troptionsmint.com, donkai.org, and kevan.unykorn.org) and 68 are in PREVIEW/Staging state (e.g. gmiie-news.pages.dev, xxxiii-io.pages.dev).
   * 44 Reusable Packages: Covering blockchain adapters (Solana, XRPL, Stellar, Besu), x402 credit gateways, neural policy engines, and security configurations.
-  * 16 Apex Domains: Including unykorn.org, xxxiii.io, mensofgod.com, y3kmarkets.com, and donkai.org.
+  * 12 Apex Domains: Including unykorn.org, mensofgod.com, optkas.org, drunks.app, xxxiii.io, y3kmarkets.com, nil33.com, troptionsmint.com, heliosdigital.xyz, digitalgiant.xyz, unykorn.ai, and donkai.org.
 - Institutional Anchors:
   * GLEIF LEI: 2549008J7LUHSQ73SI26 (Americanos Royale Divine International Trust)
   * ISO MIC: UBEC (market venue identifier)
