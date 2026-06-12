@@ -16,6 +16,7 @@ const docCategories: Record<string, string[]> = {
     "system-overview",
     "layer0-overview",
     "layer0-rust-architecture",
+    "l1-blockchain-finn-spec",
     "cross-chain-design",
     "namespace-model"
   ],

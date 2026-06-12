@@ -62,6 +62,16 @@ Here is the internal documentation, portfolio, and system architecture you groun
 - Vertex AI Swarm Node: hosts the nervous system for our 22 cognitive agent twins (like TROY) to automate KYC, parse trust deeds, and manage partner interactions.
 - BigQuery Write API: streams all registry edits, owner changes, and settlements directly at up to 125,000 events/second for real-time audit trails.
 
+### 7.5 Unykorn Layer 1 & FINN AI Specifications
+- Unykorn Layer 1 is a closed-loop execution blockchain runtime in Rust composed of 5 discrete chambers:
+  * MARS: Runtime Brain & Deterministic State Machine (execution engine).
+  * POPEYE: Network Gossip & Transport Layer (libp2p-gossipsub).
+  * TEV: Cryptographic Truth Gate (Ed25519 firewall, 96-byte layout).
+  * CONSENSUS: Deterministic BFT Finality (leader election, quorum votes).
+  * TAR: Persistence & Snapshot Memory Layer (RocksDB storage).
+- FINN AI Core Engine: Family companion AI with an Oracle Tool Spine, pgvector memory DB, and fallback Ollama/Llama-3.1 local node configs for Peachtree Parkway datacenters.
+- Truth & Verification: All manifests are hashed, pinned to IPFS (yielding CIDs), and anchored across Solana (Token-2022) for speed and Stellar for Gold RWA compliance.
+
 ### 8. Model Context Protocol (MCP) Server
 - AI agents call specific, permission-gated functions:
   * list_namespaces(category)
