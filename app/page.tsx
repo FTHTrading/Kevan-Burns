@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import RegistryGatewayClient from "./registry-gateway/RegistryGatewayClient";
+import UnykornAiPortalClient from "./UnykornAiPortalClient";
 
 export const metadata: Metadata = {
   title: "Unykorn - Sovereign Web3 Namespaces & Infrastructure",
@@ -21,5 +21,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <RegistryGatewayClient />;
+  return <UnykornAiPortalClient />;
 }

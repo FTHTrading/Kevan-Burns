@@ -2,13 +2,11 @@ import urllib.request
 import json
 import os
 
-token = "cfut_YOUR_CLOUDFLARE_API_TOKEN"
-account_id = "07bcc4a189ef176261b818409c95891f"
-project = "troptions-unity-legacy-vault"
-
 # Read local .env keys to inject
 local_env = {}
-env_path = "C:\\Users\\Kevan\\legacy-vault-protocol\\.env"
+script_dir = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(script_dir, "../.env")
+
 if os.path.exists(env_path):
     print("Reading env keys from:", env_path)
     with open(env_path, "r") as f:
@@ -22,6 +20,11 @@ if os.path.exists(env_path):
             local_env[k] = v
 else:
     print("WARNING: Local .env file not found!")
+
+# Get active API token from environment or .env
+token = os.environ.get("CLOUDFLARE_API_TOKEN") or local_env.get("CF_API_TOKEN") or "cfut_YOUR_CLOUDFLARE_API_TOKEN"
+account_id = os.environ.get("CF_ACCOUNT_ID") or local_env.get("CF_ACCOUNT_ID") or "07bcc4a189ef176261b818409c95891f"
+project = "troptions-unity-legacy-vault"
 
 # Keys to sync
 keys_to_sync = [
@@ -38,7 +41,12 @@ keys_to_sync = [
     "EVM_TREASURY_PRIVATE_KEY",
     "POLYGON_RPC_URL",
     "ETHEREUM_RPC_URL",
-    "CHAIN_RPC_URL"
+    "CHAIN_RPC_URL",
+    "PINATA_API_KEY",
+    "PINATA_SECRET",
+    "PINATA_JWT",
+    "DATABASE_URL",
+    "MOCK_IPFS"
 ]
 
 # Fetch current config

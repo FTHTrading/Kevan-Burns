@@ -49,7 +49,7 @@ export async function grokChat(
   // Handle some legacy model overrides to stay safe
   const targetModel = modelName.startsWith("grok") ? DEFAULT_MODEL : modelName;
 
-  const url = `https://generativelanguage.googleapis.com/v1/models/${targetModel}:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
 
   // Map messages format
   const systemMessage = messages.find((m) => m.role === "system")?.content || "";
@@ -140,7 +140,7 @@ export async function grokStream(
   const modelName = opts.model || DEFAULT_MODEL;
   const targetModel = modelName.startsWith("grok") ? DEFAULT_MODEL : modelName;
 
-  const url = `https://generativelanguage.googleapis.com/v1/models/${targetModel}:streamGenerateContent?alt=sse&key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:streamGenerateContent?alt=sse&key=${apiKey}`;
 
   const systemMessage = messages.find((m) => m.role === "system")?.content || "";
   const chatMessages = messages

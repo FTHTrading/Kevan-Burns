@@ -76,7 +76,7 @@ Page context: ${pageContext || "Part of Legacy Vault Protocol — a digital esta
 
 Write the full narration now.`;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
