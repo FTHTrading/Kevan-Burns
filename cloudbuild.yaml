@@ -1,0 +1,46 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-legacy-vault'
+    args: [
+      'build',
+      '-t', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/legacy-vault:${_TAG}',
+      '-t', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/legacy-vault:latest',
+      '-f', 'Dockerfile',
+      '.'
+    ]
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-legacy-vault'
+    args: [
+      'push',
+      '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/legacy-vault',
+      '--all-tags'
+    ]
+
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-legacy-vault'
+    entrypoint: 'gcloud'
+    args: [
+      'run', 'deploy', 'legacy-vault',
+      '--image', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/legacy-vault:${_TAG}',
+      '--region', '${_REGION}',
+      '--platform', 'managed',
+      '--set-env-vars', 'DATABASE_URL=postgresql://postgres:SuperSecureUnykornPassword2026!@34.150.163.120:5432/legacy_vault,SMTP_HOST=smtp.gmail.com,SMTP_PORT=465,SMTP_USER=kevan@unykorn.org,NEXTAUTH_URL=https://legacychain.app',
+      '--allow-unauthenticated',
+      '--project', '${PROJECT_ID}'
+    ]
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/legacy-vault:latest'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/legacy-vault:${_TAG}'
+
+substitutions:
+  _REGION: 'us-east4'
+  _REPOSITORY: 'unykorn-agent-registry'
+  _TAG: 'latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

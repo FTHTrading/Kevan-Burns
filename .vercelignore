@@ -1,0 +1,16 @@
+# .vercelignore
+node_modules
+.next
+.git
+.github
+circom.exe
+circom-src
+circuits
+heirloom
+zk
+public/your-legacy.mp4
+*.log
+*.txt
+*.ps1
+*.sh
+*.disabled

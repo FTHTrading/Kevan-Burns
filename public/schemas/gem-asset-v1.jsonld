@@ -1,0 +1,247 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://schema.fthtrading.com/gem/v1"
+  ],
+  "id": "https://schema.fthtrading.com/gem/v1/gem-asset-v1.jsonld",
+  "type": "JsonSchema",
+  "title": "GemAssetCredential v1",
+  "description": "VCDM 2.0 verifiable credential schema for institutional gem RWA assets (Allure Ruby + emerald bundle). Issuance is performed only via Legacy Vault Protocol.",
+  "credentialType": "GemAssetCredential",
+  "securingMechanisms": {
+    "primary": "SD-JWT VC (IETF sd-jwt-vc draft)",
+    "highPrivacy": "BBS+ Data Integrity proof (unlinkable selective disclosure)"
+  },
+  "credentialSubject": {
+    "@type": "GemAsset",
+    "required": [
+      "name",
+      "gemType",
+      "caratWeight",
+      "legalOwner",
+      "titleStatus",
+      "valuation",
+      "manifestCID"
+    ],
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Human-readable asset name (e.g. Allure Ruby)"
+      },
+      "gemType": {
+        "type": "string",
+        "enum": ["ruby", "emerald", "sapphire", "diamond", "other"],
+        "description": "Primary gem species"
+      },
+      "caratWeight": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Weight in carats (xsd:decimal)"
+      },
+      "color": {
+        "type": "string",
+        "description": "Color grade or hue description (e.g. Purple Red / vivid)"
+      },
+      "clarity": {
+        "type": "string",
+        "description": "Clarity grade per lab report summary"
+      },
+      "cut": {
+        "type": "string",
+        "description": "Cut style / shape"
+      },
+      "originCountry": {
+        "type": "string",
+        "description": "Country of geographic origin"
+      },
+      "originRegion": {
+        "type": "string",
+        "description": "Region or mining district (e.g. East Africa / Madagascar)"
+      },
+      "treatment": {
+        "type": "string",
+        "description": "Disclosed treatment (e.g. heated)"
+      },
+      "certifications": {
+        "type": "array",
+        "items": {
+          "@type": "GemCertification",
+          "required": ["lab"],
+          "properties": {
+            "lab": {
+              "type": "string",
+              "enum": ["GIA", "Gübelin", "GRS", "SSEF", "AGL", "other"]
+            },
+            "reportNumber": {
+              "type": "string",
+              "description": "Redacted or placeholder report ID (e.g. GIA-REDACTED)"
+            },
+            "reportDate": { "type": "string", "format": "date" },
+            "reportCID": {
+              "type": "string",
+              "description": "IPFS CID of redacted cert scan — SAMPLE placeholders only in repo"
+            },
+            "summary": {
+              "type": "string",
+              "description": "Non-sensitive summary from lab report"
+            }
+          }
+        }
+      },
+      "legalOwner": {
+        "type": "string",
+        "format": "uri",
+        "description": "DID of legal title holder (SPV or custodial entity)"
+      },
+      "titleStatus": {
+        "type": "string",
+        "enum": [
+          "clear",
+          "encumbered",
+          "in_custody",
+          "pending_transfer",
+          "disputed"
+        ],
+        "description": "Current legal title / custody status"
+      },
+      "valuation": {
+        "@type": "GemValuation",
+        "description": "Independent appraisal reference — package NAV is NOT asserted in this repository",
+        "required": ["appraisalStatus", "currency"],
+        "properties": {
+          "amount": {
+            "type": ["number", "null"],
+            "description": "TBD — independent appraisal required; package NAV not asserted in repo. Do not populate until third-party appraisal is on file."
+          },
+          "currency": {
+            "type": "string",
+            "default": "USD"
+          },
+          "asOf": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Valuation effective timestamp (null until appraisal complete)"
+          },
+          "appraisalStatus": {
+            "type": "string",
+            "enum": ["TBD", "pending", "completed", "stale"],
+            "default": "TBD"
+          },
+          "appraisalNote": {
+            "type": "string",
+            "default": "TBD — independent appraisal required; package NAV not asserted in repo"
+          }
+        }
+      },
+      "manifestCID": {
+        "type": "string",
+        "description": "Legacy Vault manifest IPFS CID (SAMPLE-* prefix in examples)"
+      },
+      "bundleId": {
+        "type": "string",
+        "description": "Collection bundle identifier linking ruby + emerald pair"
+      },
+      "collectionName": {
+        "type": "string",
+        "description": "Marketing / collection name (e.g. Allure Collection)"
+      },
+      "linkedRWATokens": {
+        "type": "array",
+        "items": {
+          "@type": "RWATokenLink",
+          "properties": {
+            "chain": { "type": "string", "example": "solana" },
+            "mintAddress": { "type": "string" },
+            "tokenStandard": { "type": "string", "example": "Token-2022" },
+            "fractionalShare": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      },
+      "vaultRef": {
+        "@type": "VaultRef",
+        "description": "Legacy Vault Protocol custody reference",
+        "properties": {
+          "vaultId": { "type": "string" },
+          "manifestCID": { "type": "string" },
+          "manifestHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      },
+      "chainAnchorRef": {
+        "@type": "ChainAnchorRef",
+        "description": "Legacy Chain registry anchor for manifest / VC digest",
+        "properties": {
+          "chain": { "type": "string", "example": "legacy-private" },
+          "txHash": { "type": "string" },
+          "blockNumber": { "type": "integer" },
+          "anchoredAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "troptionsmintMetadata": {
+        "@type": "TroptionsMintMetadata",
+        "description": "troptionsmint.com Token-2022 mint job cross-reference",
+        "properties": {
+          "mintJobId": { "type": "string" },
+          "metadataURI": { "type": "string", "format": "uri" },
+          "token2022Extensions": { "type": "object" }
+        }
+      },
+      "oracleRef": {
+        "@type": "OracleRef",
+        "description": "GMIIE (xxxiii.io) oracle feed reference",
+        "properties": {
+          "oracleProvider": { "type": "string", "default": "GMIIE" },
+          "oracleFeedId": { "type": "string" },
+          "lastOracleUpdate": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  },
+  "selectiveDisclosure": {
+    "collateral_lending": {
+      "description": "Minimal lender / collateral desk presentation",
+      "claims": [
+        "gemType",
+        "caratWeight",
+        "titleStatus",
+        "valuation.amount",
+        "valuation.currency",
+        "valuation.asOf",
+        "valuation.appraisalStatus",
+        "certifications[].lab",
+        "legalOwner"
+      ],
+      "securing": "SD-JWT"
+    },
+    "secondary_market": {
+      "description": "Secondary liquidity / marketplace counterparty",
+      "claims": [
+        "name",
+        "gemType",
+        "caratWeight",
+        "color",
+        "originCountry",
+        "originRegion",
+        "treatment",
+        "titleStatus",
+        "valuation",
+        "certifications",
+        "manifestCID",
+        "linkedRWATokens",
+        "legalOwner"
+      ],
+      "securing": "SD-JWT"
+    },
+    "regulatory_full": {
+      "description": "Full regulatory / accredited investor disclosure",
+      "claims": ["*"],
+      "excludes": [],
+      "securing": "SD-JWT"
+    },
+    "guardian_internal": {
+      "description": "Legacy Vault guardian quorum internal view",
+      "claims": ["*"],
+      "includesInternal": ["vaultRef", "chainAnchorRef", "troptionsmintMetadata", "oracleRef"],
+      "securing": "BBS+"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://schema.fthtrading.com/gem/v1"
+  ],
+  "id": "urn:uuid:00000000-0000-4000-8000-000000000010",
+  "type": ["VerifiableCredential", "GemAssetCredential"],
+  "issuer": "did:web:legacy.fthtrading.com:spv:allure",
+  "validFrom": "2026-06-04T12:00:00Z",
+  "validUntil": "2027-06-04T12:00:00Z",
+  "credentialSubject": {
+    "type": "GemAsset",
+    "name": "Allure Ruby",
+    "gemType": "ruby",
+    "caratWeight": 54.0,
+    "titleStatus": "in_custody",
+    "legalOwner": "did:web:legacy.fthtrading.com:spv:allure-holdings",
+    "valuation": {
+      "type": "GemValuation",
+      "amount": null,
+      "currency": "USD",
+      "asOf": null,
+      "appraisalStatus": "TBD",
+      "appraisalNote": "TBD — independent appraisal required; package NAV not asserted in repo"
+    },
+    "manifestCID": "bafybei-SAMPLE-ALLURE-MANIFEST-CID-001"
+  },
+  "proof": {
+    "type": "SdJwtVcProof2024",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:web:legacy.fthtrading.com:spv:allure#sd-jwt-key-1",
+    "proofValue": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.SYNTHETIC_SD_JWT_VC_NOT_SIGNED.~disclosed-hash-digests~",
+    "disclosureGroup": "collateral_lending",
+    "disclosedClaims": [
+      "gemType",
+      "caratWeight",
+      "titleStatus",
+      "valuation.amount",
+      "valuation.currency",
+      "valuation.appraisalStatus",
+      "legalOwner"
+    ]
+  },
+  "_comment": "SYNTHETIC SAMPLE — SD-JWT securing for collateral_lending. Not a valid JWT. Issuance via POST /api/vc/issue/gem-asset proofType sd-jwt. Exchange as application/vc."
+}

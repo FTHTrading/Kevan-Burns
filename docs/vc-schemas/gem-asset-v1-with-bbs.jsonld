@@ -1,0 +1,21 @@
+{
+  "_comment": "Superseded by public/schemas/gem-asset-v1.jsonld — kept for BBS+ proof type reference",
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://schema.fthtrading.com/gem/v1"
+  ],
+  "type": "GemAssetCredential",
+  "proof": {
+    "type": "BbsBlsSignature2020",
+    "@context": "https://w3id.org/security/bbs/v1"
+  },
+  "credentialSubject": {
+    "@type": "GemAsset",
+    "valuation": {
+      "@type": "GemValuation",
+      "amount": null,
+      "appraisalNote": "TBD — independent appraisal required; package NAV not asserted in repo"
+    }
+  },
+  "seeAlso": "/schemas/gem-asset-v1.jsonld"
+}

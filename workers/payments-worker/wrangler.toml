@@ -1,0 +1,34 @@
+name = "troptions-unity-payments"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Public
+PUBLIC_STRIPE_PUBLISHABLE = "pk_test_xxx_replace"
+UNITY_TREASURY_ADDRESS = "0x7d9a65d06dcc435a52D5880C6310Bd6E96c156DB" # example EVM or update to Unity/Apostle
+X402_GATEWAY = "http://127.0.0.1:4020"
+
+# MILITARY HARDENED SECRETS (Zero Trust - never in code/git, match blockchainfraud level)
+# All via: wrangler secret put <NAME> (use secure "cloudflare new api.txt" tokens from vault, never echo/log)
+# STRIPE_SECRET_KEY
+# STRIPE_WEBHOOK_SECRET
+# UNITY_TREASURY_ADDRESS (if overriding public)
+# D1 binding below
+
+# After deploy: CF Access policies on worker routes, WAF Super Bot Fight, Full Strict SSL + HSTS Preload
+# Georgia: All logs/comments reference 5655 Peachtree Parkway, Norcross, GA 30092
+
+[[d1_databases]]
+binding = "SUBS_DB"
+database_name = "troptions-unity-subs"
+database_id = "2bc9bf15-a7ec-452f-921a-b0e3278ac308" # created via wrangler d1 create
+# Note: wrangler suggested binding "troptions_unity_subs", but we use SUBS_DB for code compatibility.
+
+[triggers]
+# For scheduled sync of on-chain payments
+crons = ["0 */6 * * *"] # every 6h poll Unity/XRPL/Stellar for pending crypto subs
+
+[env.production]
+# Deploy with: wrangler deploy --env production
+name = "troptions-unity-payments-prod"

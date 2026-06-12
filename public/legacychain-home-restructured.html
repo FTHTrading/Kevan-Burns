@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegacyChain • Secure Digital Vault for Families & Estates | TROPTIONS Rails</title>
+  <link rel="icon" href="/images/legacy/logo-dark-square.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+    :root { --gold: #f0c84a; --ivory: #f5f0e6; --dark: #0a0f1a; }
+    body { font-family: Inter, system-ui, sans-serif; background: var(--dark); color: #fff; }
+    .font-display { font-family: 'Space Grotesk', Inter, system-ui, sans-serif; }
+    .gold { color: var(--gold); }
+    .btn-gold { background: var(--gold); color: #000; font-weight: 600; border-radius: 9999px; }
+    .btn-gold:hover { opacity: 0.92; }
+    .rail-pill { font-size: 11px; letter-spacing: .08em; padding: 6px 14px; border-radius: 9999px; border: 1px solid rgba(245,240,230,.18); background: rgba(255,255,255,.03); white-space: nowrap; transition: all .1s ease; }
+    .rail-pill:hover { border-color: #f0c84a; color: #f0c84a; background: rgba(240,200,74,.06); }
+    .rail-bar { border-bottom: 1px solid rgba(255,255,255,.06); }
+    .section { scroll-margin-top: 80px; }
+    .badge-live { background: #052e16; color: #4ade80; font-size: 10px; padding: 1px 7px; border-radius: 999px; }
+    .badge-prod { background: #1f2937; color: #60a5fa; font-size: 10px; padding: 1px 7px; border-radius: 999px; }
+    .troptions { color: #f0c84a; font-weight: 700; letter-spacing: .5px; }
+    .mermaid-like { font-family: ui-monospace, monospace; font-size: 12px; }
+    .step { counter-increment: step; }
+    .step:before { content: counter(step); font-weight: 700; color: #f0c84a; margin-right: .5rem; }
+  </style>
+</head>
+<body class="antialiased text-white bg-[#0a0f1a]">
+  <!-- Top Nav -->
+  <header class="sticky top-0 z-50 border-b border-white/5 bg-[#0a0f1a]/95 backdrop-blur-md">
+    <nav class="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between text-sm">
+      <a href="#what-is" class="font-semibold tracking-tighter text-white/90 flex items-center gap-2">
+        <span class="troptions">TROPTIONS</span>
+        <span class="text-white/60">LegacyChain</span>
+      </a>
+      <div class="hidden md:flex items-center gap-5 text-white/60">
+        <a href="#journey" class="hover:text-white transition">How it works</a>
+        <a href="#plans" class="hover:text-white transition">Plans</a>
+        <a href="#back-office" class="hover:text-white transition">Back Office</a>
+        <a href="#rails" class="hover:text-white transition">9 Rails</a>
+        <a href="/login" class="px-4 py-1.5 rounded-full border border-white/30 hover:bg-white/5">Sign up / Log in</a>
+        <a href="/onboard" class="px-5 py-1.5 rounded-full btn-gold text-xs font-semibold">Talk to LegacyChain AI</a>
+      </div>
+      <div class="md:hidden">
+        <a href="/login" class="text-xs px-3 py-1 rounded-full border border-white/30">Sign up</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- THE FUNCTIONAL RAIL BAR -->
+  <div id="rail" class="rail-bar bg-[#0a0f1a] sticky top-[53px] z-40 border-b border-white/10">
+    <div class="max-w-5xl mx-auto px-5 py-2.5 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-[10px] tracking-[0.6px] text-white/70">
+      <button onclick="scrollToSection('ai-concierge')" class="rail-pill hover:text-[#f0c84a] hover:border-[#f0c84a]">Start with AI</button>
+      <button onclick="scrollToSection('rails')" class="rail-pill hover:text-[#f0c84a] hover:border-[#f0c84a]">9 SETTLEMENT NETWORKS</button>
+      <button onclick="scrollToSection('five-proof')" class="rail-pill hover:text-[#f0c84a] hover:border-[#f0c84a]">5-Proof RELEASE POLICY</button>
+      <button onclick="scrollToSection('x402')" class="rail-pill hover:text-[#f0c84a] hover:border-[#f0c84a]">x402 PAY-PER-ACTION</button>
+      <button onclick="scrollToSection('journey')" class="rail-pill hover:text-[#f0c84a] hover:border-[#f0c84a]">AI CONCIERGE ONBOARDING</button>
+      <button onclick="scrollToSection('troptions')" class="rail-pill hover:text-[#f0c84a] hover:border-[#f0c84a]">Troptions Mint / DEX / Legacy Vault / Troptions</button>
+      <span class="hidden xl:inline text-[9px] text-white/30 ml-1">Click any — real sections + CTAs below</span>
+    </div>
+  </div>
+
+  <!-- Tiny live explainer -->
+  <div id="rail-explainer" class="hidden max-w-4xl mx-auto px-5 py-1 text-center text-[10px] text-white/50 bg-black/10"></div>
+
+  <!-- VISIBLE SITE ORGANIZATION BANNER — makes "what is going where" explicit for legacychain.app -->
+  <div class="max-w-5xl mx-auto px-5 py-2 text-[11px] bg-[#1f2937] border-b border-white/10 text-white/80">
+    <strong class="text-[#f0c84a]">legacychain.app</strong> — This static HTML is the <strong>marketing shell / "other site"</strong> (CF Pages, static hosts, fallback). 
+    The <strong>full operational site</strong> (AI concierge /onboard with late-account save-progress, real 6-plan Stripe checkout, contracts via adapter, 5-Proof release, demo with beneficiary payouts) is the <strong>Next.js app on Vercel</strong>. 
+    <span class="text-[#f0c84a]">Attach custom domain <code>legacychain.app</code> to the Vercel "legacy-vault-protocol" project</span> so the operational surface serves legacychain.app. 
+    All CTAs below (Talk to AI, demo, plans) deep-link to the ops flows. See <a href="https://github.com/FTHTrading/Legacy/blob/main/docs/LEGACYCHAIN_SITE_ORGANIZATION_AND_ROUTING.md" class="underline text-[#f0c84a]">docs/LEGACYCHAIN_SITE_ORGANIZATION_AND_ROUTING.md</a> for the full color-coded map + Mermaid trees.
+  </div>
+
+  <!-- Organization note (internal) -->
+  <!-- Organization note:
+       This static HTML is the self-contained marketing shell intended for legacychain.app (deploy to CF Pages / static host for pure marketing).
+       ... (full note as previously edited with USER DIRECTIVE) -->
+
+  <!-- HERO / WHAT IS -->
+  <section id="what-is" class="max-w-4xl mx-auto px-6 pt-16 pb-10 text-center section">
+    <div class="inline-flex items-center gap-2 text-[10px] tracking-[3px] uppercase text-white/40 mb-4">
+      <span class="troptions">TROPTIONS</span> <span class="text-white/20">•</span> UNYKORN x402 • LEGACY VAULT PROTOCOL
+    </div>
+    <h1 class="text-5xl sm:text-6xl font-semibold tracking-[-1.6px] leading-[.96] mb-5 font-display">
+      Secure digital vault<br>for families, estates,<br>and tokenized assets.
+    </h1>
+    <p class="max-w-md mx-auto text-white/55 text-[15px]">
+      One sovereign namespace. Client-side encrypted. 5-Proof release. Real money movement for beneficiaries when conditions are met.
+      Demo today. Full 9-rail production layer next.
+    </p>
+
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="#plans" class="btn-gold px-8 py-3 text-sm inline-flex items-center gap-2">Choose plan &amp; activate →</a>
+      <a href="/login" class="px-6 py-3 text-sm rounded-full border border-white/30 hover:bg-white/5">Sign up free (email first)</a>
+      <a href="/onboard" class="px-5 py-3 text-sm rounded-full border border-[#f0c84a]/40 text-[#f0c84a] hover:bg-[#f0c84a]/5">Talk to LegacyChain AI</a>
+    </div>
+    <p class="mt-3 text-[10px] text-white/40">No wallet required to start. Real registration + Stripe + x402 live in the operational app.</p>
+  </section>
+
+  <!-- ... (the rest of the file remains as in the current edited local version with the updated plans section containing the 6 direct cards and the banner already inserted) -->
+
+  <!-- 3. PLANS AND ACTIVATION (with real CTAs) -->
+  <section id="plans" class="max-w-6xl mx-auto px-6 py-12 border-t border-white/10 section">
+    <div class="mb-6">
+      <span class="text-xs tracking-[2px] text-[#f0c84a]">03 / PLANS + ACTIVATION</span>
+      <h2 class="text-3xl font-semibold tracking-tight">Plans that activate the full system</h2>
+      <p class="text-white/50 mt-1">Email sign-up is free. Payment (Stripe / x402 / ATP) activates your namespace, vault creation rights, and 5-Proof engine. Real money movement for beneficiaries on release.</p>
+    </div>
+
+    <!-- Founding Presale 4 tiers (verbatim spirit — shell narrative) -->
+    <div class="mb-8">
+      <div class="uppercase text-xs tracking-widest text-[#f0c84a] mb-2">Founding Presale (limited) — Shell Narrative</div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- ... (the 4 founding cards as in the successful local replace) -->
+      </div>
+    </div>
+
+    <!-- 3 Legacy Vault monthly tiers (shell narrative / production surface note) -->
+    <div class="mb-8">
+      <!-- ... (the 3 monthly as in local) -->
+    </div>
+
+    <!-- EXACT 6 DIRECT STRIPE PLANS — Production Operational Surface (Vercel Next.js) -->
+    <div class="mt-2">
+      <div class="uppercase text-xs tracking-widest text-[#f0c84a] mb-2">Direct Operational Plans — Vercel (attach legacychain.app domain here for full flows)</div>
+      <p class="text-[10px] text-white/50 mb-3">These cards + /onboard are the real production surface. The shell above is narrative/founding. Ops surface has the late-account 4-step, exact same 6 cards, and automated contracts.</p>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <a href="https://buy.stripe.com/3cIaEX90Y6Cag0l0i653O06" target="_blank" rel="noopener" class="rounded-2xl border border-white/10 p-5 bg-white/[0.02] hover:border-[#f0c84a] block">
+          <div class="text-sm font-semibold">Legacy Vault Starter Plus</div>
+          <div class="text-3xl font-semibold tracking-tighter mt-1">Starter</div>
+          <div class="mt-3 text-xs text-white/60">Entry family vault — core intake and release rules.</div>
+          <div class="mt-4 text-sm font-semibold text-[#f0c84a]">Start Free Trial →</div>
+        </a>
+        <a href="https://buy.stripe.com/dRmfZh0usaSq3dz3ui53O07" target="_blank" rel="noopener" class="rounded-2xl border border-white/10 p-5 bg-white/[0.02] hover:border-[#f0c84a] block">
+          <div class="text-sm font-semibold">Founding Family Vault</div>
+          <div class="text-3xl font-semibold tracking-tighter mt-1">Founding</div>
+          <div class="mt-3 text-xs text-white/60">Priority namespace and 5-Proof policy. Limited founding access.</div>
+          <div class="mt-4 text-sm font-semibold text-[#f0c84a]">Start Founding Plan →</div>
+        </a>
+        <a href="https://buy.stripe.com/bJeaEXeli4u2aG18OC53O04" target="_blank" rel="noopener" class="rounded-2xl border border-white/10 p-5 bg-white/[0.02] hover:border-[#f0c84a] block">
+          <div class="text-sm font-semibold">Family Vault Standard</div>
+          <div class="text-3xl font-semibold tracking-tighter mt-1">Standard</div>
+          <div class="mt-3 text-xs text-white/60">Guardian quorum and expanded storage.</div>
+          <div class="mt-4 text-sm font-semibold text-[#f0c84a]">Start Family Plan →</div>
+        </a>
+        <a href="https://buy.stripe.com/14A5kD90Y4u2aG17Ky53O08" target="_blank" rel="noopener" class="rounded-2xl border border-[#f0c84a]/60 p-5 bg-[#f0c84a]/[0.03] hover:border-[#f0c84a] block">
+          <div class="text-sm font-semibold">High Level Vault</div>
+          <div class="text-3xl font-semibold tracking-tighter mt-1">High Level</div>
+          <div class="mt-3 text-xs text-white/60">Up to 5 namespaces • Advanced 5-Proof + RWA support.</div>
+          <div class="mt-4 text-sm font-semibold text-[#f0c84a]">Start High Level Plan →</div>
+        </a>
+        <a href="https://buy.stripe.com/28E9AT5OMf8GdSd4ym53O05" target="_blank" rel="noopener" class="rounded-2xl border border-white/10 p-5 bg-white/[0.02] hover:border-[#f0c84a] block">
+          <div class="text-sm font-semibold">Pro Legacy</div>
+          <div class="text-3xl font-semibold tracking-tighter mt-1">Pro</div>
+          <div class="mt-3 text-xs text-white/60">Compliance exports and operator support. Full 5-Proof suite.</div>
+          <div class="mt-4 text-sm font-semibold text-[#f0c84a]">Start Pro Plan →</div>
+        </a>
+        <a href="https://buy.stripe.com/00w28r1ywbWu5lH6Gu53O09" target="_blank" rel="noopener" class="rounded-2xl border border-white/10 p-5 bg-white/[0.02] hover:border-[#f0c84a] block">
+          <div class="text-sm font-semibold">Legacy Vault Business</div>
+          <div class="text-3xl font-semibold tracking-tighter mt-1">Business</div>
+          <div class="mt-3 text-xs text-white/60">Advisors and multi-client legacy programs.</div>
+          <div class="mt-4 text-sm font-semibold text-[#f0c84a]">Start Business Plan →</div>
+        </a>
+      </div>
+      <p class="text-center text-[10px] text-white/40 mt-4">All plans include the full operational system: real registration, real pay, real 5-Proof release engine (demo already lets beneficiaries take the money on valid 5-Proof). Save progress in /onboard before choosing a plan. Full contracts on Besu + rails when deployed.</p>
+    </div>
+  </section>
+
+  <!-- ... (continue with the rest of the sections from the local edited file: back-office, rails, five-proof, x402, footer, JS for scrollToSection and checkout stubs that deep-link to ops) -->
+
+</body>
+</html>

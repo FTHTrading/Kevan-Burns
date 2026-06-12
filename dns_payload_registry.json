@@ -1,0 +1,7 @@
+{
+  "type": "CNAME",
+  "name": "registry",
+  "content": "troptions-unity-legacy-vault.pages.dev",
+  "ttl": 1,
+  "proxied": true
+}

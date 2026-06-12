@@ -1,0 +1,114 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ILegacyVaultRegistry",
+  "sourceName": "src/LegacyVaultExecutionUtility.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "vaultId",
+          "type": "string"
+        }
+      ],
+      "name": "getVault",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "vaultId",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "ownerDID",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "encryptedManifestCID",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "releasePolicyId",
+              "type": "string"
+            },
+            {
+              "internalType": "enum ILegacyVaultRegistry.VaultStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "createdAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "updatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ILegacyVaultRegistry.VaultRecord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "vaultId",
+          "type": "string"
+        },
+        {
+          "internalType": "enum ILegacyVaultRegistry.VaultStatus",
+          "name": "newStatus",
+          "type": "uint8"
+        }
+      ],
+      "name": "setVaultStatus",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "vaultId",
+          "type": "string"
+        }
+      ],
+      "name": "vaultRegistered",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

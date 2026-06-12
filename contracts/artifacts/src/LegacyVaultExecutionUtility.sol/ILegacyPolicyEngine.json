@@ -1,0 +1,145 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ILegacyPolicyEngine",
+  "sourceName": "src/LegacyVaultExecutionUtility.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "claimId",
+          "type": "string"
+        }
+      ],
+      "name": "allConditionsMet",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "vaultId",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "claimId",
+          "type": "string"
+        }
+      ],
+      "name": "authoriseRelease",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "claimId",
+          "type": "string"
+        }
+      ],
+      "name": "getClaimState",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "vaultId",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "claimId",
+              "type": "string"
+            },
+            {
+              "internalType": "bool",
+              "name": "identityVerified",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "deathCertUploaded",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "attorneyAttested",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint32",
+              "name": "guardianApprovals",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bool",
+              "name": "guardianQuorumMet",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint256",
+              "name": "quorumMetAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "waitingPeriodComplete",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint256",
+              "name": "waitingPeriodEndsAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "disputed",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "released",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "denied",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ILegacyPolicyEngine.ReleaseState",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -1,0 +1,88 @@
+{
+  "folders": [
+    {
+      "name": "Legacy Vault Protocol",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "files.exclude": {
+      "**/.next": true,
+      "**/node_modules": true
+    },
+    "search.exclude": {
+      "**/.next": true,
+      "**/node_modules": true,
+      "**/pnpm-lock.yaml": true
+    },
+    "tailwindCSS.experimental.classRegex": [
+      ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+      ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "bradlc.vscode-tailwindcss",
+      "esbenp.prettier-vscode",
+      "prisma.prisma",
+      "ms-vscode.vscode-typescript-next",
+      "vitest.explorer",
+      "ms-playwright.playwright"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Next.js Dev",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/node_modules/.bin/next",
+        "args": ["dev"],
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=4096",
+          "MOCK_IPFS": "true",
+          "MOCK_CHAIN": "true"
+        },
+        "cwd": "${workspaceFolder}",
+        "console": "integratedTerminal"
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "pnpm build",
+        "type": "shell",
+        "command": "pnpm build",
+        "group": { "kind": "build", "isDefault": true },
+        "presentation": { "reveal": "always", "panel": "shared" }
+      },
+      {
+        "label": "pnpm test",
+        "type": "shell",
+        "command": "pnpm test",
+        "group": { "kind": "test", "isDefault": true },
+        "presentation": { "reveal": "always", "panel": "shared" }
+      },
+      {
+        "label": "pnpm typecheck",
+        "type": "shell",
+        "command": "pnpm typecheck",
+        "presentation": { "reveal": "always", "panel": "shared" }
+      },
+      {
+        "label": "pnpm db:generate",
+        "type": "shell",
+        "command": "pnpm db:generate",
+        "presentation": { "reveal": "always", "panel": "shared" }
+      }
+    ]
+  }
+}

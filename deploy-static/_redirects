@@ -1,0 +1,5 @@
+/* https://www.cloudflare.com/static/pages/redirects.txt */
+/* vault.genesis402.com is a full serving domain (branded under genesis402) — do not funnel/redirect root here; attach as custom domain on main CF project instead. genesis402.com/vault handled via vercel.json or hub site. */
+     https://troptionsunity.com/pricing?utm_source=legacy&utm_medium=redirect 302
+/vault https://troptionsunity.com/pricing?utm_source=legacy&utm_medium=vault 302
+/*    https://troptionsunity.com/pricing?utm_source=legacy&utm_medium=catchall 302

@@ -1,0 +1,28 @@
+{
+  "name": "legacy-vault-contracts",
+  "version": "1.0.0",
+  "description": "Legacy Vault Protocol — Solidity smart contracts",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test test/LegacyReferral.test.ts test/LegacyPolicyEngine.test.ts test/LegacyVaultRegistry.test.ts test/AffiliateBadge.test.ts",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "deploy:private": "hardhat run scripts/deploy.ts --network privateChain",
+    "verify:manifest": "hardhat run scripts/verify-manifest.ts --network privateChain",
+    "export:abi": "hardhat run scripts/export-abi.ts",
+    "node": "hardhat node"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/chai": "^5.2.3",
+    "@types/node": "^20.0.0",
+    "chai": "^6.2.2",
+    "hardhat": "^2.22.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.1.0",
+    "ethers": "^6.13.0"
+  }
+}

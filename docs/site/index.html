@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legacy Vault Protocol — Sovereign Digital Estate Infrastructure</title>
+  <meta name="description" content="Private, encrypted, blockchain-anchored estate vault. Multi-proof release engine. W3C DID identity. Built for the digital asset era." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --navy-950: #020617;
+      --navy-900: #0f172a;
+      --navy-800: #1e293b;
+      --navy-700: #334155;
+      --gold-400: #fbbf24;
+      --gold-500: #f59e0b;
+      --gold-600: #d97706;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --emerald-400: #34d399;
+      --red-500: #ef4444;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--navy-950);
+      color: var(--slate-200);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .nav-title { font-size: 1rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      font-size: 0.875rem;
+      color: var(--slate-400);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--slate-200); }
+    .nav-cta {
+      background: var(--gold-500);
+      color: var(--navy-950) !important;
+      font-weight: 700;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      transition: background 0.15s !important;
+    }
+    .nav-cta:hover { background: var(--gold-400) !important; }
+
+    /* ── Hero ─────────────────────────────────────────────────────────── */
+    .hero {
+      padding: 7rem 2rem 5rem;
+      text-align: center;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(245,158,11,0.08) 0%, transparent 70%);
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 999px;
+      padding: 0.375rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--gold-400);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.15;
+      color: #fff;
+      letter-spacing: -0.03em;
+      max-width: 800px;
+      margin: 0 auto 1.5rem;
+    }
+    .hero h1 span { color: var(--gold-400); }
+    .hero-sub {
+      font-size: 1.125rem;
+      color: var(--slate-400);
+      max-width: 640px;
+      margin: 0 auto 2.5rem;
+    }
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--gold-500);
+      color: var(--navy-950);
+      font-weight: 700;
+      font-size: 0.9375rem;
+      padding: 0.8125rem 2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--gold-400); transform: translateY(-1px); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--slate-300);
+      font-weight: 600;
+      font-size: 0.9375rem;
+      padding: 0.8125rem 2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--gold-500); color: var(--gold-400); }
+
+    /* ── Badges strip ─────────────────────────────────────────────────── */
+    .badges {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 2rem;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--navy-800);
+      border: 1px solid var(--navy-700);
+      border-radius: 8px;
+      padding: 0.375rem 0.875rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--slate-300);
+    }
+    .badge .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-ts { background: #3178C6; }
+    .dot-next { background: #fff; }
+    .dot-green { background: #22c55e; }
+    .dot-purple { background: #8b5cf6; }
+    .dot-gold { background: var(--gold-500); }
+    .dot-blue { background: #3b82f6; }
+
+    /* ── Sections ─────────────────────────────────────────────────────── */
+    section { padding: 5rem 2rem; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold-500);
+      margin-bottom: 0.75rem;
+    }
+    h2 {
+      text-align: center;
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 3rem;
+    }
+
+    /* ── Pillars grid ─────────────────────────────────────────────────── */
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+    .pillar {
+      background: var(--navy-800);
+      border: 1px solid var(--navy-700);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .pillar:hover { border-color: rgba(245,158,11,0.5); }
+    .pillar-icon { font-size: 1.75rem; margin-bottom: 0.75rem; }
+    .pillar h3 { font-size: 0.9375rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+    .pillar p { font-size: 0.8125rem; color: var(--slate-400); line-height: 1.6; }
+
+    /* ── Flow diagram ─────────────────────────────────────────────────── */
+    .flow-section { background: var(--navy-900); border-top: 1px solid rgba(51,65,85,0.5); border-bottom: 1px solid rgba(51,65,85,0.5); }
+    .mermaid-wrap {
+      background: var(--navy-800);
+      border: 1px solid var(--navy-700);
+      border-radius: 16px;
+      padding: 2rem;
+      overflow-x: auto;
+    }
+    .mermaid { max-width: 100%; }
+
+    /* ── Comparison table ─────────────────────────────────────────────── */
+    .compare-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid var(--navy-700); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      min-width: 640px;
+    }
+    thead th {
+      background: var(--navy-800);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--slate-400);
+      border-bottom: 1px solid var(--navy-700);
+    }
+    thead th:first-child { text-align: left; }
+    thead th.lvp-col { color: var(--gold-400); }
+    tbody tr { border-bottom: 1px solid rgba(30, 41, 59, 0.8); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:nth-child(even) { background: rgba(15, 23, 42, 0.4); }
+    tbody tr:nth-child(odd) { background: rgba(30, 41, 59, 0.2); }
+    tbody tr:hover { background: rgba(30, 41, 59, 0.6); }
+    td {
+      padding: 0.875rem 1.25rem;
+      text-align: center;
+      color: var(--slate-300);
+      vertical-align: middle;
+    }
+    td:first-child { text-align: left; color: var(--slate-200); }
+    .check { color: #22c55e; font-size: 1.1rem; }
+    .cross { color: #ef4444; opacity: 0.7; font-size: 1.1rem; }
+    .partial { color: #f59e0b; font-size: 0.75rem; font-weight: 600; }
+    .cat-row td {
+      background: rgba(245,158,11,0.05) !important;
+      color: var(--gold-500) !important;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.5rem 1.25rem;
+    }
+
+    /* ── CTA ──────────────────────────────────────────────────────────── */
+    .cta-section {
+      text-align: center;
+      background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(245,158,11,0.07) 0%, transparent 70%);
+      border-top: 1px solid rgba(51, 65, 85, 0.5);
+    }
+    .cta-section h2 { margin-bottom: 1rem; }
+    .cta-sub { color: var(--slate-400); max-width: 520px; margin: 0 auto 2.5rem; }
+
+    /* ── Footer ───────────────────────────────────────────────────────── */
+    footer {
+      background: var(--navy-900);
+      border-top: 1px solid var(--navy-700);
+      padding: 2rem;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--slate-500);
+    }
+    footer a { color: var(--gold-500); text-decoration: none; }
+    footer a:hover { color: var(--gold-400); }
+
+    @media (max-width: 640px) {
+      .nav-links { gap: 1rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ──────────────────────────────────────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-brand">
+    <div class="nav-logo">🔐</div>
+    <span class="nav-title">Legacy Vault Protocol</span>
+  </a>
+  <div class="nav-links">
+    <a href="#how-it-works">How It Works</a>
+    <a href="#compare">Compare</a>
+    <a href="https://github.com/FTHTrading/Legacy" target="_blank">GitHub</a>
+    <a href="https://github.com/FTHTrading/Legacy" target="_blank" class="nav-cta">View Repo →</a>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-badge">🔒 Private · Encrypted · Sovereign</div>
+  <h1>
+    The digital estate vault<br />
+    <span>built for cryptographic certainty</span>
+  </h1>
+  <p class="hero-sub">
+    AES-256-GCM encrypted. IPFS-stored. Blockchain-anchored. Multi-proof release engine.
+    No competitor operates at this level.
+  </p>
+  <div class="hero-buttons">
+    <a href="https://github.com/FTHTrading/Legacy" target="_blank" class="btn-primary">View on GitHub →</a>
+    <a href="#how-it-works" class="btn-secondary">See Architecture ↓</a>
+  </div>
+</div>
+
+<!-- ── Badges ────────────────────────────────────────────────────────────── -->
+<div class="badges">
+  <span class="badge"><span class="dot dot-ts"></span>TypeScript 5</span>
+  <span class="badge"><span class="dot dot-next"></span>Next.js 15</span>
+  <span class="badge"><span class="dot dot-green"></span>33 Tests Passing</span>
+  <span class="badge"><span class="dot dot-purple"></span>Prisma 5.22</span>
+  <span class="badge"><span class="dot dot-gold"></span>AES-256-GCM</span>
+  <span class="badge"><span class="dot dot-blue"></span>Private IPFS</span>
+  <span class="badge"><span class="dot dot-gold"></span>Blockchain Anchored</span>
+  <span class="badge"><span class="dot dot-green"></span>W3C DID + VC 2.0</span>
+</div>
+
+<!-- ── Pillars ───────────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-inner">
+    <p class="section-label">Why Legacy Vault Protocol</p>
+    <h2>8 pillars no competitor has</h2>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-icon">🔐</div>
+        <h3>Zero Server Knowledge</h3>
+        <p>Every document is AES-256-GCM encrypted before upload. The server stores only ciphertext, IVs, and tags — never plaintext.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">📦</div>
+        <h3>Private IPFS Storage</h3>
+        <p>Documents live on a private swarm-keyed IPFS node. Content-addressed CIDs make tampering mathematically detectable.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">⛓️</div>
+        <h3>Blockchain-Anchored Audit</h3>
+        <p>Every vault registration, manifest update, and status change is written to a private chain. The audit log cannot be altered.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">⚖️</div>
+        <h3>Multi-Proof Release</h3>
+        <p>5 conditions must be cryptographically satisfied simultaneously: identity, death proof, attorney attestation, quorum, and waiting period.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">👥</div>
+        <h3>Guardian Quorum</h3>
+        <p>N-of-M guardian approval enforced in code. No single party — executor, attorney, or beneficiary — can unilaterally release a vault.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">🆔</div>
+        <h3>W3C DID + VC 2.0</h3>
+        <p>NIST SP 800-63-4 IAL 2/3 identity assurance for release-critical roles. Verifiable Credentials, not just email addresses.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">💼</div>
+        <h3>14-Model Data Architecture</h3>
+        <p>Purpose-built schema: 6 roles, 10 asset categories, 13 document types, 22 audit actions, 9 claim states. Not a generic file tree.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">🚀</div>
+        <h3>Built for Web3</h3>
+        <p>Crypto wallet registry, multi-chain asset support, DID-based governance — architected for the digital asset era, not scanned PDFs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Architecture flow ─────────────────────────────────────────────────── -->
+<section class="flow-section" id="how-it-works">
+  <div class="section-inner">
+    <p class="section-label">System Architecture</p>
+    <h2>How the protocol works</h2>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TD
+    subgraph OWNER["🔒 Vault Owner"]
+        A([Create Vault]) --> B["AES-256-GCM\nEncrypt Document"]
+        B --> C[Upload to Private IPFS]
+        C --> D[Receive CID]
+        D --> E["Build Manifest\nSHA-256 Hash"]
+        E --> F[Register on Private Chain]
+    end
+
+    subgraph STORAGE["🗄️ Sovereign Storage"]
+        IPFS[(Private IPFS\nSwarm Node)]
+        CHAIN[(Private\nBlockchain)]
+        DB[(PostgreSQL\n14 Models)]
+    end
+
+    subgraph RELEASE["⚖️ Multi-Proof Release Engine"]
+        G{Release Request} --> H{"✅ Identity\nVerified?"}
+        H -->|No| REJECT["❌ Rejected"]
+        H -->|Yes| I{"✅ Death\nProof?"}
+        I -->|No| REJECT
+        I -->|Yes| J{"✅ Attorney\nAttestation?"}
+        J -->|No| REJECT
+        J -->|Yes| K{"✅ Guardian\nQuorum?"}
+        K -->|No| REJECT
+        K -->|Yes| L{"✅ Waiting\nPeriod?"}
+        L -->|No| WAIT["⏳ Pending"]
+        L -->|Yes| GRANT["🟢 GRANTED"]
+    end
+
+    C --> IPFS
+    F --> CHAIN
+    F --> DB
+    OWNER --> G
+    GRANT --> AUDITLOG["📋 Append-Only\nAudit Log"]
+    AUDITLOG --> CHAINANCHOR["⛓️ On-Chain\nAnchor"]
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Comparison table ──────────────────────────────────────────────────── -->
+<section id="compare">
+  <div class="section-inner">
+    <p class="section-label">Competitive Analysis</p>
+    <h2>Side-by-side: every feature that matters</h2>
+    <div class="compare-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:220px">Feature</th>
+            <th class="lvp-col">Legacy Vault Protocol</th>
+            <th>Heir Tight</th>
+            <th>Everplans</th>
+            <th>Estateably</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="cat-row"><td colspan="5">Architecture</td></tr>
+          <tr><td>Storage layer</td><td class="partial">Private IPFS (CID)</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>Blockchain-anchored audit</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>Self-hostable / operator-owned</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>Open protocol (no SaaS lock-in)</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+
+          <tr class="cat-row"><td colspan="5">Encryption & Security</td></tr>
+          <tr><td>AES-256-GCM per-vault encryption</td><td class="check">✓</td><td class="partial">claimed</td><td class="partial">at-rest</td><td class="partial">at-rest</td></tr>
+          <tr><td>Zero server-knowledge</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>SHA-256 content integrity</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+
+          <tr class="cat-row"><td colspan="5">Identity & Access</td></tr>
+          <tr><td>W3C DID + Verifiable Credentials</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>NIST SP 800-63-4 IAL 2/3</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>6 cryptographic access roles</td><td class="check">✓</td><td class="partial">2 roles</td><td class="partial">2 roles</td><td class="partial">3 roles</td></tr>
+
+          <tr class="cat-row"><td colspan="5">Estate Release Protocol</td></tr>
+          <tr><td>Multi-proof release engine (5 conditions)</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>Death certificate hash verification</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>Attorney attestation workflow</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="partial">probate</td></tr>
+          <tr><td>Guardian N-of-M quorum</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>Dispute resolution + on-chain evidence</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>RUFADAA-aligned fiduciary model</td><td class="check">✓</td><td class="cross">✗</td><td class="partial">aware</td><td class="check">✓</td></tr>
+
+          <tr class="cat-row"><td colspan="5">Asset Coverage</td></tr>
+          <tr><td>Public blockchain wallet registry</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+          <tr><td>10 asset categories</td><td class="check">✓</td><td class="cross">✗</td><td class="partial">folders</td><td class="partial">financial</td></tr>
+          <tr><td>Zero private key collection (by design)</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+
+          <tr class="cat-row"><td colspan="5">Storage Model</td></tr>
+          <tr><td>No file size caps</td><td class="check">✓</td><td class="cross">✗ (10MB)</td><td class="cross">✗</td><td class="check">✓</td></tr>
+          <tr><td>Content-addressed (CID not filename)</td><td class="check">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="section-inner">
+    <p class="section-label">Ready to build?</p>
+    <h2>Your estate deserves cryptographic certainty</h2>
+    <p class="cta-sub">
+      Clone the repo, configure your environment, and deploy sovereign estate infrastructure in minutes.
+    </p>
+    <div class="hero-buttons">
+      <a href="https://github.com/FTHTrading/Legacy" target="_blank" class="btn-primary">Clone on GitHub →</a>
+      <a href="https://github.com/FTHTrading/Legacy/blob/main/docs/OPERATOR_RUNBOOK.md" target="_blank" class="btn-secondary">Read the Runbook</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ────────────────────────────────────────────────────────────── -->
+<footer>
+  <p>© 2026 <a href="https://github.com/FTHTrading" target="_blank">FTH Trading</a> · Built with Next.js 15, Prisma, AES-256-GCM, IPFS, and a private blockchain registry.</p>
+  <p style="margin-top:0.5rem;">
+    <a href="https://github.com/FTHTrading/Legacy" target="_blank">GitHub</a> ·
+    <a href="https://github.com/FTHTrading/Legacy/blob/main/docs/LEGACY_VAULT_ARCHITECTURE.md" target="_blank">Architecture</a> ·
+    <a href="https://github.com/FTHTrading/Legacy/blob/main/docs/OPERATOR_RUNBOOK.md" target="_blank">Runbook</a>
+  </p>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1e293b',
+      primaryTextColor: '#f8fafc',
+      primaryBorderColor: '#f59e0b',
+      lineColor: '#94a3b8',
+      secondaryColor: '#0f172a',
+      tertiaryColor: '#0f172a',
+      background: '#0f172a',
+      mainBkg: '#1e293b',
+      nodeBorder: '#f59e0b',
+      clusterBkg: '#0f172a',
+      titleColor: '#f8fafc',
+      edgeLabelBackground: '#1e293b',
+      fontFamily: 'Segoe UI, system-ui, sans-serif',
+    }
+  });
+</script>
+</body>
+</html>

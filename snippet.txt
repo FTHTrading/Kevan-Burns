@@ -1,0 +1,2 @@
+=== Deploying to CF Pages and capturing URL ===
+=== DEPLOY FINISHED ===

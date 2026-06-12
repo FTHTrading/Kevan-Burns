@@ -1,0 +1,73 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+
+# Build outputs
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Prisma generated
+prisma/migrations/
+
+# Database
+*.db
+*.db-journal
+
+# IPFS / chain data
+data/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+pnpm-debug.log*
+
+# Test outputs
+coverage/
+playwright-report/
+test-results/
+.vercel
+.env*.local
+
+# Binaries & Archives
+circom.exe
+*.exe
+*.tar.gz
+*.zip
+*.tar
+*.gz
+
+# Temporary logs & drafts
+*.err
+deploy-final.txt
+deploy-final2.txt
+deploy-fixed.txt
+deploy-log-tail.txt
+deploy-mem.txt
+deploy-utm-fix.txt
+wsl-deploy-output.txt
+wsl-deploy2.txt
+wsl-deploy3.txt
+wsl-deploy4.txt
+wsl-deploy5.txt

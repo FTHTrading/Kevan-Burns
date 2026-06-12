@@ -1,0 +1,72 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "gem": "https://schema.fthtrading.com/gem/v1#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+
+    "GemAssetCredential": "gem:GemAssetCredential",
+    "GemAsset": "gem:GemAsset",
+    "GemCertification": "gem:GemCertification",
+    "GemValuation": "gem:GemValuation",
+    "RWATokenLink": "gem:RWATokenLink",
+    "VaultRef": "gem:VaultRef",
+    "ChainAnchorRef": "gem:ChainAnchorRef",
+    "TroptionsMintMetadata": "gem:TroptionsMintMetadata",
+    "OracleRef": "gem:OracleRef",
+
+    "name": "gem:name",
+    "gemType": { "@id": "gem:gemType", "@type": "xsd:string" },
+    "caratWeight": { "@id": "gem:caratWeight", "@type": "xsd:decimal" },
+    "color": { "@id": "gem:color", "@type": "xsd:string" },
+    "clarity": { "@id": "gem:clarity", "@type": "xsd:string" },
+    "cut": { "@id": "gem:cut", "@type": "xsd:string" },
+    "originCountry": { "@id": "gem:originCountry", "@type": "xsd:string" },
+    "originRegion": { "@id": "gem:originRegion", "@type": "xsd:string" },
+    "treatment": { "@id": "gem:treatment", "@type": "xsd:string" },
+    "certifications": { "@id": "gem:certifications", "@type": "@json" },
+    "legalOwner": { "@id": "gem:legalOwner", "@type": "@id" },
+    "titleStatus": { "@id": "gem:titleStatus", "@type": "xsd:string" },
+    "valuation": { "@id": "gem:valuation", "@type": "@json" },
+    "manifestCID": { "@id": "gem:manifestCID", "@type": "xsd:string" },
+    "linkedRWATokens": { "@id": "gem:linkedRWATokens", "@type": "@json" },
+    "vaultRef": { "@id": "gem:vaultRef", "@type": "@json" },
+    "chainAnchorRef": { "@id": "gem:chainAnchorRef", "@type": "@json" },
+    "troptionsmintMetadata": { "@id": "gem:troptionsmintMetadata", "@type": "@json" },
+    "oracleRef": { "@id": "gem:oracleRef", "@type": "@json" },
+    "bundleId": { "@id": "gem:bundleId", "@type": "xsd:string" },
+    "collectionName": { "@id": "gem:collectionName", "@type": "xsd:string" },
+    "disclosureGroup": { "@id": "gem:disclosureGroup", "@type": "xsd:string" },
+
+    "lab": { "@id": "gem:lab", "@type": "xsd:string" },
+    "reportNumber": { "@id": "gem:reportNumber", "@type": "xsd:string" },
+    "reportDate": { "@id": "gem:reportDate", "@type": "xsd:date" },
+    "reportCID": { "@id": "gem:reportCID", "@type": "xsd:string" },
+    "summary": { "@id": "gem:summary", "@type": "xsd:string" },
+
+    "amount": { "@id": "gem:amount", "@type": "xsd:decimal" },
+    "currency": { "@id": "gem:currency", "@type": "xsd:string" },
+    "asOf": { "@id": "gem:asOf", "@type": "xsd:dateTime" },
+    "appraisalStatus": { "@id": "gem:appraisalStatus", "@type": "xsd:string" },
+    "appraisalNote": { "@id": "gem:appraisalNote", "@type": "xsd:string" },
+
+    "chain": { "@id": "gem:chain", "@type": "xsd:string" },
+    "mintAddress": { "@id": "gem:mintAddress", "@type": "xsd:string" },
+    "tokenStandard": { "@id": "gem:tokenStandard", "@type": "xsd:string" },
+    "fractionalShare": { "@id": "gem:fractionalShare", "@type": "xsd:decimal" },
+
+    "vaultId": { "@id": "gem:vaultId", "@type": "xsd:string" },
+    "manifestHash": { "@id": "gem:manifestHash", "@type": "xsd:string" },
+
+    "txHash": { "@id": "gem:txHash", "@type": "xsd:string" },
+    "blockNumber": { "@id": "gem:blockNumber", "@type": "xsd:integer" },
+    "anchoredAt": { "@id": "gem:anchoredAt", "@type": "xsd:dateTime" },
+
+    "mintJobId": { "@id": "gem:mintJobId", "@type": "xsd:string" },
+    "metadataURI": { "@id": "gem:metadataURI", "@type": "xsd:anyURI" },
+    "token2022Extensions": { "@id": "gem:token2022Extensions", "@type": "@json" },
+
+    "oracleProvider": { "@id": "gem:oracleProvider", "@type": "xsd:string" },
+    "oracleFeedId": { "@id": "gem:oracleFeedId", "@type": "xsd:string" },
+    "lastOracleUpdate": { "@id": "gem:lastOracleUpdate", "@type": "xsd:dateTime" }
+  }
+}

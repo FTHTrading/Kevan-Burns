@@ -1,0 +1,11 @@
+[build]
+  command   = "pnpm db:generate && pnpm build:ci"
+  publish   = ".next"
+
+[build.environment]
+  NODE_VERSION               = "20"
+  PRISMA_CLIENT_ENGINE_TYPE  = "library"
+  NEXT_TELEMETRY_DISABLED    = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

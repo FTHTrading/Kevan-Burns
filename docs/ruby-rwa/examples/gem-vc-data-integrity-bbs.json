@@ -1,0 +1,57 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://schema.fthtrading.com/gem/v1",
+    "https://w3id.org/security/bbs/v1"
+  ],
+  "id": "urn:uuid:00000000-0000-4000-8000-000000000020",
+  "type": ["VerifiableCredential", "GemAssetCredential"],
+  "issuer": "did:web:legacy.fthtrading.com:spv:allure",
+  "validFrom": "2026-06-04T12:00:00Z",
+  "credentialSubject": {
+    "type": "GemAsset",
+    "name": "Allure Ruby",
+    "gemType": "ruby",
+    "caratWeight": 54.0,
+    "color": "Purple Red / vivid hue",
+    "originCountry": "Madagascar",
+    "treatment": "heated",
+    "titleStatus": "in_custody",
+    "legalOwner": "did:web:legacy.fthtrading.com:spv:allure-holdings",
+    "valuation": {
+      "type": "GemValuation",
+      "amount": null,
+      "currency": "USD",
+      "appraisalStatus": "TBD",
+      "appraisalNote": "TBD — independent appraisal required; package NAV not asserted in repo"
+    },
+    "manifestCID": "bafybei-SAMPLE-ALLURE-MANIFEST-CID-001",
+    "vaultRef": {
+      "type": "VaultRef",
+      "vaultId": "SAMPLE-VAULT-ID",
+      "manifestCID": "bafybei-SAMPLE-ALLURE-MANIFEST-CID-001"
+    }
+  },
+  "proof": {
+    "type": "BbsBlsSignature2020",
+    "created": "2026-06-04T12:00:00Z",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:web:legacy.fthtrading.com:spv:allure#bbs-key-1",
+    "cryptosuite": "BLS12-381-SHA-256",
+    "proofValue": "SYNTHETIC_BASE64_BBS_SIGNATURE_NOT_REAL",
+    "header": "",
+    "messageMap": [
+      "name",
+      "gemType",
+      "caratWeight",
+      "titleStatus",
+      "legalOwner",
+      "valuation.amount",
+      "valuation.appraisalStatus",
+      "manifestCID",
+      "vaultRef"
+    ],
+    "publicKey": "SYNTHETIC_BASE64_PUBLIC_KEY"
+  },
+  "_comment": "SYNTHETIC SAMPLE — Data Integrity BBS+ issuance. Present via POST /api/vc/present/bbs with BbsBlsSignatureProof2020. Exchange credential as application/vc, presentation as application/vp."
+}

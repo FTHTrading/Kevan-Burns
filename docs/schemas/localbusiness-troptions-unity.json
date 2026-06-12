@@ -1,0 +1,49 @@
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Troptions Unity Legacy Vault",
+  "description": "Sovereign crypto/digital legacy vault with ZK PLONK 5-Proof (Poseidon, Guardian Quorum, Dead Man's Switch, on-chain). Family Vault $29.95/mo (normal for middle-class families, 1 vault), High Level Vault $49.95/mo (scaled 5-vaults + advanced). Unity Token, XRPL/Stellar anchoring. 5655 Peachtree Parkway, Norcross, GA 30092. FTH Trading / Troptions.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5655 Peachtree Parkway",
+    "addressLocality": "Norcross",
+    "addressRegion": "GA",
+    "postalCode": "30092",
+    "addressCountry": "US"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "33.9698",
+    "longitude": "-84.2216"
+  },
+  "url": "https://troptionsunity.com",
+  "areaServed": ["Norcross GA", "Peachtree Corners", "Gwinnett County", "Atlanta Metro", "Georgia", "United States"],
+  "priceRange": "$29.95 - $49.95 /mo",
+  "paymentAccepted": "Stripe, Troptions Pay, Unity Token, X402",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Legacy Vault Plans",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Product",
+          "name": "Family Plan",
+          "description": "1 beneficiary, basic 3-proof ZK, dead man's switch."
+        },
+        "price": "29.95",
+        "priceCurrency": "USD"
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Product",
+          "name": "Estate Plan",
+          "description": "5-proof ZK (Poseidon hash, Guardian Quorum 3/5), multiple executors, on-chain anchor, Grok AI docs."
+        },
+        "price": "49.95",
+        "priceCurrency": "USD"
+      }
+    ]
+  }
+}

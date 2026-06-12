@@ -1,0 +1,842 @@
+// ============================================================
+//  Legacy Vault Protocol — Prisma Schema
+//  Private data is never stored in plain text.
+//  Sensitive blobs are encrypted client-side; only CIDs,
+//  hashes, and policy references live in this database.
+// ============================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────────────────────
+//  Enums
+// ──────────────────────────────────────────────────────────
+
+enum VaultStatus {
+  ACTIVE
+  REVIEW_PENDING
+  RELEASE_PENDING
+  RELEASED
+  DISPUTED
+  LOCKED
+}
+
+enum AssetCategory {
+  WEB3_WALLET
+  CRYPTO_EXCHANGE
+  BANK_BROKERAGE
+  REAL_ESTATE
+  BUSINESS_INTEREST
+  DOMAIN_DIGITAL
+  INSURANCE_POLICY
+  RETIREMENT_ACCOUNT
+  INTELLECTUAL_PROPERTY
+  OTHER
+}
+
+enum DocumentType {
+  WILL
+  TRUST
+  POWER_OF_ATTORNEY
+  DEED
+  TITLE
+  INSURANCE_POLICY
+  TAX_DOCUMENT
+  BUSINESS_DOCUMENT
+  INSTRUCTIONS
+  LEGAL_AUTHORITY
+  DEATH_CERTIFICATE
+  COURT_ORDER
+  OTHER
+}
+
+enum ClaimStatus {
+  SUBMITTED
+  IDENTITY_VERIFIED
+  PROOF_UPLOADED
+  ATTORNEY_REVIEWED
+  GUARDIAN_QUORUM_MET
+  WAITING_PERIOD
+  APPROVED
+  DENIED
+  DISPUTED
+}
+
+enum AccessScope {
+  FULL
+  ASSET_INVENTORY
+  LEGAL_DOCS
+  ASSIGNED_ITEMS_ONLY
+  HASHES_ONLY
+}
+
+enum AuditAction {
+  VAULT_CREATED
+  VAULT_UPDATED
+  MANIFEST_UPDATED
+  ASSET_ADDED
+  ASSET_REMOVED
+  DOCUMENT_UPLOADED
+  WALLET_ADDED
+  EXECUTOR_ADDED
+  BENEFICIARY_ADDED
+  GUARDIAN_ADDED
+  RELEASE_POLICY_SET
+  RELEASE_REQUESTED
+  DEATH_PROOF_SUBMITTED
+  ATTORNEY_ATTESTED
+  GUARDIAN_APPROVED
+  RELEASE_APPROVED
+  RELEASE_DENIED
+  ACCESS_GRANTED
+  ACCESS_REVOKED
+  DISPUTE_OPENED
+  DISPUTE_RESOLVED
+  VAULT_LOCKED
+  VAULT_UNLOCKED
+  LOGIN
+  FAILED_ACCESS
+}
+
+// ──────────────────────────────────────────────────────────
+//  User (owner, executor, beneficiary, guardian, admin)
+// ──────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  /// DID document identifier (did:key:… or did:web:…)
+  did           String?  @unique
+  /// Hashed password (bcrypt) — never plaintext
+  passwordHash  String?
+  role          String   @default("owner") // owner|executor|beneficiary|guardian|admin|auditor
+  emailVerified DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  ownedVaults      Vault[]             @relation("VaultOwner")
+  executorRoles    Executor[]
+  beneficiaryRoles Beneficiary[]
+  guardianRoles    Guardian[]
+  accessGrants     AccessGrant[]
+  auditEvents      AuditEvent[]        @relation("AuditActor")
+  credentials      VerificationCredential[]
+  releaseClaims    ReleaseClaim[]
+  deadManSwitches  DeadManSwitch[]     @relation("DMSOwner")
+  legacyMessages   LegacyMessage[]     @relation("MessageAuthor")
+
+  subscriptions    Subscription[]
+  namespaceEntitlements NamespaceEntitlement[]
+  affiliate        Affiliate?
+
+  @@index([email])
+  @@index([did])
+}
+
+// ──────────────────────────────────────────────────────────
+//  Vault — top-level estate container
+// ──────────────────────────────────────────────────────────
+
+model Vault {
+  id          String      @id @default(cuid())
+  ownerId     String
+  owner       User        @relation("VaultOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+
+  /// Human label for this vault
+  label       String
+  description String?
+
+  /// Owner's DID — written to the private chain at creation
+  ownerDID    String?
+
+  /// CID of the latest encrypted manifest blob on private IPFS
+  manifestCID  String?
+  /// SHA-256 hex of the encrypted manifest bytes
+  manifestHash String?
+
+  status      VaultStatus @default(ACTIVE)
+
+  /// ID of the active release policy
+  releasePolicyId String?
+  releasePolicy   ReleasePolicy? @relation(fields: [releasePolicyId], references: [id])
+
+  /// On-chain transaction hash that anchors this vault record
+  chainTxHash String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  manifests       VaultManifest[]
+  assets          AssetRecord[]
+  wallets         WalletRecord[]
+  documents       DocumentRecord[]
+  executors       Executor[]
+  beneficiaries   Beneficiary[]
+  guardians       Guardian[]
+  releaseClaims   ReleaseClaim[]
+  accessGrants    AccessGrant[]
+  auditEvents     AuditEvent[]
+  deadManSwitch   DeadManSwitch?
+  legacyMessages  LegacyMessage[]
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+// ──────────────────────────────────────────────────────────
+//  VaultManifest — versioned encrypted manifest snapshots
+// ──────────────────────────────────────────────────────────
+
+model VaultManifest {
+  id          String   @id @default(cuid())
+  vaultId     String
+  vault       Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  version     Int
+  /// CID of the encrypted manifest on private IPFS
+  cid         String
+  /// SHA-256 hex of the encrypted bytes before IPFS upload
+  contentHash String
+  /// AES-GCM nonce used for this version (hex) — key lives in key-shards, not here
+  nonce       String?
+
+  createdAt   DateTime @default(now())
+  createdBy   String
+
+  @@unique([vaultId, version])
+  @@index([vaultId])
+}
+
+// ──────────────────────────────────────────────────────────
+//  AssetRecord — non-wallet assets
+// ──────────────────────────────────────────────────────────
+
+model AssetRecord {
+  id          String        @id @default(cuid())
+  vaultId     String
+  vault       Vault         @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  category    AssetCategory
+  label       String
+  /// Public description — never include secrets here
+  description String?
+  /// Encrypted detail blob CID (account numbers, etc.)
+  detailCID   String?
+  detailHash  String?
+
+  /// Optional: which beneficiary inherits this asset
+  beneficiaryId String?
+  beneficiary   Beneficiary? @relation(fields: [beneficiaryId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([vaultId])
+  @@index([category])
+}
+
+// ──────────────────────────────────────────────────────────
+//  WalletRecord — blockchain wallet addresses
+//  Only public addresses stored here. No private keys.
+// ──────────────────────────────────────────────────────────
+
+model WalletRecord {
+  id           String   @id @default(cuid())
+  vaultId      String
+  vault        Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  chain        String   // ethereum | polygon | base | solana | xrpl | stellar | bitcoin | custom
+  /// Public address only — NEVER a private key or seed phrase
+  publicAddress String
+  label        String?
+  /// Approximate balance snapshot (human-readable, not authoritative)
+  balanceSnapshot String?
+  balanceUpdatedAt DateTime?
+  /// IPFS CID for encrypted NFT/token inventory
+  inventoryCID  String?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([vaultId, chain, publicAddress])
+  @@index([vaultId])
+}
+
+// ──────────────────────────────────────────────────────────
+//  DocumentRecord — encrypted file references
+// ──────────────────────────────────────────────────────────
+
+model DocumentRecord {
+  id          String       @id @default(cuid())
+  vaultId     String
+  vault       Vault        @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  type        DocumentType
+  label       String
+  description String?
+  /// CID of the encrypted document on private IPFS
+  cid         String
+  /// SHA-256 of the plaintext document before encryption (integrity proof)
+  plaintextHash String
+  /// MIME type of original file
+  mimeType    String       @default("application/pdf")
+  fileSizeBytes Int?
+
+  /// Restrict to specific roles at release time
+  releaseToRoles String[]  @default(["executor", "attorney"])
+
+  uploadedAt  DateTime @default(now())
+  uploadedBy  String
+
+  @@index([vaultId])
+  @@index([type])
+}
+
+// ──────────────────────────────────────────────────────────
+//  Executor — named executor(s) for the vault
+// ──────────────────────────────────────────────────────────
+
+model Executor {
+  id        String   @id @default(cuid())
+  vaultId   String
+  vault     Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  did       String?
+  /// Attorney/professional title if applicable
+  title     String?
+  /// Primary or backup
+  isPrimary Boolean  @default(true)
+
+  addedAt   DateTime @default(now())
+  addedBy   String
+
+  accessGrants AccessGrant[]
+
+  @@unique([vaultId, userId])
+  @@index([vaultId])
+}
+
+// ──────────────────────────────────────────────────────────
+//  Beneficiary
+// ──────────────────────────────────────────────────────────
+
+model Beneficiary {
+  id        String   @id @default(cuid())
+  vaultId   String
+  vault     Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  did       String?
+  /// Free-text description of what this person inherits
+  allocation String?
+  /// Access scope after release
+  scope     AccessScope @default(ASSIGNED_ITEMS_ONLY)
+
+  addedAt   DateTime @default(now())
+  addedBy   String
+
+  assignedAssets AssetRecord[]
+  accessGrants   AccessGrant[]
+
+  @@unique([vaultId, userId])
+  @@index([vaultId])
+}
+
+// ──────────────────────────────────────────────────────────
+//  Guardian — quorum approvers for release
+// ──────────────────────────────────────────────────────────
+
+model Guardian {
+  id        String   @id @default(cuid())
+  vaultId   String
+  vault     Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  did       String?
+  /// Guardians can approve release but cannot view private vault data
+  approvedAt DateTime?
+  approvalNote String?
+
+  addedAt   DateTime @default(now())
+  addedBy   String
+
+  @@unique([vaultId, userId])
+  @@index([vaultId])
+}
+
+// ──────────────────────────────────────────────────────────
+//  ReleasePolicy — rules governing when vault access opens
+// ──────────────────────────────────────────────────────────
+
+model ReleasePolicy {
+  id          String @id @default(cuid())
+  label       String
+
+  /// Minimum guardian approvals needed (e.g., 2 of 3)
+  guardianQuorumRequired Int @default(2)
+  guardianQuorumOf       Int @default(3)
+
+  /// Days to hold release open for dispute after guardian quorum
+  waitingPeriodDays Int @default(30)
+
+  /// Require attorney attestation before release
+  requireAttorneyAttestation Boolean @default(true)
+
+  /// Require death certificate or court order upload
+  requireDeathProof Boolean @default(true)
+
+  /// Allowed identity assurance level per NIST SP 800-63-4 (1|2|3)
+  executorIAL Int @default(2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vaults Vault[]
+
+  @@index([label])
+}
+
+// ──────────────────────────────────────────────────────────
+//  ReleaseClaim — estate claim workflow instance
+// ──────────────────────────────────────────────────────────
+
+model ReleaseClaim {
+  id       String      @id @default(cuid())
+  vaultId  String
+  vault    Vault       @relation(fields: [vaultId], references: [id], onDelete: Restrict)
+  claimantId String
+  claimant   User      @relation(fields: [claimantId], references: [id])
+
+  status   ClaimStatus @default(SUBMITTED)
+
+  /// CID of the encrypted death certificate / court order on private IPFS
+  deathProofCID  String?
+  deathProofHash String?
+
+  /// Attorney/notary DID who attested
+  attorneyDID    String?
+  attorneyNote   String?
+  attestedAt     DateTime?
+
+  /// Count of guardian approvals so far
+  guardianApprovals Int @default(0)
+
+  /// Date when waiting period expires
+  waitingPeriodEndsAt DateTime?
+
+  /// If disputed: reason
+  disputeReason String?
+  disputedAt    DateTime?
+
+  resolvedAt    DateTime?
+  resolutionNote String?
+
+  submittedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([vaultId])
+  @@index([status])
+}
+
+// ──────────────────────────────────────────────────────────
+//  VerificationCredential — W3C VC 2.0 record
+// ──────────────────────────────────────────────────────────
+
+model VerificationCredential {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// W3C VC type (e.g., IdentityCredential, ExecutorAuthorityCredential)
+  vcType        String
+  /// Issuer DID
+  issuerDID     String
+  /// Subject DID
+  subjectDID    String
+  /// SHA-256 of the VC JWT for audit — not the JWT itself
+  credentialHash String
+  /// ISO 8601 expiry
+  expiresAt     DateTime?
+  revokedAt     DateTime?
+
+  issuedAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([vcType])
+}
+
+// ──────────────────────────────────────────────────────────
+//  AccessGrant — scoped access record after release
+// ──────────────────────────────────────────────────────────
+
+model AccessGrant {
+  id            String      @id @default(cuid())
+  vaultId       String
+  vault         Vault       @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  granteeId     String
+  grantee       User        @relation(fields: [granteeId], references: [id])
+
+  scope         AccessScope
+  /// JSON list of specific asset or document IDs granted (for ASSIGNED_ITEMS_ONLY)
+  itemIds       String[]    @default([])
+
+  executorId    String?
+  executor      Executor?   @relation(fields: [executorId], references: [id])
+  beneficiaryId String?
+  beneficiary   Beneficiary? @relation(fields: [beneficiaryId], references: [id])
+
+  grantedAt     DateTime @default(now())
+  revokedAt     DateTime?
+  expiresAt     DateTime?
+
+  @@index([vaultId])
+  @@index([granteeId])
+}
+
+// ──────────────────────────────────────────────────────────
+//  AuditEvent — immutable append-only log
+//  Every significant action is recorded here.
+// ──────────────────────────────────────────────────────────
+
+model AuditEvent {
+  id        String      @id @default(cuid())
+  vaultId   String?
+  vault     Vault?      @relation(fields: [vaultId], references: [id], onDelete: SetNull)
+  actorId   String?
+  actor     User?       @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  action    AuditAction
+  /// Non-sensitive detail (no raw secrets)
+  detail    Json?
+  /// IP address (hashed in production for privacy)
+  ipHash    String?
+
+  /// On-chain event hash for tamper-evidence
+  chainEventHash String?
+
+  occurredAt DateTime @default(now())
+
+  @@index([vaultId])
+  @@index([actorId])
+  @@index([action])
+  @@index([occurredAt])
+}
+
+// ──────────────────────────────────────────────────────────
+//  DeadManSwitch — configurable check-in / heartbeat system
+//  Owner must check in at configured intervals.
+//  Missing N consecutive check-ins triggers the alert flow.
+// ──────────────────────────────────────────────────────────
+
+model DeadManSwitch {
+  id        String  @id @default(cuid())
+  vaultId   String  @unique
+  vault     Vault   @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  ownerId   String
+  owner     User    @relation("DMSOwner", fields: [ownerId], references: [id])
+
+  /// How often the owner must check in (days)
+  intervalDays      Int     @default(90)
+  /// How many missed check-ins before triggering
+  missedThreshold   Int     @default(3)
+  /// Current missed check-in count
+  missedCount       Int     @default(0)
+
+  enabled           Boolean @default(true)
+  /// Last time the owner confirmed they are alive
+  lastCheckIn       DateTime @default(now())
+  /// When the next check-in is due
+  nextCheckInDue    DateTime
+  /// When the trigger alert was fired (null = not yet triggered)
+  triggeredAt       DateTime?
+  /// Whether the release claim has been initiated
+  claimInitiated    Boolean @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  checkIns    CheckInEvent[]
+
+  @@index([vaultId])
+  @@index([ownerId])
+  @@index([nextCheckInDue])
+}
+
+model CheckInEvent {
+  id        String        @id @default(cuid())
+  switchId  String
+  switch    DeadManSwitch @relation(fields: [switchId], references: [id], onDelete: Cascade)
+
+  /// Method used to check in
+  method    String  @default("web") // web | email | api
+  ipHash    String?
+  note      String?
+
+  occurredAt DateTime @default(now())
+
+  @@index([switchId])
+}
+
+// ──────────────────────────────────────────────────────────
+//  LegacyMessage — personal messages to beneficiaries
+//  Sealed until vault release. Released per beneficiary scope.
+// ──────────────────────────────────────────────────────────
+
+enum MessageType {
+  TEXT
+  VIDEO_URL
+  AUDIO_URL
+  DOCUMENT_CID
+}
+
+model LegacyMessage {
+  id        String      @id @default(cuid())
+  vaultId   String
+  vault     Vault       @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User        @relation("MessageAuthor", fields: [authorId], references: [id])
+
+  /// Recipient (beneficiary userId — null = all beneficiaries)
+  recipientId   String?
+  recipientName String?
+
+  subject   String
+  /// Type of message
+  messageType MessageType @default(TEXT)
+  /// Encrypted content CID (text/video URL encrypted before storage)
+  contentCID  String?
+  /// SHA-256 of plaintext content
+  contentHash String?
+  /// Unencrypted display excerpt (public — no sensitive data)
+  excerpt     String?
+
+  /// Personal occasion (birthday, anniversary — for scheduled delivery)
+  scheduledFor    DateTime?
+  releaseOnDeath  Boolean  @default(true)
+
+  delivered   Boolean  @default(false)
+  deliveredAt DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([vaultId])
+  @@index([authorId])
+  @@index([recipientId])
+}
+
+// ============================================================
+//  Troptions Unity Legacy Vault — Subscription & Hybrid Payments
+//  Per approved plan: keep *normal systems* for normal people + middle class
+//    Family Vault $29.95 (1 vault, basic, normal/professional Heirloom "Advisor")
+//    High Level Vault $49.95 (5 vaults, high level *scaled* start, Strategist Heirloom)
+//  High level scaled further in upper tiers (user's savage structure preserved for HNW):
+//    Fuck You Level $129 | Fuck Em All (Nuclear) $499 (or $4,999 lifetime self-hosted)
+//    — full ruthless Heirloom (Warlord/Immortal), multi-jurisdiction, rugpull, 100+yr etc.
+//  Hybrid: Stripe (fiat, easy onboarding for middle class) + full on-chain
+//  (Unity Token, USDC, BTC via Troptions Pay / Xchange / x402 on Apostle Chain)
+//  Zero-knowledge: subscription proofs can be ZK too (prove active without leaking details).
+//  Georgia: All tiers anchored at 5655 Peachtree Parkway, Norcross, GA 30092 (RUFADAA / probate avoidance).
+// ============================================================
+
+enum PlanTier {
+  // Normal systems (accessible for normal people + middle class)
+  FAMILY                // "Family Vault" — 1 vault, basic, normal/professional Heirloom
+  // High level scaled (entry to advanced for complex / aspiring middle-to-high)
+  HIGH_LEVEL            // "High Level Vault" — 5 vaults, advanced features + Strategist Heirloom
+  // Upper high-level scaled (user-defined extreme for HNW who want maximum protection)
+  FUCK_YOU_LEVEL        // "Fuck You Level" — 10+ vaults, full Warlord Heirloom + rugpull / protocols
+  // ...
+  NUCLEAR               // "Fuck Em All (Nuclear)" — unlimited + Immortal Heirloom, 100+yr, self-hosted
+  // Legacy / lifetime compat (map to high during transition)
+  ESTATE
+  LIFETIME_LEGACY_LOCK
+  SELF_HOSTED_SOVEREIGN
+  TRIAL
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  LIFETIME
+  EXPIRED
+}
+
+enum PaymentProvider {
+  STRIPE
+  UNITY_TOKEN
+  USDC
+  XRPL
+  STELLAR
+  BTC
+  X402_METERED
+  TROPTIONS_PAY
+}
+
+model Subscription {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tier          PlanTier
+  status        SubscriptionStatus @default(TRIAL)
+
+  /// Stripe subscription id (for fiat path)
+  stripeSubscriptionId String? @unique
+  stripeCustomerId     String?
+
+  /// On-chain primary payment proof (Unity or USDC tx that granted/renewed)
+  onChainPaymentId String?
+
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?   // for lifetime this is null or far future
+  cancelAt           DateTime?
+  trialEndsAt        DateTime?
+
+  /// Max vaults allowed under this sub (tier-driven via lib/payments/tier-config.ts)
+  /// FAMILY (normal for middle class): 1 | HIGH_LEVEL (high level scaled): 5
+  /// FUCK_YOU_LEVEL / NUCLEAR (high level scaled extreme): 10 / unlimited
+  maxVaults         Int     @default(1)
+  /// Whether advanced policies (time-locks, tiered heirs, custom ZK, rugpull etc) + scaled Heirloom enabled
+  advancedFeatures  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments PaymentRecord[]
+  namespaceEntitlements NamespaceEntitlement[]
+}
+
+model PaymentRecord {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  provider       PaymentProvider
+  amount         String   // decimal string e.g. "29.95" or "49950000" (on-chain units)
+  currency       String   // USD | USDC | UNITY | USDF | BTC
+  status         String   // succeeded | pending | failed | onchain_confirmed
+
+  /// Stripe checkout / invoice
+  stripePaymentIntentId String?
+  stripeInvoiceId       String?
+
+  /// On-chain proof (for crypto path)
+  txHash         String?
+  chain          String?  // unity | apostle-7332 | xrpl | stellar | polygon
+  fromAddress    String?
+  blockHeight    String?
+
+  /// ZK proof of payment (optional future: prove paid without revealing tx to public indexers)
+  zkPaymentProof String?
+
+  createdAt DateTime @default(now())
+
+  @@index([subscriptionId])
+  @@index([txHash])
+}
+
+model OnChainPaymentProof {
+  id            String @id @default(cuid())
+  paymentId     String @unique
+
+  /// The hash we anchored for this payment event (Unity Token event or x402 402 fulfillment)
+  anchoredHash  String
+  /// Which chain settled it
+  chain         String
+  txHash        String
+  /// When the on-chain settlement was observed
+  settledAt     DateTime
+
+  createdAt     DateTime @default(now())
+}
+
+// Optional: link sovereign namespace (.legacy / .troptions) entitlement to active sub
+model NamespaceEntitlement {
+  id            String @id @default(cuid())
+  userId        String
+  user          User   @relation(fields: [userId], references: [id])
+  namespace     String @unique // e.g. "kevansfamily.troptions" or "smith.legacy"
+  subscriptionId String?
+  subscription  Subscription? @relation(fields: [subscriptionId], references: [id])
+  plan          PlanTier
+  isActive      Boolean @default(true)
+  createdAt     DateTime @default(now())
+
+  ipfsCID        String?
+  stellarTxHash  String?
+  solanaTxHash   String?
+  xrplTxHash     String?
+
+  @@index([userId])
+  @@index([namespace])
+}
+
+// ──────────────────────────────────────────────────────────
+//  Affiliate and Referral Layer
+// ──────────────────────────────────────────────────────────
+
+model Affiliate {
+  id             String         @id @default(cuid())
+  userId         String         @unique
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referralCode   String         @unique
+  namespace      String?
+  sftBadgeId     String?        // Token ID of the Soulbound Badge
+  status         String         @default("ACTIVE") // PENDING | ACTIVE | SUSPENDED
+  createdAt      DateTime       @default(now())
+  
+  referrals      Referral[]
+  rewards        ReferralReward[]
+}
+
+model Referral {
+  id             String         @id @default(cuid())
+  affiliateId    String
+  affiliate      Affiliate      @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  referredUserId String         @unique
+  referredVaultId String?
+  status         String         @default("CONVERTED") // REGISTERED | CONVERTED
+  createdAt      DateTime       @default(now())
+}
+
+model ReferralReward {
+  id             String         @id @default(cuid())
+  affiliateId    String
+  affiliate      Affiliate      @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  txHash         String         @unique
+  amount         String
+  currency       String         @default("USDC")
+  settledAt      DateTime       @default(now())
+}
+
+model BackgroundJob {
+  id        String   @id @default(uuid())
+  type      String   // e.g. "ANCHOR_NAMESPACE", "SEND_WELCOME_EMAIL"
+  payload   Json     // Input data needed for the job
+  status    String   // PENDING, PROCESSING, COMPLETED, FAILED
+  error     String?  // Error log if it failed
+  retries   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+// Tier features (centralized in lib/payments/tier-config.ts + enforced in activate + vault/create):
+// - FAMILY ("Family Vault"): normal systems for normal people/middle class — maxVaults=1, advanced=false, heirloom=NORMAL_ADVISOR
+// - HIGH_LEVEL ("High Level Vault"): high level *scaled* start — max=5, advanced=true, heirloom=STRATEGIST
+// - FUCK_YOU_LEVEL: high level scaled extreme — max=10, full Warlord Heirloom + rugpull etc.
+// - NUCLEAR: generational scaled — unlimited + Immortal Heirloom + self-hosted + 100yr
+// See approved plan + heirloom/ for the normal vs high-level-scaled split (Heirloom persona + intake).

@@ -1,0 +1,9 @@
+{
+  "framework": "nextjs",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm db:generate && pnpm build:ci",
+  "outputDirectory": ".next",
+  "redirects": [
+    { "source": "/vault", "destination": "https://troptionsunity.com/pricing?utm_source=genesis402&utm_medium=redirect", "statusCode": 301, "has": [{ "type": "host", "value": "genesis402.com" }] }
+  ]
+}

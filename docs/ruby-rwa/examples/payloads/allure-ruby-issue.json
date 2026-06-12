@@ -1,0 +1,38 @@
+{
+  "proofType": "bbs",
+  "disclosureGroup": "guardian_internal",
+  "issuerDid": "did:web:legacy.fthtrading.com:spv:allure",
+  "credentialSubject": {
+    "id": "did:web:legacy.fthtrading.com:asset:allure-ruby-54ct",
+    "type": "GemAsset",
+    "name": "Allure Ruby",
+    "gemType": "ruby",
+    "caratWeight": 54.0,
+    "color": "Purple Red / vivid hue",
+    "treatment": "heated",
+    "certifications": [
+      {
+        "type": "GemCertification",
+        "lab": "GIA",
+        "reportNumber": "GIA-REDACTED",
+        "reportCID": "bafybei-SAMPLE-GIA-REPORT-CID-001"
+      }
+    ],
+    "legalOwner": "did:web:legacy.fthtrading.com:spv:allure-holdings",
+    "titleStatus": "in_custody",
+    "valuation": {
+      "type": "GemValuation",
+      "amount": null,
+      "currency": "USD",
+      "asOf": null,
+      "appraisalStatus": "TBD",
+      "appraisalNote": "TBD — independent appraisal required; package NAV not asserted in repo"
+    },
+    "manifestCID": "bafybei-SAMPLE-ALLURE-MANIFEST-CID-001",
+    "oracleRef": {
+      "type": "OracleRef",
+      "oracleProvider": "GMIIE",
+      "oracleFeedId": "gmii:allure-ruby-nav-feed-SAMPLE"
+    }
+  }
+}

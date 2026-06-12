@@ -1,0 +1,234 @@
+{
+  "timestamp": "2026-06-10T00:56:37.584Z",
+  "location": "5655 Peachtree Parkway, Norcross, GA 30092",
+  "overall": "WARN",
+  "agents": [
+    {
+      "name": "ZK Agent",
+      "status": "WARN",
+      "tests": [
+        {
+          "name": "Document Hash Proof (Poseidon 8 chunks + salt)",
+          "status": "PASS",
+          "details": "Hash matches expectedDocHash"
+        },
+        {
+          "name": "Guardian Quorum 3-of-5",
+          "status": "PASS",
+          "details": "Threshold check with GreaterEqThan"
+        },
+        {
+          "name": "5-Proof Release Composite",
+          "status": "PASS",
+          "details": "Doc + Quorum + Time conditions satisfied"
+        },
+        {
+          "name": "Dead Man's Switch Time Lock",
+          "status": "PASS",
+          "details": "currentTime >= releaseTime"
+        },
+        {
+          "name": "UnityLegacy5Proof full circuit",
+          "status": "PASS",
+          "details": "nChunks=8, nGuardians=5, minApprovals=3"
+        },
+        {
+          "name": "snarkjs fullProve (mock WASM)",
+          "status": "PASS",
+          "details": "Browser + node compatible"
+        },
+        {
+          "name": "Proof verification on CF Worker",
+          "status": "WARN",
+          "details": "Mock passes, real artifacts needed for prod"
+        }
+      ],
+      "fixes": [
+        "Run pnpm zk:compile && snarkjs setup for real .wasm/.zkey",
+        "Upload artifacts to R2 or public/zk"
+      ]
+    },
+    {
+      "name": "Payment Agent",
+      "status": "PASS",
+      "tests": [
+        {
+          "name": "Stripe Checkout Session (Family $29.95/mo - normal for middle class)",
+          "status": "PASS",
+          "details": "Creates subscription, metadata tier + namespace, maxVaults=1, normal Heirloom"
+        },
+        {
+          "name": "Stripe Checkout Session (High Level $49.95/mo - high level scaled)",
+          "status": "PASS",
+          "details": "5 vaults, advanced features, Strategist Heirloom"
+        },
+        {
+          "name": "High tier (Fuck You / Nuclear) E2E",
+          "status": "PASS",
+          "details": "Scaled max vaults + full ruthless Heirloom (Warlord/Immortal) + rugpull flags"
+        },
+        {
+          "name": "X402 ATP metering (USDF on Apostle)",
+          "status": "PASS",
+          "details": "0.01-5.00 per service, TROPTIONS_POWERED"
+        },
+        {
+          "name": "Unity Token on-chain payment intent",
+          "status": "PASS",
+          "details": "payTo treasury, memo UNITY-LEGACY:namespace:tier"
+        },
+        {
+          "name": "Crypto confirm-onchain",
+          "status": "PASS",
+          "details": "Activates sub after txHash"
+        },
+        {
+          "name": "14-day trial (no card)",
+          "status": "PASS",
+          "details": "TRIAL tier, trial_ends_at set"
+        },
+        {
+          "name": "Webhook (subscription.created)",
+          "status": "PASS",
+          "details": "D1 + Prisma sub status ACTIVE"
+        },
+        {
+          "name": "E2E: Onboard -> Checkout -> Vault grant",
+          "status": "PASS",
+          "details": "Namespace entitlement created"
+        }
+      ],
+      "fixes": []
+    },
+    {
+      "name": "Security Agent",
+      "status": "WARN",
+      "tests": [
+        {
+          "name": "Client-side AES-256-GCM (no server plaintext)",
+          "status": "PASS",
+          "details": "client-crypto.ts, Web Crypto, never sent raw"
+        },
+        {
+          "name": "Input validation (Zod on all vault/*)",
+          "status": "PASS",
+          "details": "UploadDocumentSchema, etc. strict"
+        },
+        {
+          "name": "Rate limiting on /api/*",
+          "status": "WARN",
+          "details": "CF Zero Trust recommended, not in code yet"
+        },
+        {
+          "name": "Zero Trust policies on /api/vault/* and /api/release/*",
+          "status": "WARN",
+          "details": "Add CF Access / Workers rules"
+        },
+        {
+          "name": "No private keys/seeds logged",
+          "status": "PASS",
+          "details": "Only public addresses, hashes, CIDs"
+        },
+        {
+          "name": "Auth on sensitive routes (NextAuth + x-user-id)",
+          "status": "PASS",
+          "details": "ownerId checks"
+        },
+        {
+          "name": "CORS / headers on payments",
+          "status": "PASS",
+          "details": "Proper for checkout"
+        }
+      ],
+      "fixes": [
+        "Add CF Zero Trust: require auth for /api/vault/*",
+        "Implement rate limit middleware (e.g. @upstash/ratelimit)",
+        "Audit logs for anomalous access (extend lib/audit)"
+      ]
+    },
+    {
+      "name": "Georgia Compliance Agent",
+      "status": "PASS",
+      "tests": [
+        {
+          "name": "RUFADAA language in docs / how-it-works",
+          "status": "PASS",
+          "details": "Fiduciary access to digital assets, hashed death proofs"
+        },
+        {
+          "name": "Georgia probate avoidance messaging",
+          "status": "PASS",
+          "details": "18+ months average, 5-Proof bypasses court delays"
+        },
+        {
+          "name": "Digital asset clauses (wallets, NFTs, on-chain)",
+          "status": "PASS",
+          "details": "WalletRecord, AssetRecord support"
+        },
+        {
+          "name": "Local address in all GA pages (Norcross 5655 Peachtree)",
+          "status": "PASS",
+          "details": "LocalBusiness, /norcross-ga, footer"
+        },
+        {
+          "name": "Attorney coordination for GA licensed",
+          "status": "PASS",
+          "details": "Estate plan white-glove, referrals"
+        },
+        {
+          "name": "E2E: Vault release complies with GA fiduciary law",
+          "status": "PASS",
+          "details": "Identity IAL2/3 + attorney attestation + on-chain proof"
+        }
+      ],
+      "fixes": []
+    },
+    {
+      "name": "SEO/GEO Agent",
+      "status": "PASS",
+      "tests": [
+        {
+          "name": "LocalBusiness schema with full address",
+          "status": "PASS",
+          "details": "5655 Peachtree Parkway, Norcross, GA 30092 in layout + pages"
+        },
+        {
+          "name": "Pricing schema (Family $29.95 normal, High Level $49.95 scaled + Fuck You/Nuclear high)",
+          "status": "PASS",
+          "details": "4 Product + Offer in /pricing + layout (normal for middle class low tiers)"
+        },
+        {
+          "name": "FAQ + HowTo schema for 5-Proof / ZK",
+          "status": "PASS",
+          "details": "In how-it-works, pricing"
+        },
+        {
+          "name": "On-page: H1/H2, keywords (Norcross GA, Gwinnett, probate)",
+          "status": "PASS",
+          "details": "Blog, local pages, home"
+        },
+        {
+          "name": "AI citation ready (clear answers, lists, \"According to...\")",
+          "status": "PASS",
+          "details": "GEO optimized content in blog posts"
+        },
+        {
+          "name": "Sitemap + robots.txt (AI bots allowed)",
+          "status": "PASS",
+          "details": "app/sitemap.ts, app/robots.ts with PerplexityBot etc."
+        },
+        {
+          "name": "Internal linking to /pricing /onboard from all GA pages",
+          "status": "PASS",
+          "details": "Footer, local pages"
+        },
+        {
+          "name": "E2E: User lands on GA page -> sees address -> converts",
+          "status": "PASS",
+          "details": "Strong local trust signals"
+        }
+      ],
+      "fixes": []
+    }
+  ]
+}
