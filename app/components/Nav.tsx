@@ -36,6 +36,7 @@ const navGroups = [
       { href: "/onboard", label: "Conversational Setup" },
       { href: "/troptions", label: "Troptions Platform & Manual" },
       { href: "/research", label: "Technical Research & Specs" },
+      { href: "/media", label: "Media Swarm & Portfolio" },
     ],
   },
 ];

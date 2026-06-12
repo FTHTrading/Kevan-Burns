@@ -480,6 +480,7 @@ export default function RegistryGatewayClient() {
             <Link href="/blog" className="hover:text-red-500 transition-all">Blog</Link>
             <Link href="/research" className="hover:text-red-500 transition-all">Research Portal</Link>
             <Link href="/connect" className="hover:text-red-500 transition-all">Connect Hub</Link>
+            <Link href="/media" className="hover:text-red-500 transition-all">Media & Portfolio</Link>
             <Link href="/troptionsinvestors" className="hover:text-red-500 transition-all">Investor Portal</Link>
           </div>
         </div>
