@@ -25,7 +25,7 @@ export default function AboutPage() {
       logo: "https://unykorn.ai/images/legacy/logo-nav.png",
       founder: {
         "@type": "Person",
-        name: "Kevan Burns"
+        name: "Founder-Architect"
       },
       address: {
         "@type": "PostalAddress",
@@ -40,16 +40,7 @@ export default function AboutPage() {
 
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 relative overflow-hidden ${bgStyle}`}>
-      {/* Trust bar */}
-      <div className={`border-b px-4 py-1.5 text-center transition-colors duration-200 relative z-30 ${
-        isDark 
-          ? "bg-amber-950/40 border-amber-500/20 text-amber-400" 
-          : "bg-amber-50 border-amber-200/60 text-amber-800 font-bold"
-      }`}>
-        <span className="text-xs font-medium uppercase tracking-wider">
-          Founded by Kevan Burns • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
-        </span>
-      </div>
+      
 
       {/* Background grids */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.08] dark:opacity-[0.15]" 
@@ -72,7 +63,7 @@ export default function AboutPage() {
             </span>
           </Link>
           <span className="bg-red-500/10 text-red-500 border border-red-500/25 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">
-            Founder & Story
+            Sovereign Story
           </span>
         </div>
 
@@ -101,7 +92,7 @@ export default function AboutPage() {
             <span>Sovereign Web3 Infrastructure</span>
           </div>
           <h1 className={`text-4xl sm:text-5xl font-extrabold tracking-tight ${titleColor} orbitron-title`}>
-            The Unykorn Story & Founder
+            The Unykorn Story & Architecture
           </h1>
           <p className={`${textMuted} text-base max-w-2xl mx-auto leading-relaxed`}>
             Unykorn is a global Web3 platform pioneering permanent namespaces, digital legacy inheritance, and real-world asset tokenization across Solana and Stellar.
@@ -114,7 +105,7 @@ export default function AboutPage() {
             Our Evolution Since 2011
           </h2>
           <p className={`text-sm sm:text-base leading-relaxed ${textBody}`}>
-            Long before the advent of modern blockchains or smart contracts, Unykorn's founder, **Kevan Burns**, began developing alternative digital barter architectures, accounting frameworks, and credit-unit networks in 2004, transitioning to building sovereign Web3 infrastructure in 2011. The core thesis was simple: the internet lacks a native identity and payment settlement layer. 
+            Long before the advent of modern blockchains or smart contracts, Unykorn's founder began developing alternative digital barter architectures, accounting frameworks, and credit-unit networks in 2004, transitioning to building sovereign Web3 infrastructure in 2011. The core thesis was simple: the internet lacks a native identity and payment settlement layer. 
           </p>
           <p className={`text-sm sm:text-base leading-relaxed ${textBody}`}>
             Over the years, those early barter designs evolved to incorporate decentralized ledger tech. In 2026, Unykorn operates as a comprehensive sovereign Web3 ecosystem. By separating high-frequency application logic (on Solana) from institutional compliance (on Stellar), we deliver a dual-chain network that keeps users in complete control of their digital presence.
@@ -139,7 +130,7 @@ export default function AboutPage() {
           <div className="space-y-4 text-xs sm:text-sm">
             <div className="border-l-2 border-amber-500 pl-4 space-y-1">
               <h3 className={`font-bold ${titleColor}`}>“Deterministic Literary Publishing: A Multi-Layer Provenance Model for Verifiable Manuscripts”</h3>
-              <p className={textMuted}>By Kevan Burns — February 2026</p>
+              <p className={textMuted}>By Founder-Architect — February 2026</p>
               <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 font-mono text-[11px] text-red-500">
                 <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6241279" target="_blank" rel="noopener noreferrer" className="hover:underline">SSRN Abstract</a>
                 <a href="https://www.researchgate.net/publication/403558328_Deterministic_Literary_Publishing_A_Multi-Layer_Provenance_Model_for_Verifiable_Manuscripts" target="_blank" rel="noopener noreferrer" className="hover:underline">ResearchGate Publication</a>

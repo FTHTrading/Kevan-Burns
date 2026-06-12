@@ -207,17 +207,17 @@ export const REGISTRY_SITES: RegistrySite[] = [
     "web3": "LIVE"
   },
   {
-    "id": "kevan-unykorn-org",
-    "name": "Kevan Burns \u2014 kevan.unykorn.org",
+    "id": "architect-unykorn-org",
+    "name": "Platform Architect \u2014 architect.unykorn.org",
     "system": "UnyKorn Core",
     "category": "Research & DOI",
-    "url": "https://kevan.unykorn.org/",
+    "url": "https://architect.unykorn.org/",
     "status": "live",
     "web3": "NOT_ONBOARDED"
   },
   {
-    "id": "orcid-kevan-burns",
-    "name": "ORCID \u2014 Kevan Burns",
+    "id": "orcid-platform-architect",
+    "name": "ORCID \u2014 Platform Architect",
     "system": "Genesis / SUPER-S",
     "category": "Research & DOI",
     "url": "https://orcid.org/0009-0008-8425-939X",

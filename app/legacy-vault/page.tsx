@@ -76,7 +76,7 @@ export default function LegacyVaultPage() {
       {/* Trust bar */}
       <div className="border-b px-4 py-1.5 text-center bg-amber-50 border-amber-200/60 text-amber-800 font-bold relative z-30">
         <span className="text-xs font-medium uppercase tracking-wider">
-          Founded by Kevan Burns • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
+          Unykorn Platforms • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
         </span>
       </div>
 

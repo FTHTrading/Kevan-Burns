@@ -4,7 +4,7 @@ import { X402_SERVICES } from "@/lib/x402";
 const mockUsage = [
   { service: "Executor Packet Export", namespace: "smithfamily.legacy", date: "2026-01-14", units: 1, total: "0.50 USDF", status: "COMPLETED" },
   { service: "Audit Log Export", namespace: "apexholdings.legacy", date: "2026-01-12", units: 3, total: "0.75 USDF", status: "COMPLETED" },
-  { service: "Metered API Access", namespace: "founder-kevan.legacy", date: "2026-01-12", units: 42, total: "0.42 USDF", status: "COMPLETED" },
+  { service: "Metered API Access", namespace: "architect.legacy", date: "2026-01-12", units: 42, total: "0.42 USDF", status: "COMPLETED" },
   { service: "Namespace Manifest Export", namespace: "doe-trust.legacy", date: "2026-01-10", units: 1, total: "0.25 USDF", status: "COMPLETED" },
   { service: "Beneficiary Packet Export", namespace: "smithfamily.legacy", date: "2026-01-09", units: 2, total: "1.00 USDF", status: "COMPLETED" },
 ];

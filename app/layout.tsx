@@ -7,7 +7,7 @@ import { JsonLd } from "./components/JsonLd";
 
 // Unykorn — Primary Entity for SEO/GEO
 const BUSINESS_NAME = "Unykorn";
-const OWNER = "Kevan Burns";
+const OWNER = "Founder-Architect";
 const ADDRESS = "5655 Peachtree Parkway, Norcross, GA 30092";
 const FULL_ADDRESS = "5655 Peachtree Parkway, Suite 100, Norcross, GA 30092 (Technology Park / Peachtree Corners)";
 const CITY = "Norcross";
@@ -16,14 +16,13 @@ const POSTAL = "30092";
 const COUNTRY = "US";
 const PHONE = "+1-770-555-0199"; 
 const SITE_URL = "https://unykorn.ai";
-const DESCRIPTION = "Unykorn operates permanent Web3 namespaces, digital identity systems, and real-world asset infrastructure across Solana and Stellar. Founded by Kevan Burns.";
+const DESCRIPTION = "Unykorn operates permanent Web3 namespaces, digital identity systems, and real-world asset infrastructure across Solana and Stellar.";
 
 export const metadata: Metadata = {
   title: "Unykorn - Sovereign Web3 Namespaces & Infrastructure",
   description: DESCRIPTION,
   keywords: [
     "Unykorn",
-    "Kevan Burns",
     "web3 namespace",
     "sovereign identity",
     "blockchain registry",
@@ -32,7 +31,7 @@ export const metadata: Metadata = {
     "rwa tokenization",
     "solana stellar"
   ],
-  authors: [{ name: "Kevan Burns", url: SITE_URL }],
+  authors: [{ name: "Unykorn Platforms", url: SITE_URL }],
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: "/",
@@ -100,7 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     {
       "@type": "Product",
       "name": "Unykorn Legacy Vault - Essential Vault",
-      "description": "Straightforward legacy protection for families and individuals. 1 sovereign namespace, client AES-256 + basic 5-Proof ZK + Dead Man's Switch. $29.95/mo. Founded by Kevan Burns at 5655 Peachtree Parkway, Norcross, GA 30092.",
+      "description": "Straightforward legacy protection for families and individuals. 1 sovereign namespace, client AES-256 + basic 5-Proof ZK + Dead Man's Switch. $29.95/mo. Provided by Unykorn at 5655 Peachtree Parkway, Norcross, GA 30092.",
       "offers": {
         "@type": "Offer",
         "price": "29.95",
@@ -111,7 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     {
       "@type": "Product",
       "name": "Unykorn Legacy Vault - Premium Estate Vault",
-      "description": "Scaled for complex families, trusts, and estates. Up to 5 vaults, advanced time-locks/tiered heirs, professional Heirloom Strategist AI, business docs, white-glove, 5-Proof ZK. $49.95/mo (most popular). Founded by Kevan Burns at 5655 Peachtree Parkway, Norcross, GA 30092.",
+      "description": "Scaled for complex families, trusts, and estates. Up to 5 vaults, advanced time-locks/tiered heirs, professional Heirloom Strategist AI, business docs, white-glove, 5-Proof ZK. $49.95/mo (most popular). Provided by Unykorn at 5655 Peachtree Parkway, Norcross, GA 30092.",
       "offers": {
         "@type": "Offer",
         "price": "49.95",
@@ -122,7 +121,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     {
       "@type": "Product",
       "name": "Unykorn Legacy Vault - Elite Trust Vault",
-      "description": "Advanced privacy controls, custom ZK trust quorums, secure asset protection triggers, active Heirloom Trust Defense AI, biometric triggers. $89.95/mo. Founded by Kevan Burns at 5655 Peachtree Parkway, Norcross, GA 30092.",
+      "description": "Advanced privacy controls, custom ZK trust quorums, secure asset protection triggers, active Heirloom Trust Defense AI, biometric triggers. $89.95/mo. Provided by Unykorn at 5655 Peachtree Parkway, Norcross, GA 30092.",
       "offers": {
         "@type": "Offer",
         "price": "89.95",
@@ -133,7 +132,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     {
       "@type": "Product",
       "name": "Unykorn Legacy Vault - Enterprise & Family Office",
-      "description": "Generational planning for family offices, legal firms, and institutions. Custom quorums, dedicated SLAs, self-hosted enterprise option. Custom Pricing. Founded by Kevan Burns at 5655 Peachtree Parkway, Norcross, GA 30092.",
+      "description": "Generational planning for family offices, legal firms, and institutions. Custom quorums, dedicated SLAs, self-hosted enterprise option. Custom Pricing. Provided by Unykorn at 5655 Peachtree Parkway, Norcross, GA 30092.",
       "offers": {
         "@type": "Offer",
         "price": "0.00",

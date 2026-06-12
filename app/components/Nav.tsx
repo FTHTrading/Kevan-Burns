@@ -89,15 +89,17 @@ export default function Nav() {
     /* Single sticky wrapper — banner + nav scroll as one unit, then stick together */
     <header className="sticky top-0 z-50 shrink-0">
       {/* Trust bar */}
-      <div className={`border-b px-4 py-1.5 text-center transition-colors duration-200 ${
-        isDarkTheme 
-          ? "bg-amber-950/40 border-amber-500/20 text-amber-400" 
-          : "bg-amber-50 border-amber-200/60 text-amber-800 font-bold"
-      }`}>
-        <span className="text-xs font-medium uppercase tracking-wider">
-          Founded by Kevan Burns • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
-        </span>
-      </div>
+      {(pathname === "/legacy-vault" || pathname?.startsWith("/vault") || pathname === "/executor" || pathname === "/pricing" || pathname === "/onboard" || pathname === "/vault-explained" || pathname === "/lifetime") && (
+        <div className={`border-b px-4 py-1.5 text-center transition-colors duration-200 ${
+          isDarkTheme 
+            ? "bg-amber-950/40 border-amber-500/20 text-amber-400" 
+            : "bg-amber-50 border-amber-200/60 text-amber-800 font-bold"
+        }`}>
+          <span className="text-xs font-medium uppercase tracking-wider">
+            Unykorn Platforms • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
+          </span>
+        </div>
+      )}
 
       <nav className={`border-b px-4 py-2.5 transition-colors duration-200 ${
         isDarkTheme 

@@ -6,7 +6,6 @@ export const metadata: Metadata = {
   description: "Unykorn operates permanent Web3 namespaces, digital identity systems, and real-world asset infrastructure across Solana and Stellar.",
   keywords: [
     "Unykorn",
-    "Kevan Burns",
     "web3 namespace",
     "sovereign identity",
     "blockchain registry",

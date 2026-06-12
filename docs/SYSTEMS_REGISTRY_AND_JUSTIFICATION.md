@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The Unykorn platform (unykorn.ai), founded and engineered by Kevan Burns, is supported by a multi-layered codebase distributed across several GitHub organizations and profiles: `FTHTrading`, `kevanbtc`, `unykornai`, `y3kmarkets`, and `y3kdigital`. Rather than a monolithic repository, the system is designed as a modular, service-oriented architecture. This spec catalogs the repository classes, justifies their separation, and maps their role in achieving a zero-knowledge, deterministic, and RUFADAA-compliant digital legacy infrastructure.
+The Unykorn platform (unykorn.ai), developed by the Unykorn Platform Group, is supported by a multi-layered codebase distributed across several GitHub organizations and profiles: `FTHTrading`, `kevanbtc`, `unykornai`, `y3kmarkets`, and `y3kdigital`. Rather than a monolithic repository, the system is designed as a modular, service-oriented architecture. This spec catalogs the repository classes, justifies their separation, and maps their role in achieving a zero-knowledge, deterministic, and RUFADAA-compliant digital legacy infrastructure.
 
 ---
 

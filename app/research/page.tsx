@@ -184,27 +184,18 @@ export default function ResearchPortal() {
     "@context": "https://schema.org",
     "@type": "ResearchProject",
     "name": "Unykorn Sovereign Web3 Research Portal",
-    "description": "Comprehensive academic specifications, cryptographic designs, and dual-chain architectures for the Unykorn platform founded by Kevan Burns.",
+    "description": "Comprehensive academic specifications, cryptographic designs, and dual-chain architectures for the Unykorn platform.",
     "url": "https://unykorn.ai/research",
     "author": {
       "@type": "Person",
-      "name": "Kevan Burns"
+      "name": "Founder-Architect"
     }
   };
 
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 relative overflow-hidden ${bgStyle}`}>
       
-      {/* Trust bar */}
-      <div className={`border-b px-4 py-1.5 text-center transition-colors duration-200 relative z-30 ${
-        isDark 
-          ? "bg-amber-950/40 border-amber-500/20 text-amber-400" 
-          : "bg-amber-50 border-amber-200/60 text-amber-800 font-bold"
-      }`}>
-        <span className="text-xs font-medium uppercase tracking-wider">
-          Founded by Kevan Burns • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
-        </span>
-      </div>
+      
 
       {/* Background Grid */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.05] dark:opacity-[0.10]" 
@@ -263,7 +254,7 @@ export default function ResearchPortal() {
           {/* Published Papers Highlight */}
           <div className={`p-4 rounded-2xl border ${cardBg} flex flex-col md:flex-row justify-between items-start md:items-center gap-4`}>
             <div className="space-y-1">
-              <span className="text-[10px] text-red-500 font-mono font-bold uppercase block">Author Highlight · Kevan Burns</span>
+              <span className="text-[10px] text-red-500 font-mono font-bold uppercase block">Platform Author Highlight</span>
               <h3 className={`font-bold text-sm ${titleColor}`}>“Deterministic Literary Publishing: A Multi-Layer Provenance Model for Verifiable Manuscripts”</h3>
               <p className={`text-xs ${textMuted}`}>Core theoretical framework for content authentication and decentralized trust registries.</p>
             </div>

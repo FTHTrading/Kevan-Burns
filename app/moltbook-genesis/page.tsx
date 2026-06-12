@@ -88,16 +88,7 @@ export default function MoltbookGenesisPage() {
 
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 relative overflow-hidden ${bgStyle}`}>
-      {/* Trust bar */}
-      <div className={`border-b px-4 py-1.5 text-center transition-colors duration-200 relative z-30 ${
-        isDark 
-          ? "bg-amber-950/40 border-amber-500/20 text-amber-400" 
-          : "bg-amber-50 border-amber-200/60 text-amber-800 font-bold"
-      }`}>
-        <span className="text-xs font-medium uppercase tracking-wider">
-          Founded by Kevan Burns • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
-        </span>
-      </div>
+      
 
       {/* Background grids */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.08] dark:opacity-[0.15]" 
@@ -132,8 +123,8 @@ export default function MoltbookGenesisPage() {
           >
             {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-rose-600" />}
           </button>
-          <Link href="/about" className="text-xs font-bold border border-red-500/20 hover:bg-red-500/10 text-red-550 px-4 py-2 rounded-xl transition-all">
-            About Kevan
+          <Link href="/about" className="text-xs font-bold border border-red-500/20 hover:bg-red-500/10 text-red-555 px-4 py-2 rounded-xl transition-all">
+            About Unykorn
           </Link>
           <Link href="/registry" className="rounded-xl bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white font-bold px-4 py-2 text-xs transition-all shadow-md shadow-red-500/10">
             Enter Cockpit

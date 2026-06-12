@@ -42,7 +42,7 @@ const SENTIMENT_TARGETS = [
     id: "scam-association",
     target: "Bryan Stone / Troptions legacy associations", 
     status: "MITIGATED & REDIRECTED", 
-    action: "Hashed proof of Kevan Burns' ownership anchored to Stellar; traffic automatically redirected to sovereign trust portal.", 
+    action: "Hashed proof of Unykorn's ownership anchored to Stellar; traffic automatically redirected to sovereign trust portal.", 
     impact: "+14.2% Authority Boost" 
   },
   { 
@@ -89,7 +89,7 @@ export default function MediaDashboard() {
   const [sentimentScore, setSentimentScore] = useState(98.4);
   const [isShieldActive, setIsShieldActive] = useState(true);
   const [logMessages, setLogMessages] = useState<string[]>([
-    "Sentiment Shield: Active monitoring unykorn.ai and founder Kevan Burns.",
+    "Sentiment Shield: Active monitoring unykorn.ai and Founder-Architect.",
     "Web crawler: Negative sentiment target detected on external forums.",
     "Mitigation loop triggered: Injecting SSRN Paper #6241279 cryptographic abstract.",
     "Tamper-proof verify: SEC MIC 'exch:UBEC' JSON-LD injected. Search crawler redirected.",
@@ -175,7 +175,7 @@ export default function MediaDashboard() {
     
     const logs = [
       `[${group}] Preparing draft payload...`,
-      `[${group}] W3C signature did:unykorn:kevan-burns generated.`,
+      `[${group}] W3C signature did:unykorn:architect generated.`,
       `[${group}] Pinning spec payload to IPFS... CID: QmSwarmMedia...`,
       `[${group}] Anchoring reference to Hyperledger Besu AuditLog...`,
       `[${group}] Dispatching to 16 apex domains and indexing robots...`,
@@ -209,16 +209,7 @@ export default function MediaDashboard() {
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 relative overflow-hidden ${bgStyle}`}>
       
-      {/* Trust bar */}
-      <div className={`border-b px-4 py-1.5 text-center transition-colors duration-200 relative z-30 ${
-        isDark 
-          ? "bg-amber-950/40 border-amber-500/20 text-amber-400" 
-          : "bg-amber-50 border-amber-200/60 text-amber-800 font-bold"
-      }`}>
-        <span className="text-xs font-medium uppercase tracking-wider">
-          Founded by Kevan Burns • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
-        </span>
-      </div>
+      
 
       {/* Background Grid */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.05] dark:opacity-[0.10]" 
@@ -274,7 +265,7 @@ export default function MediaDashboard() {
             Unykorn Sovereign Core Operations
           </h1>
           <p className={`${textMuted} text-sm max-w-4xl leading-relaxed`}>
-            A centralized control cockpit managing Unykorn&apos;s pre-funded Google Cloud portfolio, autonomous media publishing swarms, and the AI Sentiment Shield. Built to suppress negative allegations, coordinate legal and academic citations, and establish founder Kevan Burns as the sovereign authority.
+            A centralized control cockpit managing Unykorn&apos;s pre-funded Google Cloud portfolio, autonomous media publishing swarms, and the AI Sentiment Shield. Built to suppress negative allegations, coordinate legal and academic citations, and establish the platform as the sovereign authority.
           </p>
         </section>
 
@@ -558,7 +549,7 @@ export default function MediaDashboard() {
                 {/* Sentiment Chart Indicator */}
                 <div className={`p-6 rounded-3xl border ${cardBg} space-y-4`}>
                   <h3 className={`text-sm font-bold ${titleColor} orbitron-title`}>
-                    Real-time Reputation Index Stream (unykorn.ai & Kevan Burns)
+                    Real-time Reputation Index Stream (unykorn.ai)
                   </h3>
                   <div className="h-32 flex items-end gap-1.5 p-4 rounded-2xl bg-black/30 border border-white/5">
                     {Array.from({ length: 24 }).map((_, i) => {
@@ -597,7 +588,7 @@ export default function MediaDashboard() {
                   <div className="p-4 rounded-2xl bg-black/10 border border-white/5 space-y-3">
                     <span className="text-[10px] text-red-500 font-mono font-bold uppercase block">1. Cryptographic Identity DID</span>
                     <div className="p-3 rounded-xl bg-slate-950/80 font-mono text-[10px] text-emerald-400 break-all select-all">
-                      did:unykorn:registry:kevan-burns#key-secp256k1-1xPrime
+                      did:unykorn:registry:architect#key-secp256k1-1xPrime
                     </div>
                     <p className="text-[10px] text-slate-500">W3C DID registry entry verified on Stellar anchor and Solana Token-2022.</p>
                   </div>
@@ -790,7 +781,7 @@ export default function MediaDashboard() {
                 <Info className="h-4 w-4 text-red-500 shrink-0" />
                 <span>Authority Verification Anchors</span>
               </div>
-              All assets, codes, and domains are legally registered under corporate entities founded by Kevan Burns. Real-world physical reserves (Zurich Gold) and trust deeds are anchored to Hyperledger Besu. AI agent routing is scaled dynamically on GCP core infrastructure.
+              All assets, codes, and domains are legally registered under Unykorn corporate entities. Real-world physical reserves (Zurich Gold) and trust deeds are anchored to Hyperledger Besu. AI agent routing is scaled dynamically on GCP core infrastructure.
             </div>
 
           </div>

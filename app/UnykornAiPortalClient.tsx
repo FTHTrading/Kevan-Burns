@@ -229,7 +229,7 @@ export default function UnykornAiPortalClient() {
   const [sentimentScore, setSentimentScore] = useState(98.4);
   const [isShieldActive, setIsShieldActive] = useState(true);
   const [logMessages, setLogMessages] = useState<string[]>([
-    "Sentiment Shield: Active monitoring unykorn.ai and founder Kevan Burns.",
+    "Sentiment Shield: Active monitoring unykorn.ai and Unykorn systems.",
     "Web crawler: Negative sentiment target detected on external forums.",
     "Mitigation loop triggered: Injecting SSRN Paper #6241279 cryptographic abstract.",
     "Tamper-proof verify: SEC MIC 'exch:UBEC' JSON-LD injected. Search crawler redirected.",
@@ -344,7 +344,7 @@ export default function UnykornAiPortalClient() {
       setTimeout(() => {
         setBadassLogs(prev => [
           ...prev,
-          `[BADASS-AI] Extracted Entities: { company: "FTH Trading", founder: "Kevan Burns", sec_mic: "exch:UBEC" }`,
+          `[BADASS-AI] Extracted Entities: { company: "FTH Trading", founder: "Founder-Architect", sec_mic: "exch:UBEC" }`,
           `[BADASS-AI] Ingestion SUCCESS. Metadata parsed.`
         ]);
         setBadassProcessing(false);
@@ -392,7 +392,7 @@ export default function UnykornAiPortalClient() {
     let currentStep = 0;
     const steps = [
       `[${group}] Preparing draft payload...`,
-      `[${group}] W3C signature did:unykorn:kevan-burns generated.`,
+      `[${group}] W3C signature did:unykorn:architect generated.`,
       `[${group}] Pinning spec payload to IPFS... CID: QmSwarmMedia...`,
       `[${group}] Anchoring reference to Hyperledger Besu AuditLog...`,
       `[${group}] Dispatching to 16 apex domains and indexing robots...`,
@@ -584,7 +584,7 @@ export default function UnykornAiPortalClient() {
             agentName = "ZK Proof Verifier";
             role = "Verification Swarm";
           } else if (formattedQuery.includes("kevan") || formattedQuery.includes("burns")) {
-            aiTitle = "AI Swarm Answer: Kevan Burns (Founder & CEO)";
+            aiTitle = "AI Swarm Answer: Unykorn Platform Architect";
             avatar = "🏛️";
             agentName = "Unykorn Founder Agent";
             role = "Ecosystem Swarm";
@@ -835,16 +835,7 @@ export default function UnykornAiPortalClient() {
 
   return (
     <div className={`min-h-screen ${bgStyle} flex flex-col font-sans transition-colors duration-300 relative overflow-hidden`}>
-      {/* Trust bar */}
-      <div className={`border-b px-4 py-1.5 text-center transition-colors duration-200 relative z-30 ${
-        isDark 
-          ? "bg-amber-950/40 border-amber-500/20 text-amber-400" 
-          : "bg-amber-50 border-amber-200/60 text-amber-800 font-bold"
-      }`}>
-        <span className="text-xs font-medium uppercase tracking-wider">
-          Founded by Kevan Burns • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
-        </span>
-      </div>
+
 
       {/* Background radial glows */}
       {isDark && (
@@ -1729,7 +1720,7 @@ export default function UnykornAiPortalClient() {
                 <div className="space-y-3">
                   <p className="text-xs font-bold text-slate-400">Active Suppression Targets</p>
                   {[
-                    { id: "bryan", t: "Bryan Stone / Troptions legacy associations", status: "REDIRECTED", action: "Hashed proof of Kevan Burns' ownership anchored to Stellar." },
+                    { id: "bryan", t: "Bryan Stone / Troptions legacy associations", status: "REDIRECTED", action: "Hashed proof of Unykorn ownership anchored to Stellar." },
                     { id: "securities", t: "Unregulated coin/securities allegations", status: "SUPPRESSED", action: "Peachtree Parkway physical office proof and SEC MIC exch:UBEC files attached." },
                     { id: "scams", t: "Scam allegations / False reporting", status: "REPLACED", action: "Injected SSRN Paper Abstract #6241279 and Zenodo carry capacity proof to IPFS." }
                   ].map((target) => (
@@ -2103,8 +2094,8 @@ export default function UnykornAiPortalClient() {
                     🏛️
                   </div>
                   <div className="text-center sm:text-left space-y-1">
-                    <h2 className={`text-2xl font-black ${textTitle}`}>Kevan Burns</h2>
-                    <p className="text-xs text-amber-500 font-bold uppercase tracking-wider">Chairman & Chief Systems Engineer • FTH Trading / Unykorn</p>
+                    <h2 className={`text-2xl font-black ${textTitle}`}>Platform Architect</h2>
+                    <p className="text-xs text-amber-500 font-bold uppercase tracking-wider">Founder-Architect & Chief Systems Engineer • FTH Trading / Unykorn</p>
                     <p className={`text-xs ${textMuted} max-w-lg leading-relaxed`}>
                       Architect of multi-layered sovereign finance, barter networks, and zero-knowledge legal execution chains. Designs permanent digital identity namespaces and asset protection models.
                     </p>
@@ -2114,11 +2105,11 @@ export default function UnykornAiPortalClient() {
                 <div className={`grid grid-cols-2 gap-4 p-4 rounded-xl border ${inputBg} font-mono text-[10px]`}>
                   <div>
                     <span className="block text-slate-500 font-sans">NIL33 Anchor Public Hash</span>
-                    <span className="font-bold text-amber-500">0xNIL33_Burns_Anchor_772e...88ab</span>
+                    <span className="font-bold text-amber-500">0xNIL33_Architect_Anchor_772e...88ab</span>
                   </div>
                   <div>
                     <span className="block text-slate-500 font-sans">Stripe Verified Merchant ID</span>
-                    <span className="font-bold text-emerald-500">acct_1H2z8cKevBurnsFTH</span>
+                    <span className="font-bold text-emerald-500">acct_1H2z8cArchitectFTH</span>
                   </div>
                 </div>
               </div>

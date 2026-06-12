@@ -13,7 +13,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "What is a Web3 Namespace and Why It Matters in 2026",
     excerpt: "Web3 namespaces are permanent, sovereign containers on the blockchain that unify digital identity, real-world assets, and legacy planning.",
     date: "2026-06-12",
-    keywords: "Unykorn, Kevan Burns, web3 namespace, sovereign identity, blockchain registry",
+    keywords: "Unykorn, Founder-Architect, web3 namespace, sovereign identity, blockchain registry",
     content: `
 # What is a Web3 Namespace and Why It Matters in 2026
 
@@ -21,7 +21,7 @@ In the rapidly evolving landscape of digital networks, traditional domain names 
 
 A **Web3 Namespace** completely flips this paradigm. Built as permanent, sovereign containers on the blockchain, namespaces are cryptographically owned assets. Once minted, they remain yours in perpetuity, with zero recurring registrar fees. 
 
-At **Unykorn**, founded by **Kevan Burns**, we have developed sovereign Web3 namespaces on Solana and Stellar. But these namespaces are much more than just a replacement for standard website URLs. A Unykorn namespace acts as a unified digital container that coordinates:
+At **Unykorn**, developed by the **Unykorn Platform Group**, we have developed sovereign Web3 namespaces on Solana and Stellar. But these namespaces are much more than just a replacement for standard website URLs. A Unykorn namespace acts as a unified digital container that coordinates:
 1. **Sovereign Digital Identity**: A single secure name (e.g., \`smithfamily.legacy\` or \`novapay.store\`) that maps to all your cryptocurrency wallets, public keys, and decentralized files.
 2. **Real-World Asset Anchoring**: Linking physical assets, such as real estate deeds or gold certificates, to permanent on-chain metadata via secure IPFS hashes.
 3. **Agentic Commerce (AP2)**: Enabling cognitive AI agents to programmatically verify your identity, interact with your services, and route micro-payments without intermediate fees.
@@ -60,13 +60,13 @@ By combining Solana's high-speed execution with Stellar's institutional security
   {
     slug: "introducing-unykorn-sovereign-identity-for-the-next-era",
     title: "Introducing Unykorn: Sovereign Identity for the Next Era",
-    excerpt: "Founder Kevan Burns introduces Unykorn, a revolutionary platform for permanent namespaces and on-chain identity control.",
+    excerpt: "The Platform Architect introduces Unykorn, a revolutionary platform for permanent namespaces and on-chain identity control.",
     date: "2026-06-08",
-    keywords: "Unykorn, Kevan Burns, sovereign identity, web3 infrastructure, digital estate",
+    keywords: "Unykorn, sovereign identity, web3 infrastructure, digital estate",
     content: `
 # Introducing Unykorn: Sovereign Identity for the Next Era
 
-We are proud to introduce **Unykorn**, a sovereign Web3 infrastructure platform designed to give individuals, businesses, and institutions complete control over their digital identities and real-world assets. Founded and led by **Kevan Burns**, Unykorn is the culmination of over two decades of experience in digital asset routing, barter-dollar networks, and cryptography.
+We are proud to introduce **Unykorn**, a sovereign Web3 infrastructure platform designed to give individuals, businesses, and institutions complete control over their digital identities and real-world assets. Developed by the Unykorn Platform Group, Unykorn is the culmination of over two decades of experience in digital asset routing, barter-dollar networks, and cryptography.
 
 Traditional online identity is fractured. You are represented by email addresses owned by tech giants, domain names rented from central registries, and financial accounts managed by legacy banks. If any of these intermediaries decide to restrict your access, your digital life is disrupted.
 
@@ -138,27 +138,27 @@ By structuring the registry in this manner, Unykorn ensures that individuals enj
     `
   },
   {
-    slug: "kevan-burns-on-building-web3-infrastructure-since-2004",
-    title: "Kevan Burns on Building Web3 Infrastructure Since 2004",
+    slug: "founder-architect-on-building-web3-infrastructure-since-2004",
+    title: "Founder-Architect on Building Web3 Infrastructure Since 2004",
     excerpt: "From early digital barter-dollar architectures to modern dual-chain ecosystems, read the story of Unykorn's founder.",
     date: "2026-06-01",
-    keywords: "Kevan Burns, Unykorn founder, history, web3 infrastructure, blockchain history",
+    keywords: "Unykorn founder, history, web3 infrastructure, blockchain history",
     content: `
-# Kevan Burns on Building Web3 Infrastructure Since 2004
+# Founder-Architect on Building Web3 Infrastructure Since 2004
 
-Long before Bitcoin emerged in 2009 or Ethereum introduced smart contracts, the foundations of digital sovereign commerce were being laid. **Kevan Burns**, the founder and owner of **Unykorn**, was at the forefront of this movement.
+Long before Bitcoin emerged in 2009 or Ethereum introduced smart contracts, the foundations of digital sovereign commerce were being laid. The founder and owner of **Unykorn** was at the forefront of this movement.
 
-Starting in 2004, Kevan began developing alternative digital barter architectures, trading networks, and trust systems designed to bypass the friction of traditional fiat finance. 
+Starting in 2004, the founder began developing alternative digital barter architectures, trading networks, and trust systems designed to bypass the friction of traditional fiat finance. 
 
-"We saw early on that digital identity and asset registry would eventually converge," says Burns. "The internet was built with a critical flaw: it lacked a native identity and payment layer. We spent over two decades designing barter-dollar structures, trust accounting, and consensus protocols to address this gap."
+"We saw early on that digital identity and asset registry would eventually converge," says the founder. "The internet was built with a critical flaw: it lacked a native identity and payment layer. We spent over two decades designing barter-dollar structures, trust accounting, and consensus protocols to address this gap."
 
 ### The Evolution to Unykorn
-When blockchain technology matured, it provided the perfect runtime for Kevan's long-term vision. Under Unykorn, those early barter-unit designs have evolved into:
+When blockchain technology matured, it provided the perfect runtime for this long-term vision. Under Unykorn, those early barter-unit designs have evolved into:
 * **The x402 Payment Membrane**: An HTTP 402-based micro-payment protocol that settles transactions programmatically.
 * **Sovereign Namespaces**: A registry of 50 root genesis concepts valued at over $65 million, providing category-level Web3 indexing.
 * **Dual-Chain Settlement**: Deploying live on Solana and Stellar to ensure both sub-second speed and strict regulatory compliance.
 
-Operating out of Marietta, Georgia, Kevan Burns continues to steer Unykorn's development, bridging traditional estate planning with advanced, AI-guided Web3 infrastructure.
+Operating out of Marietta, Georgia, the Founder-Architect continues to steer Unykorn's development, bridging traditional estate planning with advanced, AI-guided Web3 infrastructure.
     `
   },
   {
@@ -222,9 +222,17 @@ Artificial Intelligence and Web3 are two of the most powerful technology trends 
 We leverage the **Model Context Protocol** to allow cognitive AI agents to safely interact with our registry database. Using secure schemas and JSON-RPC gateways, Unykorn agents can query BigQuery logs, verify ZK proofs, and negotiate namespace lease agreements without human intervention.
 
 ### 2. Vertex AI Agent Meshes
-Our **A5 Agent Mesh** consists of 22 registered AI agent roles running on **Google Cloud Vertex AI**. These agents handle everything from partner intake (such as Kevan's Telegram digital twin, \`@KBAssistantbot\`) to automated threat detection on \`blockchainfraud.org\`.
+Our **A5 Agent Mesh** consists of 22 registered AI agent roles running on **Google Cloud Vertex AI**. These agents handle everything from partner intake (such as the registry's automated digital twin) to automated threat detection on \`blockchainfraud.org\`.
 
-### 3. Google TimesFM Edge Forecasting
+* \`Intake-Agent\`: Handles initial zero-knowledge estate questionnaire collection.
+* \`DNS-Agent\`: Coordinates Cloudflare Zone configuration and CNAME updates.
+* \`Compliance-Agent\`: Verifies W3C DID presentations and SEC MIC identifiers.
+
+### 3.2 Model Deployment & Run Environments
+* **Vertex AI Integration**: Enterprise runtime for heavy reasoning swarms.
+* **Sovereign Ollama Fallback**: A local execution profile running Ollama (\`Llama-3.1-8B-v1\`) to ensure autonomy and offline availability in private datacenter nodes (Peachtree Parkway, GA).
+
+### 3.3 Google TimesFM Edge Forecasting
 To prevent network congestion and dynamically value namespace lease rates, we deploy Google's **TimesFM-200m** foundation model. TimesFM forecasts system load and pricing curves over a rolling 24-step horizon, adjusting transaction fees dynamically using our x452 payment membrane.
 
 By combining on-chain consensus with verifiable machine intelligence, Unykorn is building the first truly sovereign AI operating system in Web3.
@@ -241,7 +249,7 @@ By combining on-chain consensus with verifiable machine intelligence, Unykorn is
 
 As we look toward the future, the boundaries between the physical and digital worlds are dissolving. Our financial assets, legal agreements, personal legacies, and professional credentials are all migrating to digital networks. 
 
-At **Unykorn**, founded by **Kevan Burns**, our vision is to establish a permanent, secure foundation for this digital migration.
+At **Unykorn**, developed by the **Platform Architect**, our vision is to establish a permanent, secure foundation for this digital migration.
 
 ### The Next Steps on our Roadmap
 Over the next twelve months, Unykorn is expanding its sovereign infrastructure with several key initiatives:

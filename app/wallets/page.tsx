@@ -174,7 +174,7 @@ export default function WalletsPage() {
                     else if (e.target.value === "solana") setQrInput("HN7cRh21AZv7P4KEPt17tgRPJ67Dvw621287RT");
                     else if (e.target.value === "xrpl") setQrInput("rPT1S4GAhVTED3A53t2C3n4n54t74a2C1");
                     else if (e.target.value === "stellar") setQrInput("GCO2S45F54FEDC3n4t2C3n4t2C3n4t2C3n4t2C3");
-                    else if (e.target.value === "namespace") setQrInput("kevan.legacy");
+                    else if (e.target.value === "namespace") setQrInput("architect.legacy");
                   }}
                   className="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-gold-500/50 outline-none"
                 >

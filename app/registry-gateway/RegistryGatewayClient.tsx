@@ -96,16 +96,7 @@ export default function RegistryGatewayClient() {
         ? "bg-[#09040a] text-[#ffdce6] selection:bg-rose-500/30" 
         : "bg-[#fbf5f6] text-[#250d14] selection:bg-rose-500/20"
     }`}>
-      {/* Trust bar */}
-      <div className={`border-b px-4 py-1.5 text-center transition-colors duration-200 relative z-30 ${
-        theme === "dark" 
-          ? "bg-amber-950/40 border-amber-500/20 text-amber-400" 
-          : "bg-amber-50 border-amber-200/60 text-amber-800 font-bold"
-      }`}>
-        <span className="text-xs font-medium uppercase tracking-wider">
-          Founded by Kevan Burns • Moltbook Genesis Protocol • Live on Solana & Stellar • Deterministic Systems
-        </span>
-      </div>
+      
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes float-slow {
