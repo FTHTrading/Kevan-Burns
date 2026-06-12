@@ -7,12 +7,12 @@ import {
   CheckCircle, Clock, AlertTriangle, ChevronRight, Download, Send,
   RefreshCw, Layers, Cpu, Database, Award, ExternalLink, Info, Terminal, X,
   Coins, Sparkles, Building, ArrowRight, Activity, ArrowUpRight, Check, Eye, Plus, ArrowDown, ArrowUp, DollarSign,
-  Sun, Moon
+  Sun, Moon, BookOpen, Briefcase, Code, Play, Zap, Calendar, TrendingUp, SlidersHorizontal, Scale, FileCheck, Radio
 } from "lucide-react";
 
 // Types
 type WalletType = "phantom" | "metamask" | "freighter";
-type TabType = "search" | "neobank" | "commerce" | "apps";
+type TabType = "search" | "neobank" | "commerce" | "swarm" | "monorepo" | "persona" | "apps";
 type ThemeType = "dark" | "light";
 
 interface WalletState {
@@ -217,6 +217,73 @@ export default function UnykornAiPortalClient() {
   ]);
   const [edgeLogsActive, setEdgeLogsActive] = useState<boolean>(false);
 
+  // Kraken Ledgers
+  const [krakenLedgers, setKrakenLedgers] = useState([
+    { id: "KRK-801", chain: "XRPL", payload: "BridgePayload:USDC->Solana", amount: "12,500 USDC", timestamp: "Just now", status: "SUCCESS" },
+    { id: "KRK-802", chain: "Stellar", payload: "GoldenPath:TROP->USDF", amount: "5,000 TROP", timestamp: "2 mins ago", status: "SUCCESS" },
+    { id: "KRK-803", chain: "Base", payload: "LiquidationArbitrage:FlashBot", amount: "1.45 ETH", timestamp: "5 mins ago", status: "SUCCESS" },
+    { id: "KRK-804", chain: "Besu", payload: "NamespaceRegistry:anchor.mcp", amount: "2,500 TROP", timestamp: "10 mins ago", status: "SUCCESS" }
+  ]);
+
+  // Reputation / Sentiment Shield (Ported from app/media/page.tsx)
+  const [sentimentScore, setSentimentScore] = useState(98.4);
+  const [isShieldActive, setIsShieldActive] = useState(true);
+  const [logMessages, setLogMessages] = useState<string[]>([
+    "Sentiment Shield: Active monitoring unykorn.ai and founder Kevan Burns.",
+    "Web crawler: Negative sentiment target detected on external forums.",
+    "Mitigation loop triggered: Injecting SSRN Paper #6241279 cryptographic abstract.",
+    "Tamper-proof verify: SEC MIC 'exch:UBEC' JSON-LD injected. Search crawler redirected.",
+    "Reputation index update: Neutralized negative target. Sentiment score: 98.4%."
+  ]);
+  const [isDispatching, setIsDispatching] = useState(false);
+  const [dispatchLogs, setDispatchLogs] = useState<string[]>([]);
+
+  // BADASS AI State
+  const [badassLogs, setBadassLogs] = useState<string[]>([
+    "[BADASS-AI] Ingestion engine ready. Awaiting document payload...",
+  ]);
+  const [badassProcessing, setBadassProcessing] = useState(false);
+  const [badassDocType, setBadassDocType] = useState("sec_filing");
+
+  // FlashRouter State
+  const [routerSource, setRouterSource] = useState("SOL");
+  const [routerDest, setRouterDest] = useState("USDF");
+  const [routerAmount, setRouterAmount] = useState("10");
+  const [routerResult, setRouterResult] = useState<{
+    route: string[];
+    expectedOutput: string;
+    priceImpact: string;
+    executionTime: string;
+  } | null>(null);
+  const [routerCalculating, setRouterCalculating] = useState(false);
+
+  // FlashBot State
+  const [botActive, setBotActive] = useState(false);
+  const [botLogs, setBotLogs] = useState<string[]>([
+    "[FlashBot] Liquidation node inactive. Click 'Start FlashBot' to run on Base."
+  ]);
+  const [arbitrageProfit, setArbitrageProfit] = useState(0.0);
+
+  // ADK Orchestrator State
+  const [orchestratorLogs, setOrchestratorLogs] = useState<string[]>([
+    "[ADK-Orchestrator] Scheduler standing by. Registered cron: '0 0 * * *' (Daily Ledger Snapshot)"
+  ]);
+  const [orchestratorRunning, setOrchestratorRunning] = useState(false);
+  const [cronInterval, setCronInterval] = useState("daily");
+
+  // Playbook State
+  const [flywheelLeverage, setFlywheelLeverage] = useState(1.5);
+  const [flywheelReserveRate, setFlywheelReserveRate] = useState(20);
+
+  // L1 Chambers State
+  const [l1Chambers, setL1Chambers] = useState([
+    { name: "POPEYE", role: "Primary Authority Execution", height: "12,982,105", status: "ACTIVE", validators: 12 },
+    { name: "TEV", role: "Token Evaluation & Valuation", height: "12,982,094", status: "ACTIVE", validators: 12 },
+    { name: "CONSENSUS", role: "Besu AuditLog Synchronization", height: "8,241,092", status: "ACTIVE", validators: 24 },
+    { name: "MARS", role: "Metaplex Authority Registration", height: "48,931,225", status: "STANDBY", validators: 8 },
+    { name: "TAR", role: "Trustee Asset Recovery", height: "3,205,941", status: "ACTIVE", validators: 6 }
+  ]);
+
   useEffect(() => {
     if (!edgeLogsActive) return;
     const items = [
@@ -234,6 +301,118 @@ export default function UnykornAiPortalClient() {
     }, 3000);
     return () => clearInterval(timer);
   }, [edgeLogsActive]);
+
+  // Sentiment Shield Fluctuations
+  useEffect(() => {
+    if (!isShieldActive) return;
+    const timer = setInterval(() => {
+      setSentimentScore(prev => {
+        const delta = (Math.random() - 0.45) * 0.15;
+        return parseFloat(Math.min(100, Math.max(90, prev + delta)).toFixed(2));
+      });
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isShieldActive]);
+
+  // FlashBot Execution logs simulation
+  useEffect(() => {
+    if (!botActive) return;
+    const items = [
+      "Checking Aave V3 borrow positions on Base...",
+      "Checking Balancer V2 dynamic pool spreads...",
+      "No liquidation threshold exceeded. Standing by...",
+      "Found liquidatable position: User 0x82f... Collateral: WETH, Debt: USDC",
+      "Executing liquidation via FlashBot contract... Gas limit: 350,000",
+      "Arbitrage transaction SUCCESS. Profit: 0.14 WETH (Hash: 0x9fbc1...)"
+    ];
+    const timer = setInterval(() => {
+      const line = items[Math.floor(Math.random() * items.length)];
+      setBotLogs(prev => [...prev.slice(-10), `[${new Date().toLocaleTimeString()}] [FlashBot] ${line}`]);
+      if (line.includes("Profit")) {
+        setArbitrageProfit(p => parseFloat((p + 0.14).toFixed(2)));
+      }
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [botActive]);
+
+  // BADASS AI OCR simulation
+  const runBadassOcr = () => {
+    setBadassProcessing(true);
+    setBadassLogs(prev => [...prev, `[BADASS-AI] Ingesting document of type: ${badassDocType.toUpperCase()}...`]);
+    setTimeout(() => {
+      setBadassLogs(prev => [...prev, `[BADASS-AI] Processing OCR layout layers via cognitive vision models...`]);
+      setTimeout(() => {
+        setBadassLogs(prev => [
+          ...prev,
+          `[BADASS-AI] Extracted Entities: { company: "FTH Trading", founder: "Kevan Burns", sec_mic: "exch:UBEC" }`,
+          `[BADASS-AI] Ingestion SUCCESS. Metadata parsed.`
+        ]);
+        setBadassProcessing(false);
+      }, 1000);
+    }, 1000);
+  };
+
+  // FlashRouter route builder
+  const runRouterCalculation = () => {
+    setRouterCalculating(true);
+    setTimeout(() => {
+      const path = routerSource === "SOL" 
+        ? ["Solana DEX AMM", "Stellar Bridge payload", "USDF Pool"]
+        : ["Base L2 Pool", "Balancer V2 Route", "USDF Pool"];
+      const out = (parseFloat(routerAmount) * 0.985).toFixed(2);
+      setRouterResult({
+        route: path,
+        expectedOutput: `${out} ${routerDest}`,
+        priceImpact: "< 0.08%",
+        executionTime: "45ms"
+      });
+      setRouterCalculating(false);
+    }, 1200);
+  };
+
+  // ADK Orchestrator manual runner
+  const triggerOrchestratorJob = () => {
+    setOrchestratorRunning(true);
+    setOrchestratorLogs(prev => [...prev, `[ADK-Orchestrator] Triggering manual execution of workflow: ${cronInterval.toUpperCase()}...`]);
+    setTimeout(() => {
+      setOrchestratorLogs(prev => [
+        ...prev,
+        `[ADK-Orchestrator] Syncing master registry state...`,
+        `[ADK-Orchestrator] Backup of Kraken Ledgers complete.`,
+        `[ADK-Orchestrator] Job completed successfully.`
+      ]);
+      setOrchestratorRunning(false);
+    }, 1500);
+  };
+
+  // Swarm Dispatcher manual runner
+  const triggerSwarmPublish = (group: string) => {
+    setIsDispatching(true);
+    setDispatchLogs([]);
+    let currentStep = 0;
+    const steps = [
+      `[${group}] Preparing draft payload...`,
+      `[${group}] W3C signature did:unykorn:kevan-burns generated.`,
+      `[${group}] Pinning spec payload to IPFS... CID: QmSwarmMedia...`,
+      `[${group}] Anchoring reference to Hyperledger Besu AuditLog...`,
+      `[${group}] Dispatching to 16 apex domains and indexing robots...`,
+      `[${group}] SUCCESS: Media distributed. Neutralizing negative index targets.`
+    ];
+    const interval = setInterval(() => {
+      if (currentStep < steps.length) {
+        setDispatchLogs(prev => [...prev, steps[currentStep]]);
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        setIsDispatching(false);
+        setLogMessages(prev => [
+          `Media Swarm: Distributed ${group} spec release. Search indexes updated.`,
+          ...prev.slice(0, 4)
+        ]);
+        setSentimentScore(prev => Math.min(100, prev + 0.25));
+      }
+    }, 800);
+  };
 
   const queryRpcNode = async () => {
     setRpcLoading(true);
@@ -689,10 +868,10 @@ export default function UnykornAiPortalClient() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className={`hidden md:flex items-center gap-1.5 p-1 rounded-xl border ${isDark ? "bg-slate-900/80 border-white/5" : "bg-slate-100 border-slate-200"}`}>
+        <div className={`hidden md:flex flex-wrap items-center gap-1.5 p-1 rounded-xl border ${isDark ? "bg-slate-900/80 border-white/5" : "bg-slate-100 border-slate-200"}`}>
           <button
             onClick={() => setActiveTab("search")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${navBtnStyle("search")}`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${navBtnStyle("search")}`}
           >
             <span className="flex items-center gap-1.5">
               <Search className="h-3.5 w-3.5" /> Registry Search
@@ -700,7 +879,7 @@ export default function UnykornAiPortalClient() {
           </button>
           <button
             onClick={() => setActiveTab("neobank")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${navBtnStyle("neobank")}`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${navBtnStyle("neobank")}`}
           >
             <span className="flex items-center gap-1.5">
               <Coins className="h-3.5 w-3.5" /> Neo Bank
@@ -708,15 +887,39 @@ export default function UnykornAiPortalClient() {
           </button>
           <button
             onClick={() => setActiveTab("commerce")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${navBtnStyle("commerce")}`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${navBtnStyle("commerce")}`}
           >
             <span className="flex items-center gap-1.5">
               <Activity className="h-3.5 w-3.5" /> Agentic Commerce
             </span>
           </button>
           <button
+            onClick={() => setActiveTab("swarm")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${navBtnStyle("swarm")}`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Radio className="h-3.5 w-3.5" /> Media Swarm
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab("monorepo")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${navBtnStyle("monorepo")}`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Cpu className="h-3.5 w-3.5" /> Monorepo Systems
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab("persona")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${navBtnStyle("persona")}`}
+          >
+            <span className="flex items-center gap-1.5">
+              <BookOpen className="h-3.5 w-3.5" /> Persona & Papers
+            </span>
+          </button>
+          <button
             onClick={() => setActiveTab("apps")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${navBtnStyle("apps")}`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${navBtnStyle("apps")}`}
           >
             <span className="flex items-center gap-1.5">
               <Layers className="h-3.5 w-3.5" /> Extensions & Apps
@@ -1193,6 +1396,47 @@ export default function UnykornAiPortalClient() {
                 </table>
               </div>
             </div>
+
+            {/* Kraken Cross-Chain Ledgers */}
+            <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+              <h3 className={`text-lg font-bold mb-2 flex items-center gap-2 ${textTitle}`}>
+                <Activity className="h-5 w-5 text-amber-500" />
+                Kraken Cross-Chain Unified Ledgers
+              </h3>
+              <p className={`text-xs mb-4 ${textMuted}`}>Live telemetry from FTH multi-chain settlement rails (9 production environments, unified BridgePayload protocol).</p>
+              
+              <div className={`overflow-x-auto rounded-xl border ${isDark ? "border-white/5" : "border-slate-200"}`}>
+                <table className="w-full text-xs text-left">
+                  <thead>
+                    <tr className={`border-b font-bold ${tableHeaderStyle}`}>
+                      <th className="py-3 px-4">Ledger ID</th>
+                      <th className="py-3 px-4">Chain</th>
+                      <th className="py-3 px-4">Payload/Payload Metadata</th>
+                      <th className="py-3 px-4">Value Settled</th>
+                      <th className="py-3 px-4">Timestamp</th>
+                      <th className="py-3 px-4 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {krakenLedgers.map((l) => (
+                      <tr key={l.id} className={`border-b hover:bg-white/5 transition-colors ${isDark ? "border-white/5" : "border-slate-100"}`}>
+                        <td className="py-3.5 px-4 font-mono font-bold">{l.id}</td>
+                        <td className="py-3.5 px-4 font-bold text-amber-400 font-mono">{l.chain}</td>
+                        <td className="py-3.5 px-4 font-mono">{l.payload}</td>
+                        <td className="py-3.5 px-4 font-bold text-emerald-500 font-mono">{l.amount}</td>
+                        <td className={`py-3.5 px-4 ${textMuted}`}>{l.timestamp}</td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 text-[10px] font-bold font-mono">
+                            {l.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
         )}
 
@@ -1419,7 +1663,553 @@ export default function UnykornAiPortalClient() {
           </div>
         )}
 
-        {/* 4. EXTENSIONS & APPS TAB */}
+        {/* 4. MEDIA SWARM & SHIELD TAB */}
+        {activeTab === "swarm" && (
+          <div className="w-full grid md:grid-cols-3 gap-6 animate-in fade-in duration-300">
+            <div className="md:col-span-2 space-y-6">
+              
+              {/* GCP Assets Telemetry */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h3 className={`text-lg font-bold mb-2 flex items-center gap-2 ${textTitle}`}>
+                  <Globe className="h-5 w-5 text-amber-500" />
+                  GCP Sovereign Portfolio Telemetry
+                </h3>
+                <p className={`text-xs mb-6 ${textMuted}`}>Live network status and tokenized value metrics of pre-funded cloud systems ($15.4M - $28.5M book valuation).</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className={`rounded-xl border p-4 ${subCardStyle}`}>
+                    <span className="text-[10px] uppercase font-bold text-slate-500">Deployed App Nodes</span>
+                    <p className="text-2xl font-black text-white mt-1">17 Nodes</p>
+                    <p className="text-[10px] text-slate-400 mt-1">Active load-balanced edges</p>
+                  </div>
+                  <div className={`rounded-xl border p-4 ${subCardStyle}`}>
+                    <span className="text-[10px] uppercase font-bold text-slate-500">Apex Domains</span>
+                    <p className="text-2xl font-black text-white mt-1">16 Domains</p>
+                    <p className="text-[10px] text-slate-400 mt-1">Routing via Cloudflare proxied DNS</p>
+                  </div>
+                  <div className={`rounded-xl border p-4 ${subCardStyle}`}>
+                    <span className="text-[10px] uppercase font-bold text-slate-500">Reusable Packages</span>
+                    <p className="text-2xl font-black text-white mt-1">44 Crates</p>
+                    <p className="text-[10px] text-slate-400 mt-1">NPM, Cargo, and Python wheel builds</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sentiment Shield / Reputation Guard */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className={`text-lg font-bold flex items-center gap-2 ${textTitle}`}>
+                    <Shield className="h-5 w-5 text-emerald-400" />
+                    AI Sentiment Shield & Reputation Guard
+                  </h3>
+                  <button
+                    onClick={() => setIsShieldActive(!isShieldActive)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${isShieldActive ? "bg-emerald-500 text-slate-950" : "bg-slate-800 text-slate-450"}`}
+                  >
+                    {isShieldActive ? "Shield Active" : "Shield Suspended"}
+                  </button>
+                </div>
+                
+                <div className="grid sm:grid-cols-3 gap-6 mb-6">
+                  <div className={`rounded-xl border p-4 sm:col-span-1 text-center flex flex-col justify-center ${subCardStyle}`}>
+                    <span className="text-xs font-bold text-slate-400">Reputation Index</span>
+                    <p className="text-4xl font-black text-amber-500 font-mono mt-1">{sentimentScore}%</p>
+                    <p className="text-[9px] text-slate-500 mt-1 font-bold">SOVEREIGN PROOF DOMINANCE</p>
+                  </div>
+                  <div className="sm:col-span-2 space-y-2.5">
+                    <p className="text-xs font-bold text-slate-400">Target Mitigation Logs</p>
+                    <div className={`rounded-xl p-3.5 border font-mono text-[9px] h-28 overflow-y-auto space-y-1.5 ${terminalBg}`}>
+                      {logMessages.map((msg, index) => (
+                        <div key={index} className="text-slate-350">{msg}</div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-slate-400">Active Suppression Targets</p>
+                  {[
+                    { id: "bryan", t: "Bryan Stone / Troptions legacy associations", status: "REDIRECTED", action: "Hashed proof of Kevan Burns' ownership anchored to Stellar." },
+                    { id: "securities", t: "Unregulated coin/securities allegations", status: "SUPPRESSED", action: "Peachtree Parkway physical office proof and SEC MIC exch:UBEC files attached." },
+                    { id: "scams", t: "Scam allegations / False reporting", status: "REPLACED", action: "Injected SSRN Paper Abstract #6241279 and Zenodo carry capacity proof to IPFS." }
+                  ].map((target) => (
+                    <div key={target.id} className={`rounded-xl border p-3.5 flex justify-between items-start gap-4 ${subCardStyle}`}>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-white leading-none">{target.t}</p>
+                        <p className="text-[10px] text-slate-400">{target.action}</p>
+                      </div>
+                      <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 text-[9px] font-bold shrink-0 font-mono">
+                        {target.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            <div className="space-y-4">
+              {/* Media Swarm Dispatcher */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Media Swarm Dispatcher</h4>
+                <p className="text-xs text-slate-400 mb-4">Select an AI Publishing Group to distribute peer-reviewed articles, specifications, and telemetry mappings to index engines.</p>
+                
+                <div className="space-y-2.5">
+                  {[
+                    { id: "acad", name: "Academic Research Group", desc: "SSRN abstract injections & Zenodo carrying capacity details." },
+                    { id: "specs", name: "Web3 Specifications Group", desc: "OpenAPI endpoints & Hyperledger Besu AuditLogs." },
+                    { id: "barter", name: "Barter & Commodity Group", desc: "Y3K markets pricing index & Zurich gold reserve details." },
+                    { id: "defense", name: "Security & Anti-Scam Group", desc: "Fraud suppression logic & ZK wills attestation guides." }
+                  ].map((grp) => (
+                    <div key={grp.id} className={`rounded-xl border p-3 flex flex-col justify-between gap-3 ${subCardStyle}`}>
+                      <div>
+                        <p className="text-xs font-bold text-white leading-tight">{grp.name}</p>
+                        <p className="text-[10px] text-slate-400 mt-1 leading-normal">{grp.desc}</p>
+                      </div>
+                      <button
+                        onClick={() => triggerSwarmPublish(grp.name)}
+                        disabled={isDispatching}
+                        className="w-full text-center rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-1.5 text-[10px] transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {isDispatching ? "Publishing..." : "Dispatch Publication"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {dispatchLogs.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-[10px] font-bold uppercase text-slate-500">Publishing Logs</p>
+                    <div className={`rounded-xl p-3 border font-mono text-[9px] h-28 overflow-y-auto space-y-1 ${terminalBg}`}>
+                      {dispatchLogs.map((log, index) => (
+                        <div key={index} className="text-emerald-400">{log}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 5. MONOREPO SYSTEMS TAB */}
+        {activeTab === "monorepo" && (
+          <div className="w-full grid md:grid-cols-3 gap-6 animate-in fade-in duration-300">
+            <div className="md:col-span-2 space-y-6">
+              
+              {/* BADASS AI Console */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h3 className={`text-lg font-bold mb-2 flex items-center gap-2 ${textTitle}`}>
+                  <Cpu className="h-5 w-5 text-amber-500" />
+                  BADASS AI: OCR Ingestion Console
+                </h3>
+                <p className={`text-xs mb-6 ${textMuted}`}>AI cognitive vision document parser for processing SEC filings, regulatory registries, and troptions-ucc layouts.</p>
+                
+                <div className="grid sm:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1.5">Document Class</label>
+                    <select
+                      value={badassDocType}
+                      onChange={(e) => setBadassDocType(e.target.value)}
+                      className={`w-full rounded-xl border p-2 text-xs cursor-pointer ${inputBg}`}
+                    >
+                      <option value="sec_filing">SEC Form Filings</option>
+                      <option value="troptions_ucc">Troptions UCC Filings</option>
+                      <option value="trust_deeds">Legal Succession Trusts</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1.5">Simulate File Upload</label>
+                    <div className={`rounded-xl border p-1 flex items-center ${inputBg}`}>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. form-10k-fth-trading.pdf" 
+                        disabled
+                        className="bg-transparent border-none outline-none py-1.5 px-2.5 text-xs w-full text-slate-400"
+                      />
+                      <button
+                        onClick={runBadassOcr}
+                        disabled={badassProcessing}
+                        className="rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-1.5 text-xs transition-all shrink-0 cursor-pointer disabled:opacity-50"
+                      >
+                        {badassProcessing ? "Ingesting..." : "Ingest Document"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold uppercase text-slate-500">Extraction Log Output</p>
+                  <div className={`rounded-xl p-3.5 border font-mono text-[9px] h-28 overflow-y-auto space-y-1.5 ${terminalBg}`}>
+                    {badassLogs.map((log, index) => (
+                      <div key={index} className={log.includes("SUCCESS") ? "text-emerald-400 font-bold" : "text-slate-300"}>{log}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* FlashRouter & FlashBot */}
+              <div className="grid sm:grid-cols-2 gap-6">
+                
+                {/* FlashRouter */}
+                <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                  <h3 className={`text-base font-bold mb-2 flex items-center gap-2 ${textTitle}`}>
+                    <SlidersHorizontal className="h-4.5 w-4.5 text-amber-500" />
+                    FlashRouter Liquidity Optimizer
+                  </h3>
+                  <p className={`text-[10px] mb-4 ${textMuted}`}>Route transactions across unified Solana DEX and Stellar Bridge pools at minimal price impact.</p>
+                  
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="block text-[9px] uppercase font-bold text-slate-500 mb-1">Source Asset</span>
+                        <select
+                          value={routerSource}
+                          onChange={(e) => setRouterSource(e.target.value)}
+                          className={`w-full rounded-xl border p-2 text-xs ${inputBg}`}
+                        >
+                          <option value="SOL">SOL</option>
+                          <option value="USDC">USDC</option>
+                          <option value="TROP">TROP</option>
+                        </select>
+                      </div>
+                      <div>
+                        <span className="block text-[9px] uppercase font-bold text-slate-500 mb-1">Destination</span>
+                        <select
+                          value={routerDest}
+                          onChange={(e) => setRouterDest(e.target.value)}
+                          className={`w-full rounded-xl border p-2 text-xs ${inputBg}`}
+                        >
+                          <option value="USDF">USDF</option>
+                          <option value="USDT">USDT</option>
+                          <option value="XRP">XRP</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="block text-[9px] uppercase font-bold text-slate-500 mb-1">Amount</span>
+                      <div className={`relative rounded-xl border p-1 flex items-center ${inputBg}`}>
+                        <input
+                          type="number"
+                          value={routerAmount}
+                          onChange={(e) => setRouterAmount(e.target.value)}
+                          className="bg-transparent border-none outline-none py-1.5 px-2 text-xs w-full font-mono text-white"
+                        />
+                        <button
+                          onClick={runRouterCalculation}
+                          disabled={routerCalculating}
+                          className="rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 text-[10px] transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          {routerCalculating ? "Optimizing..." : "Calculate Route"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {routerResult && (
+                      <div className={`rounded-xl border p-3 space-y-2 text-[10px] font-mono ${subCardStyle}`}>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Path:</span>
+                          <span className="font-bold text-amber-500">{routerResult.route.join(" → ")}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Expected Output:</span>
+                          <span className="font-bold text-emerald-500">{routerResult.expectedOutput}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Price Impact:</span>
+                          <span className="font-bold text-white">{routerResult.priceImpact}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* FlashBot Arbitrage */}
+                <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className={`text-base font-bold flex items-center gap-2 ${textTitle}`}>
+                      <Zap className="h-4.5 w-4.5 text-amber-500" />
+                      FlashBot Liquidation Arbitrage
+                    </h3>
+                    <button
+                      onClick={() => setBotActive(!botActive)}
+                      className={`rounded-lg px-2.5 py-1 text-[10px] font-bold transition-all ${botActive ? "bg-red-500 text-white" : "bg-emerald-500 text-slate-955"}`}
+                    >
+                      {botActive ? "Stop Bot" : "Start FlashBot"}
+                    </button>
+                  </div>
+                  <p className={`text-[10px] mb-3 ${textMuted}`}>Executes instant liquidated debt arbitrage transactions on Base L2 using flash loans.</p>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-center text-xs mb-3">
+                    <div className={`rounded-xl border p-2 ${subCardStyle}`}>
+                      <span className="text-[8px] font-bold uppercase text-slate-500">Status</span>
+                      <p className={`font-black mt-0.5 ${botActive ? "text-emerald-500 animate-pulse" : "text-red-500"}`}>{botActive ? "RUNNING" : "INACTIVE"}</p>
+                    </div>
+                    <div className={`rounded-xl border p-2 ${subCardStyle}`}>
+                      <span className="text-[8px] font-bold uppercase text-slate-500">Arbitrage Yield</span>
+                      <p className="font-black text-amber-500 mt-0.5 font-mono">{arbitrageProfit} WETH</p>
+                    </div>
+                  </div>
+
+                  <div className={`rounded-xl p-2.5 border font-mono text-[8px] h-20 overflow-y-auto space-y-1 ${terminalBg}`}>
+                    {botLogs.map((log, index) => (
+                      <div key={index} className={log.includes("SUCCESS") ? "text-emerald-400 font-bold" : "text-slate-300"}>{log}</div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Playbook (Genesis 402 Model Simulator) */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h3 className={`text-lg font-bold mb-2 flex items-center gap-2 ${textTitle}`}>
+                  <TrendingUp className="h-5 w-5 text-amber-500" />
+                  Genesis 402: Money Playbook Simulator
+                </h3>
+                <p className={`text-xs mb-6 ${textMuted}`}>Interactive macroeconomic modeling representing capital scale velocity and settlement flywheels.</p>
+                
+                <div className="grid sm:grid-cols-2 gap-6 mb-5">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="font-bold text-slate-300">Target Leverage Ratio</span>
+                        <span className="font-mono text-amber-500">{flywheelLeverage}x</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1.0"
+                        max="3.0"
+                        step="0.1"
+                        value={flywheelLeverage}
+                        onChange={(e) => setFlywheelLeverage(parseFloat(e.target.value))}
+                        className="w-full accent-amber-500 h-1 rounded bg-slate-800"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="font-bold text-slate-300">Reserve Coverage Rate</span>
+                        <span className="font-mono text-amber-500">{flywheelReserveRate}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="10"
+                        max="40"
+                        step="1"
+                        value={flywheelReserveRate}
+                        onChange={(e) => setFlywheelReserveRate(parseInt(e.target.value))}
+                        className="w-full accent-amber-500 h-1 rounded bg-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className={`rounded-xl border p-4 text-center flex flex-col justify-center ${subCardStyle}`}>
+                      <span className="text-[10px] uppercase font-bold text-slate-500">Simulated Annual Yield</span>
+                      <p className="text-2xl font-black text-emerald-400 mt-1">{(24.5 * (flywheelLeverage / 1.5) * (20 / flywheelReserveRate)).toFixed(1)}%</p>
+                    </div>
+                    <div className={`rounded-xl border p-4 text-center flex flex-col justify-center ${subCardStyle}`}>
+                      <span className="text-[10px] uppercase font-bold text-slate-500">Projected Volume</span>
+                      <p className="text-xl font-black text-amber-500 mt-1 font-mono">${(1.85 * flywheelLeverage).toFixed(2)}M</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="space-y-4">
+              
+              {/* ADK Orchestrator */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">ADK Python Agent Orchestrator</h4>
+                <p className="text-xs text-slate-400 mb-4">Orchestrate and schedule regular monorepo sync actions, ledger snapshots, and metadata audits.</p>
+                
+                <div className="space-y-3 mb-4">
+                  <div>
+                    <span className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Job Interval</span>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {["minutely", "hourly", "daily"].map((inv) => (
+                        <button
+                          key={inv}
+                          onClick={() => {
+                            setCronInterval(inv);
+                            const expr = inv === "minutely" ? "*/5 * * * *" : inv === "hourly" ? "0 * * * *" : "0 0 * * *";
+                            setOrchestratorLogs(prev => [...prev, `[ADK-Orchestrator] Schedule updated to: '${expr}'`]);
+                          }}
+                          className={`rounded-lg py-1.5 text-[10px] font-bold transition-all cursor-pointer ${cronInterval === inv ? "bg-amber-500 text-slate-950" : isDark ? "bg-slate-800 text-slate-400 hover:text-white" : "bg-slate-200 text-slate-700"}`}
+                        >
+                          {inv.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={triggerOrchestratorJob}
+                    disabled={orchestratorRunning}
+                    className="w-full text-center rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 text-xs transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {orchestratorRunning ? "Executing Job..." : "Trigger Manual Workflow"}
+                  </button>
+                </div>
+
+                <div className={`rounded-xl p-3 border font-mono text-[9px] h-28 overflow-y-auto space-y-1 ${terminalBg}`}>
+                  {orchestratorLogs.map((log, index) => (
+                    <div key={index} className="text-slate-350">{log}</div>
+                  ))}
+                </div>
+              </div>
+
+              {/* L1 Chambers Status */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Sovereign L1 Chambers</h4>
+                <div className="space-y-3">
+                  {l1Chambers.map((ch) => (
+                    <div key={ch.name} className={`rounded-xl border p-3 flex justify-between items-center ${subCardStyle}`}>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <p className={`font-bold text-xs ${textTitle}`}>{ch.name}</p>
+                          <span className={`rounded-full px-1.5 py-0.2 text-[8px] font-mono ${ch.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-slate-800 text-slate-550 border border-white/5"}`}>
+                            {ch.status}
+                          </span>
+                        </div>
+                        <p className="text-[9px] text-slate-500 mt-0.5 leading-none">{ch.role}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-mono text-amber-500 text-[10px] font-bold">h: {ch.height}</p>
+                        <p className="text-[9px] text-slate-500 mt-0.5">{ch.validators} nodes</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* 6. SOVEREIGN PERSONA & PAPERS TAB */}
+        {activeTab === "persona" && (
+          <div className="w-full grid md:grid-cols-3 gap-6 animate-in fade-in duration-300">
+            <div className="md:col-span-2 space-y-6">
+              
+              {/* Profile Card */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md relative overflow-hidden ${cardStyle}`}>
+                <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                
+                <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start mb-6">
+                  <div className={`h-20 w-20 rounded-2xl flex items-center justify-center text-4xl shrink-0 ${isDark ? "bg-slate-800 border border-white/5" : "bg-white border border-slate-200 shadow"}`}>
+                    🏛️
+                  </div>
+                  <div className="text-center sm:text-left space-y-1">
+                    <h2 className={`text-2xl font-black ${textTitle}`}>Kevan Burns</h2>
+                    <p className="text-xs text-amber-500 font-bold uppercase tracking-wider">Chairman & Chief Systems Engineer • FTH Trading / Unykorn</p>
+                    <p className={`text-xs ${textMuted} max-w-lg leading-relaxed`}>
+                      Architect of multi-layered sovereign finance, barter networks, and zero-knowledge legal execution chains. Designs permanent digital identity namespaces and asset protection models.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={`grid grid-cols-2 gap-4 p-4 rounded-xl border ${inputBg} font-mono text-[10px]`}>
+                  <div>
+                    <span className="block text-slate-500 font-sans">NIL33 Anchor Public Hash</span>
+                    <span className="font-bold text-amber-500">0xNIL33_Burns_Anchor_772e...88ab</span>
+                  </div>
+                  <div>
+                    <span className="block text-slate-500 font-sans">Stripe Verified Merchant ID</span>
+                    <span className="font-bold text-emerald-500">acct_1H2z8cKevBurnsFTH</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Research Publications */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h3 className={`text-lg font-bold mb-2 flex items-center gap-2 ${textTitle}`}>
+                  <FileText className="h-5 w-5 text-amber-500" />
+                  Published Scientific Papers & Specifications
+                </h3>
+                <p className={`text-xs mb-6 ${textMuted}`}>Peer-reviewed academic research publications and IPFS structural protocol drafts grounding the Unykorn OS.</p>
+                
+                <div className="space-y-4">
+                  {[
+                    {
+                      title: "Moltbook Genesis Protocol Macroeconomic Carrying Capacity Simulation",
+                      meta: "Zenodo Research Library • DOI 10.5281/zenodo.18729652 • June 2026",
+                      desc: "Simulates systemic liquidity, barter transaction carrying capacity limits, and velocity metrics within zero-margin settlement environments."
+                    },
+                    {
+                      title: "Sovereign Web3 Namespace Capital & Scale",
+                      meta: "SSRN Academic Catalog • Abstract #6241279 • October 2025",
+                      desc: "Outlines tokenized real-world assets (RWA), permanent registry suffixes, and legal succession governance deeds backed by ZK proofs."
+                    },
+                    {
+                      title: "Troptions Multi-Chain Rails Bridge Payload Specification",
+                      meta: "IPFS Network Draft • CID QmBridgePayloadRailsSpecification343 • January 2026",
+                      desc: "Defines the unified bridge payload state, multi-sig execution rules, and zero-bps stablecoin settlement rails on XRPL, Stellar, and Solana."
+                    }
+                  ].map((paper, idx) => (
+                    <div key={idx} className={`rounded-xl border p-5 space-y-2.5 ${subCardStyle}`}>
+                      <div className="space-y-0.5">
+                        <h4 className="font-bold text-xs text-white leading-tight">{paper.title}</h4>
+                        <p className="text-[9px] text-amber-500 font-mono font-bold uppercase">{paper.meta}</p>
+                      </div>
+                      <p className={`text-xs leading-relaxed ${textMuted}`}>{paper.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            <div className="space-y-4">
+              
+              {/* Licensing Matrix */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Ecosystem Licensing & Security Matrix</h4>
+                
+                <div className="space-y-3.5">
+                  <div>
+                    <div className="flex justify-between items-center text-xs mb-1">
+                      <span className="font-bold text-white">unykorn-sovereign-core</span>
+                      <span className="rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 text-[9px] font-bold font-mono">PROPRIETARY</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400">Protects base execution state-machine, token evaluation vaults, and operator keys.</p>
+                  </div>
+                  <hr className="border-white/5" />
+                  <div>
+                    <div className="flex justify-between items-center text-xs mb-1">
+                      <span className="font-bold text-white">legacy-vault-protocol</span>
+                      <span className="rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 text-[9px] font-bold font-mono">AGPL-3.0</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400">Copyleft enforcement for local succession will templates, dead-man gates, and notary widgets.</p>
+                  </div>
+                  <hr className="border-white/5" />
+                  <div>
+                    <div className="flex justify-between items-center text-xs mb-1">
+                      <span className="font-bold text-white">contracts / flashrouter</span>
+                      <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 text-[9px] font-bold font-mono">MIT LICENSE</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400">Permissive licensing for DEX routers, liquidity pool optimizers, and Solidity build targets.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Protective Measures */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Sovereign Protection Measures</h4>
+                <div className="space-y-2 text-[10px] font-medium leading-relaxed">
+                  <p className="text-slate-350">🛡️ <strong className="text-white">Anti-Tamper Proofs:</strong> Billinear curve groups committed to Besu/Stellar mirrors.</p>
+                  <p className="text-slate-350">🧬 <strong className="text-white">ZK Wills Succession:</strong> PLONK-based inheritance deeds executed via time-lock triggers.</p>
+                  <p className="text-slate-350">🔌 <strong className="text-white">Dynamic Fraud Guard:</strong> Active suppression of phishing copycats via Sentiment Shield.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* 7. EXTENSIONS & APPS TAB */}
         {activeTab === "apps" && (
           <div className="w-full grid md:grid-cols-3 gap-6 animate-in fade-in duration-300">
             <div className="md:col-span-2 space-y-6">

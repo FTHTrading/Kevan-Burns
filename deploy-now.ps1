@@ -18,7 +18,18 @@ Write-Output "=== pnpm install ==="
 pnpm install
 
 Write-Output "=== Setting Cloudflare Token ==="
-$env:CLOUDFLARE_API_TOKEN = "cfut_YOUR_CLOUDFLARE_API_TOKEN"
+if ($null -eq $env:CLOUDFLARE_API_TOKEN -or $env:CLOUDFLARE_API_TOKEN -eq "" -or $env:CLOUDFLARE_API_TOKEN -eq "cfut_YOUR_CLOUDFLARE_API_TOKEN") {
+  if (Test-Path ".env") {
+    $envToken = Get-Content .env | Select-String "^CF_API_TOKEN=" | ForEach-Object { $_.Line.Split('=', 2)[1].Trim().Trim('"').Trim("'") }
+    if ($envToken) {
+      $env:CLOUDFLARE_API_TOKEN = $envToken
+      Write-Output "Loaded CLOUDFLARE_API_TOKEN from .env"
+    }
+  }
+}
+if ($null -eq $env:CLOUDFLARE_API_TOKEN -or $env:CLOUDFLARE_API_TOKEN -eq "" -or $env:CLOUDFLARE_API_TOKEN -eq "cfut_YOUR_CLOUDFLARE_API_TOKEN") {
+  $env:CLOUDFLARE_API_TOKEN = "cfut_YOUR_CLOUDFLARE_API_TOKEN"
+}
 
 Write-Output "=== Ensuring nodejs_compat flag in Cloudflare Pages ==="
 $accountId = "07bcc4a189ef176261b818409c95891f"

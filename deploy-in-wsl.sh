@@ -8,7 +8,18 @@ pnpm install --ignore-scripts
 echo "=== Pre-create .next/export/500.html to workaround WSL/Next.js rename ENOENT on shared FS ==="
 mkdir -p .next/export .next/server/pages
 echo "<!DOCTYPE html><html><body><h1>500 - Internal Server Error</h1></body></html>" > .next/export/500.html
-export CLOUDFLARE_API_TOKEN="cfut_YOUR_CLOUDFLARE_API_TOKEN"
+if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ "$CLOUDFLARE_API_TOKEN" = "cfut_YOUR_CLOUDFLARE_API_TOKEN" ]; then
+  if [ -f .env ]; then
+    ENV_TOKEN=$(grep -E "^CF_API_TOKEN=" .env | cut -d'=' -f2- | tr -d '"' | tr -d '\r')
+    if [ -n "$ENV_TOKEN" ]; then
+      export CLOUDFLARE_API_TOKEN="$ENV_TOKEN"
+      echo "Loaded CLOUDFLARE_API_TOKEN from .env"
+    fi
+  fi
+fi
+if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ "$CLOUDFLARE_API_TOKEN" = "cfut_YOUR_CLOUDFLARE_API_TOKEN" ]; then
+  export CLOUDFLARE_API_TOKEN="cfut_YOUR_CLOUDFLARE_API_TOKEN"
+fi
 echo "=== Ensuring nodejs_compat compatibility flag (required for next-on-pages worker) ==="
 ACCOUNT_ID="07bcc4a189ef176261b818409c95891f"
 PROJECT="troptions-unity-legacy-vault"
@@ -84,6 +95,10 @@ curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/pages
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   --data '{"name":"investors.unykorn.ai"}' | cat
+curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/pages/projects/$PROJECT/domains" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{"name":"kevan.unykorn.ai"}' | cat
 
 
 update_dns_record() {
@@ -115,6 +130,7 @@ update_dns_record() {
 update_dns_record "bc4d3d1b2fa6e1b52e1d3854bbaa691e" "vault" "vault.genesis402.com" "troptions-unity-legacy-vault.pages.dev"
 update_dns_record "40ce3ca38991756ee115a650cfea0d14" "registry" "registry.unykorn.ai" "troptions-unity-legacy-vault.pages.dev"
 update_dns_record "40ce3ca38991756ee115a650cfea0d14" "investors" "investors.unykorn.ai" "troptions-unity-legacy-vault.pages.dev"
+update_dns_record "40ce3ca38991756ee115a650cfea0d14" "kevan" "kevan.unykorn.ai" "troptions-unity-legacy-vault.pages.dev"
 
 echo "=== DNS Records updated (may take minutes to propagate + CF validation). ==="
 echo "=== FULL AUTOMATED DEPLOY + DNS COMPLETE ==="
