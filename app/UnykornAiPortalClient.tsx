@@ -2134,19 +2134,24 @@ export default function UnykornAiPortalClient() {
                 <div className="space-y-4">
                   {[
                     {
+                      title: "Deterministic Literary Publishing: A Multi-Layer Provenance Model for Verifiable Manuscripts",
+                      meta: "SSRN Academic Catalog • Abstract #6241279 • October 2025",
+                      desc: "Outlines tokenized real-world assets (RWA), permanent registry suffixes, and legal succession governance deeds backed by ZK proofs. ORCID Profile: 0009-0008-8425-939X."
+                    },
+                    {
                       title: "Moltbook Genesis Protocol Macroeconomic Carrying Capacity Simulation",
                       meta: "Zenodo Research Library • DOI 10.5281/zenodo.18729652 • June 2026",
                       desc: "Simulates systemic liquidity, barter transaction carrying capacity limits, and velocity metrics within zero-margin settlement environments."
                     },
                     {
-                      title: "Sovereign Web3 Namespace Capital & Scale",
-                      meta: "SSRN Academic Catalog • Abstract #6241279 • October 2025",
-                      desc: "Outlines tokenized real-world assets (RWA), permanent registry suffixes, and legal succession governance deeds backed by ZK proofs."
+                      title: "Apostle-7332: Symmetric Cryptographic Entitlements over Decentralized Barter Membranes",
+                      meta: "IPFS Network Specifications • CID QmTroyUnYkOrn9Rail • March 2026",
+                      desc: "Defines the unified bridge payload state, multi-sig execution rules, and zero-bps stablecoin settlement rails on XRPL, Stellar, and Solana."
                     },
                     {
-                      title: "Troptions Multi-Chain Rails Bridge Payload Specification",
-                      meta: "IPFS Network Draft • CID QmBridgePayloadRailsSpecification343 • January 2026",
-                      desc: "Defines the unified bridge payload state, multi-sig execution rules, and zero-bps stablecoin settlement rails on XRPL, Stellar, and Solana."
+                      title: "DONK PublishingKernelV2 (LPS-1 Specification)",
+                      meta: "Zenodo Academic Catalog • DOI 10.5281/zenodo.18646886 • March 2026",
+                      desc: "Sovereign publishing protocol standard for autonomous AI delegation, Polygon LiteraryAnchor syncing, and automated metadata pinsets."
                     }
                   ].map((paper, idx) => (
                     <div key={idx} className={`rounded-xl border p-5 space-y-2.5 ${subCardStyle}`}>
@@ -2155,6 +2160,81 @@ export default function UnykornAiPortalClient() {
                         <p className="text-[9px] text-amber-500 font-mono font-bold uppercase">{paper.meta}</p>
                       </div>
                       <p className={`text-xs leading-relaxed ${textMuted}`}>{paper.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Review of Deployed Projects */}
+              <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
+                <h3 className={`text-lg font-bold mb-2 flex items-center gap-2 ${textTitle}`}>
+                  <Layers className="h-5 w-5 text-amber-500" />
+                  Review of Deployed Workspace Projects
+                </h3>
+                <p className={`text-xs mb-6 ${textMuted}`}>Audit log and status of active sub-projects currently deployed across the local and cloud infrastructure.</p>
+
+                <div className="space-y-3">
+                  {[
+                    {
+                      name: "legacy-vault-protocol",
+                      path: "adk_build/legacy-vault-protocol",
+                      status: "LIVE",
+                      desc: "Zero-knowledge digital estate succession OS. Configured for client-side AES-256-GCM encryption, SnarkJS PLONK proofs, and RUFADAA succession checklists."
+                    },
+                    {
+                      name: "unykorn-doc-intelligence (BADASS AI)",
+                      path: "adk_build/unykorn-doc-intelligence",
+                      status: "LIVE",
+                      desc: "Autonomous voice-driven cognitive cockpit for the Troptions ecosystem. Coordinated 6-agent mesh using Gemini 2.0 and local LLM pipelines."
+                    },
+                    {
+                      name: "flashrouter",
+                      path: "adk_build/flashrouter",
+                      status: "DEPLOYED",
+                      desc: "Multi-provider flash loan optimizer abstracting Aave V3, Balancer V2, Uniswap V3, and MakerDAO DSS-Flash behind a unified Solidity/TS router."
+                    },
+                    {
+                      name: "flash-bot",
+                      path: "adk_build/flash-bot",
+                      status: "ACTIVE",
+                      desc: "Liquidation and arbitrage contracts running on Base L2 pools with automated settlement closures."
+                    },
+                    {
+                      name: "adk_orchestrator",
+                      path: "adk_build/adk_orchestrator",
+                      status: "RUNNING",
+                      desc: "Python Asyncio scheduler orchestrating multi-agent tasks, transaction monitors, and wallet balance sweeps."
+                    },
+                    {
+                      name: "genesis402-playbook",
+                      path: "genesis402-playbook",
+                      status: "INTEGRATED",
+                      desc: "Interactive macroeconomic simulator modeling capital velocity, dynamic AP2 rates, and Zurich vault gold allocations."
+                    },
+                    {
+                      name: "kraken_ledgers",
+                      path: "kraken_ledgers",
+                      status: "AUDITED",
+                      desc: "Financial statement ingestion pipeline parsing audited stock/ETF positions to verify physical vault reserve backings."
+                    },
+                    {
+                      name: "Legacy-Namespace-Registry",
+                      path: "Legacy-Namespace-Registry",
+                      status: "LIVE",
+                      desc: "Dual-chain namespace register anchoring identity records to Stellar, XRPL, and Solana (Token-2022) ledgers."
+                    }
+                  ].map((proj, idx) => (
+                    <div key={idx} className={`rounded-xl border p-4 space-y-2 ${subCardStyle}`}>
+                      <div className="flex justify-between items-center">
+                        <div className="space-y-0.5">
+                          <h4 className="font-bold text-xs text-white leading-tight font-mono">{proj.name}</h4>
+                          <span className="text-[9px] text-slate-500 font-mono">Location: {proj.path}</span>
+                        </div>
+                        <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold font-mono ${proj.status === "LIVE" || proj.status === "ACTIVE" ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" : "bg-blue-500/10 border border-blue-500/20 text-blue-400"}`}>
+                          {proj.status}
+                        </span>
+                      </div>
+                      <p className={`text-xs leading-relaxed ${textMuted}`}>{proj.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -2174,23 +2254,31 @@ export default function UnykornAiPortalClient() {
                       <span className="font-bold text-white">unykorn-sovereign-core</span>
                       <span className="rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 text-[9px] font-bold font-mono">PROPRIETARY</span>
                     </div>
-                    <p className="text-[10px] text-slate-400">Protects base execution state-machine, token evaluation vaults, and operator keys.</p>
+                    <p className="text-[10px] text-slate-400">Protects base execution state-machine, token evaluation vaults, and operator keys. All rights reserved.</p>
                   </div>
-                  <hr className="border-white/5" />
+                  <hr className="border-white/5" style={{ borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }} />
                   <div>
                     <div className="flex justify-between items-center text-xs mb-1">
                       <span className="font-bold text-white">legacy-vault-protocol</span>
-                      <span className="rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 text-[9px] font-bold font-mono">AGPL-3.0</span>
+                      <span className="rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 text-[9px] font-bold font-mono">PROPRIETARY / AGPL-3.0</span>
                     </div>
-                    <p className="text-[10px] text-slate-400">Copyleft enforcement for local succession will templates, dead-man gates, and notary widgets.</p>
+                    <p className="text-[10px] text-slate-400">Sovereign client portal and API proprietary. Local inheritance check logic, dead-man gates, and notary widgets enforced under AGPL-3.0.</p>
                   </div>
-                  <hr className="border-white/5" />
+                  <hr className="border-white/5" style={{ borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }} />
                   <div>
                     <div className="flex justify-between items-center text-xs mb-1">
-                      <span className="font-bold text-white">contracts / flashrouter</span>
+                      <span className="font-bold text-white">flashrouter (Contracts)</span>
+                      <span className="rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 text-[9px] font-bold font-mono">AGPL-3.0 LICENSED</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400">Solidity smart contracts for multi-lender routing. Enforces copyleft for derivative settlement membranes.</p>
+                  </div>
+                  <hr className="border-white/5" style={{ borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }} />
+                  <div>
+                    <div className="flex justify-between items-center text-xs mb-1">
+                      <span className="font-bold text-white">flashrouter / flash-bot / adk</span>
                       <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 text-[9px] font-bold font-mono">MIT LICENSE</span>
                     </div>
-                    <p className="text-[10px] text-slate-400">Permissive licensing for DEX routers, liquidity pool optimizers, and Solidity build targets.</p>
+                    <p className="text-[10px] text-slate-400">Permissive MIT licensing for TypeScript SDKs, Fastify REST APIs, Python agent modules, and arbitrage bot templates.</p>
                   </div>
                 </div>
               </div>
@@ -2198,10 +2286,11 @@ export default function UnykornAiPortalClient() {
               {/* Protective Measures */}
               <div className={`rounded-2xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Sovereign Protection Measures</h4>
-                <div className="space-y-2 text-[10px] font-medium leading-relaxed">
-                  <p className="text-slate-350">🛡️ <strong className="text-white">Anti-Tamper Proofs:</strong> Billinear curve groups committed to Besu/Stellar mirrors.</p>
-                  <p className="text-slate-350">🧬 <strong className="text-white">ZK Wills Succession:</strong> PLONK-based inheritance deeds executed via time-lock triggers.</p>
-                  <p className="text-slate-350">🔌 <strong className="text-white">Dynamic Fraud Guard:</strong> Active suppression of phishing copycats via Sentiment Shield.</p>
+                <div className="space-y-2.5 text-[10px] font-medium leading-relaxed">
+                  <p className="text-slate-350">🛡️ <strong className="text-white">Anti-Tamper Proofs:</strong> Bilinear curve group commitments verified on Besu and Stellar ledgers.</p>
+                  <p className="text-slate-350">🧬 <strong className="text-white">ZK Wills Succession:</strong> SnarkJS client-side PLONK proofs mapping to Georgia RUFADAA succession rules.</p>
+                  <p className="text-slate-350">🔌 <strong className="text-white">Dynamic Fraud Guard:</strong> Active monitor/redirection of domain spoofers via the sentiment shield.</p>
+                  <p className="text-slate-350">🏛️ <strong className="text-white">Peachtree Nexus:</strong> Physical office gateway anchor (Peachtree Parkway, Norcross) with SEC MIC exch:UBEC compliance mappings.</p>
                 </div>
               </div>
 
