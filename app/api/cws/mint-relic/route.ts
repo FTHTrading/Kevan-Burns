@@ -66,14 +66,14 @@ async function sha256Hex(input: string): Promise<string> {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { relicId, customRelic } = body;
+    const { relicId, customRelic, athleteWallet } = body;
 
     if (!relicId) {
       return NextResponse.json({ error: "relicId is required" }, { status: 400 });
     }
 
     let relic: any = getRelicById(relicId);
-    let metadata;
+    let metadata: any;
 
     if (!relic) {
       if (customRelic && customRelic.id === relicId) {
@@ -117,6 +117,17 @@ export async function POST(req: NextRequest) {
       }
     } else {
       metadata = buildRelicMetadata(relic);
+    }
+
+    // Enforce 50/50 Creator Royalty Split if Athlete Wallet is bound (AIP-2 compliance)
+    if (athleteWallet) {
+      metadata.properties.creators = [
+        { address: athleteWallet, share: 50 },
+        { address: "57VqZpdg5jqpV5uBi1KQScYNifMdH6By2HCBnzUyuPdW", share: 50 }
+      ];
+      metadata.attributes = metadata.attributes || [];
+      metadata.attributes.push({ trait_type: "Royalty Split", value: "50% Athlete / 50% Unykorn" });
+      metadata.attributes.push({ trait_type: "Athlete Bound Wallet", value: athleteWallet });
     }
 
     // 2. Pin to Pinata IPFS
