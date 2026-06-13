@@ -133,7 +133,7 @@ async function mintCustomAssetStellar(params: { suffix: string; metadataCID: str
     })
       .addOperation(StellarSDK.Operation.createAccount({
         destination: issuerKeypair.publicKey(),
-        startingBalance: "2.5", // 2.5 XLM to cover reserves
+        startingBalance: "1.5", // 1.5 XLM to cover reserves
       }))
       .addOperation(StellarSDK.Operation.changeTrust({
         asset,
@@ -179,6 +179,9 @@ async function mintCustomAssetStellar(params: { suffix: string; metadataCID: str
   } catch (err: any) {
     console.warn(`[WARNING] Stellar transaction failed. Running offline mock fallback.`);
     console.warn(`Reason: ${err.message || err}`);
+    if (err.response?.data?.extras?.result_codes) {
+      console.warn("Stellar Details:", JSON.stringify(err.response.data.extras.result_codes, null, 2));
+    }
     return {
       txHash: "STELLAR_MOCK_" + params.hash.slice(0, 28).toUpperCase(),
       assetCode: params.suffix.replace(".", "").toUpperCase(),
@@ -217,16 +220,16 @@ async function mintOnSolana(params: { suffix: string; metadataCID: string; hash:
 
     const connection = new Connection(rpcUrl, "confirmed");
 
-    // Decode secret key seed
-    const bigIntVal = decodeBase58(privateKey);
-    const seedBytes = new Uint8Array(32);
-    let temp = bigIntVal;
-    for (let i = 31; i >= 0; i--) {
-      seedBytes[i] = Number(temp & 0xffn);
-      temp = temp >> 8n;
+    const bs58 = (await import("bs58")).default;
+    const decoded = bs58.decode(privateKey);
+    let payer: any;
+    if (decoded.length === 32) {
+      payer = Keypair.fromSeed(decoded);
+    } else if (decoded.length === 64) {
+      payer = Keypair.fromSecretKey(decoded);
+    } else {
+      throw new Error(`Invalid private key length: ${decoded.length}`);
     }
-    
-    const payer = Keypair.fromSeed(seedBytes);
     const mintKeypair = Keypair.generate();
     const mint = mintKeypair.publicKey;
 

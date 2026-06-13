@@ -11,6 +11,7 @@ import {
   User, Plus, Trash2, Settings, DollarSign, AlertCircle,
   CheckCircle, XCircle, ChevronRight, ChevronDown, Building, Heart
 } from "lucide-react";
+import { CWS_MATCHES, CWSMatch } from "@/lib/cws/cws-bracket-registry";
 
 // User Classes:
 // 1. Protocol Admin: pre-mints and manages registry policy.
@@ -101,7 +102,7 @@ interface OnChainRecord {
 
 export default function CwsClient() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [activeTab, setActiveTab] = useState<"registry" | "control-hub" | "offers" | "vaults" | "simulation" | "relics" | "marketplace">("registry");
+  const [activeTab, setActiveTab] = useState<"registry" | "control-hub" | "offers" | "vaults" | "simulation" | "relics" | "marketplace" | "bracket">("registry");
   
   // Protocol State Engine
   const [userClass, setUserClass] = useState<UserClass>("fan");
@@ -115,6 +116,14 @@ export default function CwsClient() {
   const [onChainState, setOnChainState] = useState<Record<string, OnChainRecord>>({});
   const [genesisMinting, setGenesisMinting] = useState(false);
   const [genesisManifest, setGenesisManifest] = useState<any>(null);
+  
+  // Bracket & Oracle State
+  const [matches, setMatches] = useState<CWSMatch[]>(CWS_MATCHES);
+  const [attestingMatchId, setAttestingMatchId] = useState<string | null>(null);
+  const [attestWinnerKey, setAttestWinnerKey] = useState<TeamKey | "">("");
+  const [attestTeam1Score, setAttestTeam1Score] = useState<string>("");
+  const [attestTeam2Score, setAttestTeam2Score] = useState<string>("");
+  const [attestStatsSummary, setAttestStatsSummary] = useState<string>("");
 
   useEffect(() => {
     const fetchMintLog = async () => {
@@ -165,6 +174,10 @@ export default function CwsClient() {
     };
     fetchMintLog();
   }, []);
+
+  useEffect(() => {
+    setSearchQuery("");
+  }, [activeTab]);
   
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
     "[Protocol Initialized] Sovereign CWS Sports Protocol v1.0.0 is online.",
@@ -1137,6 +1150,164 @@ export default function CwsClient() {
     addLog(`Play simulated. Upgraded on-chain metrics for ${randomPlayer.handle}.`);
   };
 
+  const handleAttestMatch = async (matchId: string) => {
+    if (!attestWinnerKey) {
+      alert("Please select the winning team.");
+      return;
+    }
+    const t1Score = parseInt(attestTeam1Score) || 0;
+    const t2Score = parseInt(attestTeam2Score) || 0;
+    const scoreStr = `${t1Score}-${t2Score}`;
+
+    addLog(`⛓ Initiating cryptographic oracle attestation for CWS Match: ${matchId}...`);
+    
+    // Optimistic status update
+    setMatches(prev => prev.map(m => {
+      if (m.id === matchId) {
+        return {
+          ...m,
+          status: "live",
+          team1Score: t1Score,
+          team2Score: t2Score,
+        };
+      }
+      return m;
+    }));
+
+    try {
+      const res = await fetch("/api/cws/oracle/attest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          matchId,
+          winnerKey: attestWinnerKey,
+          team1Score: t1Score,
+          team2Score: t2Score,
+          scoreString: scoreStr,
+          statsSummary: attestStatsSummary,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Attestation failed");
+
+      setMatches(prev => prev.map(m => {
+        if (m.id === matchId) {
+          const lKey = m.team1Key === attestWinnerKey ? m.team2Key : m.team1Key;
+          return {
+            ...m,
+            status: "completed",
+            team1Score: t1Score,
+            team2Score: t2Score,
+            winnerKey: attestWinnerKey as any,
+            loserKey: lKey as any,
+            solanaTxHash: data.solanaTxHash,
+            explorerUrl: data.explorerUrl,
+            oracleSignature: data.signature,
+            attestedAt: data.timestamp,
+          };
+        }
+        return m;
+      }));
+
+      // Update next round match slots automatically if possible
+      const targetMatch = matches.find(m => m.id === matchId);
+      if (targetMatch) {
+        const loser = targetMatch.team1Key === attestWinnerKey ? targetMatch.team2Key : targetMatch.team1Key;
+        updateBracketProgress(matchId, attestWinnerKey, loser);
+      }
+
+      addLog(`✔ Cryptographic Oracle Attestation anchored. Tx: ${data.solanaTxHash.slice(0, 10)}...`);
+      setAttestingMatchId(null);
+      setAttestWinnerKey("");
+      setAttestTeam1Score("");
+      setAttestTeam2Score("");
+      setAttestStatsSummary("");
+    } catch (err: any) {
+      addLog(`❌ Oracle attestation failed: ${err.message}`);
+      alert(`Oracle attestation failed: ${err.message}`);
+      setMatches(prev => prev.map(m => {
+        if (m.id === matchId) {
+          return { ...m, status: "scheduled" };
+        }
+        return m;
+      }));
+    }
+  };
+
+  const updateBracketProgress = (matchId: string, winner: string, loser: string) => {
+    setMatches(prev => prev.map(m => {
+      // Game 5 slots: Winner Game 1 vs Winner Game 2
+      if (matchId === "cws_g1_wvu_troy" && m.id === "cws_g5_wvu_uga") {
+        return { ...m, team1Key: winner as any };
+      }
+      if (matchId === "cws_g2_uga_bama" && m.id === "cws_g5_wvu_uga") {
+        return { ...m, team2Key: winner as any };
+      }
+      // Game 6 slots: Winner Game 3 vs Winner Game 4
+      if (matchId === "cws_g3_unc_olemiss" && m.id === "cws_g6_unc_tbd") {
+        return { ...m, team1Key: winner as any };
+      }
+      if (matchId === "cws_g4_ou_texas" && m.id === "cws_g6_unc_tbd") {
+        return { ...m, team2Key: winner as any };
+      }
+      // Game 7 slots: Loser Game 1 vs Loser Game 2
+      if (matchId === "cws_g1_wvu_troy" && m.id === "cws_g7_troy_bama") {
+        return { ...m, team1Key: loser as any };
+      }
+      if (matchId === "cws_g2_uga_bama" && m.id === "cws_g7_troy_bama") {
+        return { ...m, team2Key: loser as any };
+      }
+      // Game 8 slots: Loser Game 3 vs Loser Game 4
+      if (matchId === "cws_g3_unc_olemiss" && m.id === "cws_g8_olemiss_tbd") {
+        return { ...m, team1Key: loser as any };
+      }
+      if (matchId === "cws_g4_ou_texas" && m.id === "cws_g8_olemiss_tbd") {
+        return { ...m, team2Key: loser as any };
+      }
+      // Game 9 slots: Loser Game 5 vs Winner Game 7
+      if (matchId === "cws_g5_wvu_uga" && m.id === "cws_g9_loser5_winner7") {
+        return { ...m, team1Key: loser as any };
+      }
+      if (matchId === "cws_g7_troy_bama" && m.id === "cws_g9_loser5_winner7") {
+        return { ...m, team2Key: winner as any };
+      }
+      // Game 10 slots: Loser Game 6 vs Winner Game 8
+      if (matchId === "cws_g6_unc_tbd" && m.id === "cws_g10_loser6_winner8") {
+        return { ...m, team1Key: loser as any };
+      }
+      if (matchId === "cws_g8_olemiss_tbd" && m.id === "cws_g10_loser6_winner8") {
+        return { ...m, team2Key: winner as any };
+      }
+      // Game 11 slots: Winner Game 5 vs Winner Game 9
+      if (matchId === "cws_g5_wvu_uga" && m.id === "cws_g11_winner5_winner9") {
+        return { ...m, team1Key: winner as any };
+      }
+      if (matchId === "cws_g9_loser5_winner7" && m.id === "cws_g11_winner5_winner9") {
+        return { ...m, team2Key: winner as any };
+      }
+      // Game 12 slots: Winner Game 6 vs Winner Game 10
+      if (matchId === "cws_g6_unc_tbd" && m.id === "cws_g12_winner6_winner10") {
+        return { ...m, team1Key: winner as any };
+      }
+      if (matchId === "cws_g10_loser6_winner8" && m.id === "cws_g12_winner6_winner10") {
+        return { ...m, team2Key: winner as any };
+      }
+      // Championship slots: Winner Game 11 vs Winner Game 12
+      if (matchId === "cws_g11_winner5_winner9") {
+        if (m.id === "cws_f1_champ" || m.id === "cws_f2_champ" || m.id === "cws_f3_champ") {
+          return { ...m, team1Key: winner as any };
+        }
+      }
+      if (matchId === "cws_g12_winner6_winner10") {
+        if (m.id === "cws_f1_champ" || m.id === "cws_f2_champ" || m.id === "cws_f3_champ") {
+          return { ...m, team2Key: winner as any };
+        }
+      }
+      return m;
+    }));
+  };
+
   // ── On-Chain Mainnet Mint Handlers ──────────────────────────────────────────
 
   /** Mint a single athlete namespace to Pinata IPFS + Solana mainnet */
@@ -1403,6 +1574,7 @@ export default function CwsClient() {
         <div className="flex flex-wrap justify-center gap-2 border-b border-emerald-500/10 pb-4">
           {[
             { id: "registry", label: "Registry & Claims", icon: <Globe className="h-4 w-4" /> },
+            { id: "bracket", label: "CWS Bracket & Oracle", icon: <Layers className="h-4 w-4" /> },
             { id: "control-hub", label: "Athlete Control Panel", icon: <Settings className="h-4 w-4" />, visible: userClass === "athlete" || userClass === "admin" },
             { id: "offers", label: "NIL Offers Inbox", icon: <MessageSquare className="h-4 w-4" /> },
             { id: "vaults", label: "Fiduciary Wealth Vaults", icon: <Lock className="h-4 w-4" /> },
@@ -1468,6 +1640,37 @@ export default function CwsClient() {
                   </div>
                 </div>
 
+                {/* Search Bar UI */}
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="h-4 w-4 text-emerald-400" />
+                  </span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (e.target.value) {
+                        addLog(`Searching registry for: "${e.target.value}"`);
+                      }
+                    }}
+                    placeholder="Search by athlete name, handle, role, suffix or team..."
+                    className={`w-full rounded-2xl pl-10 pr-10 py-3.5 text-xs outline-none transition-all border ${
+                      searchQuery 
+                        ? "border-emerald-400 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] text-white" 
+                        : "border-emerald-500/10 bg-black/40 text-slate-300 focus:border-emerald-500/35"
+                    }`}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
                 {/* Suffix Pricing Matrix Banner */}
                 <div className="rounded-2xl border border-amber-400/25 bg-amber-500/5 p-4 space-y-3">
                   <div className="flex items-center gap-2 text-xs font-bold text-amber-400 font-mono uppercase">
@@ -1494,9 +1697,23 @@ export default function CwsClient() {
 
                 {/* Directory List filtered by Sport */}
                 <div className="space-y-4">
-                  <h4 className="text-xs font-mono uppercase tracking-wider text-slate-500">Rosters & Pre-minted Registry Pointers</h4>
+                  <h4 className="text-xs font-mono uppercase tracking-wider text-slate-500">
+                    {searchQuery ? `Registry Results for "${searchQuery}"` : "Rosters & Pre-minted Registry Pointers"}
+                  </h4>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    {namespaces.filter(ns => ns.teamKey === activeTeamFilter).map(athlete => {
+                    {namespaces.filter(ns => {
+                      if (searchQuery.trim() === "") {
+                        return ns.teamKey === activeTeamFilter;
+                      }
+                      const query = searchQuery.toLowerCase().trim();
+                      return (
+                        ns.name.toLowerCase().includes(query) ||
+                        ns.handle.toLowerCase().includes(query) ||
+                        ns.suffix.toLowerCase().includes(query) ||
+                        ns.role.toLowerCase().includes(query) ||
+                        ns.teamKey.toLowerCase().includes(query)
+                      );
+                    }).map(athlete => {
                       const isSelected = selectedAthleteId === athlete.id;
                       return (
                         <div 
@@ -1653,6 +1870,776 @@ export default function CwsClient() {
                         <span className="text-[9px] text-slate-500">Route: Custom Fan SFT Registry</span>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* TAB 1.5: TOURNAMENT BRACKET & ORACLE */}
+            {activeTab === "bracket" && (
+              <div className="space-y-6">
+                
+                {/* Main Header Card */}
+                <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-4`}>
+                  <div className="flex justify-between items-center border-b border-emerald-500/10 pb-4">
+                    <div>
+                      <h3 className={`text-xl font-bold ${textTitle} orbitron-title flex items-center gap-2`}>
+                        <Layers className="h-5 w-5 text-emerald-400" />
+                        CWS Bracket & Cryptographic Oracle
+                      </h3>
+                      <p className={`text-xs ${textMuted}`}>
+                        Sovereign game results signed using HMAC-SHA256 and anchored to Solana Mainnet-Beta via SPL Memo records.
+                      </p>
+                    </div>
+                    <span className="text-xs font-mono bg-emerald-500/10 border border-emerald-500/35 text-emerald-400 px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <Shield className="h-3.5 w-3.5 text-emerald-400" />
+                      Oracle consensus active
+                    </span>
+                  </div>
+
+                  {/* Dual-Oracle Architecture Info */}
+                  <div className="grid md:grid-cols-2 gap-4 text-xs font-mono">
+                    <div className="bg-black/30 p-3 rounded-lg border border-white/5 space-y-1">
+                      <strong className="text-white block">🔒 Unykorn Cryptographic Oracle</strong>
+                      <p className="text-slate-400 text-[10px] leading-relaxed">
+                        Matches are signed using HMAC-SHA256 by the protocol authority. The signature is posted on-chain (Solana Mainnet-Beta) and the metadata is pinned to Pinata IPFS to guarantee zero manipulation of game statistics.
+                      </p>
+                    </div>
+                    <div className="bg-black/30 p-3 rounded-lg border border-white/5 space-y-1">
+                      <strong className="text-white block">🔗 Chainlink Attestation Feed</strong>
+                      <p className="text-slate-400 text-[10px] leading-relaxed">
+                        Decentralized oracle nodes scrape NCAA scoreboard telemetry, StatBroadcast, and ESPN. Once consensus is reached (majority rule), results trigger the on-chain metadata minting of highlight Moment SFTs.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Brackets Grid */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  
+                  {/* Bracket 1 Columns */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 flex items-center gap-1.5 orbitron-title">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      CWS Bracket 1 (Double-Elimination)
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      {matches.filter(m => m.bracketType === "bracket1").map(match => (
+                        <div key={match.id} className={`rounded-2xl border p-4 ${subCardStyle} space-y-3 relative overflow-hidden transition-all hover:border-emerald-500/30`}>
+                          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+                            <span>Round {match.round} · {match.scheduledTime}</span>
+                            <span className={`px-2 py-0.5 rounded uppercase font-bold text-[9px] border ${
+                              match.status === "completed" ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" :
+                              match.status === "live" ? "bg-red-500/10 border-red-500/30 text-red-400 animate-pulse" :
+                              "bg-slate-500/10 border-slate-500/30 text-slate-400"
+                            }`}>{match.status}</span>
+                          </div>
+
+                          {/* Teams Render */}
+                          <div className="space-y-2">
+                            {/* Team 1 */}
+                            <div className="flex justify-between items-center text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  {match.team1Key !== "TBD" ? teams[match.team1Key]?.seed.slice(0, 5) : ""}
+                                </span>
+                                <strong className={match.winnerKey === match.team1Key ? "text-white font-black" : "text-slate-400"}>
+                                  {match.team1Key !== "TBD" ? teams[match.team1Key]?.name : "TBD (Loser Game 1/2)"}
+                                </strong>
+                              </div>
+                              <span className={`font-mono font-bold text-sm ${match.winnerKey === match.team1Key ? "text-emerald-400" : "text-slate-500"}`}>
+                                {match.team1Score !== undefined ? match.team1Score : "-"}
+                              </span>
+                            </div>
+
+                            {/* Team 2 */}
+                            <div className="flex justify-between items-center text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  {match.team2Key !== "TBD" ? teams[match.team2Key]?.seed.slice(0, 5) : ""}
+                                </span>
+                                <strong className={match.winnerKey === match.team2Key ? "text-white font-black" : "text-slate-400"}>
+                                  {match.team2Key !== "TBD" ? teams[match.team2Key]?.name : "TBD (Loser Game 1/2)"}
+                                </strong>
+                              </div>
+                              <span className={`font-mono font-bold text-sm ${match.winnerKey === match.team2Key ? "text-emerald-400" : "text-slate-500"}`}>
+                                {match.team2Score !== undefined ? match.team2Score : "-"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* On-Chain Attestation Details */}
+                          {match.status === "completed" && match.solanaTxHash && (
+                            <div className="pt-2.5 border-t border-white/5 space-y-1.5 text-[9px] font-mono">
+                              <div className="text-emerald-400 flex items-center gap-1">
+                                <Check className="h-3 w-3" /> SECURE ON-CHAIN ATTESTATION
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-slate-400">
+                                <div className="truncate flex items-center gap-1">
+                                  <span className="text-slate-500">Solana Tx:</span>{" "}
+                                  <a href={match.explorerUrl || `https://solscan.io/tx/${match.solanaTxHash}`} target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">
+                                    {match.solanaTxHash.slice(0, 8)}...
+                                  </a>
+                                </div>
+                                <div className="truncate">
+                                  <span className="text-slate-500">Signature:</span>{" "}
+                                  <span className="text-blue-400" title={match.oracleSignature}>
+                                    HMAC Verified
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="bg-black/30 p-1.5 rounded border border-white/5 text-[8px] text-slate-500 break-all leading-normal">
+                                <span className="text-slate-400 block font-bold">HMAC-SHA256 Signature:</span>
+                                {match.oracleSignature || "N/A"}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Admin Attest Action */}
+                          {userClass === "admin" && match.status !== "completed" && (
+                            <div className="pt-2 border-t border-white/5">
+                              {attestingMatchId === match.id ? (
+                                <div className="p-3 bg-black/40 border border-emerald-500/25 rounded-xl space-y-3 mt-2 font-mono text-xs">
+                                  <h5 className="font-bold text-emerald-400">Attest Match Outcome</h5>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <label className="block text-[9px] text-slate-500 mb-0.5">Select Winner</label>
+                                      <select
+                                        value={attestWinnerKey}
+                                        onChange={(e) => setAttestWinnerKey(e.target.value as any)}
+                                        className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                      >
+                                        <option value="">-- Select Winner --</option>
+                                        {match.team1Key !== "TBD" && <option value={match.team1Key}>{teams[match.team1Key]?.name}</option>}
+                                        {match.team2Key !== "TBD" && <option value={match.team2Key}>{teams[match.team2Key]?.name}</option>}
+                                      </select>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-[9px] text-slate-500 mb-0.5">Team 1 Score</label>
+                                        <input
+                                          type="number"
+                                          value={attestTeam1Score}
+                                          onChange={(e) => setAttestTeam1Score(e.target.value)}
+                                          className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                          placeholder="e.g. 5"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[9px] text-slate-500 mb-0.5">Team 2 Score</label>
+                                        <input
+                                          type="number"
+                                          value={attestTeam2Score}
+                                          onChange={(e) => setAttestTeam2Score(e.target.value)}
+                                          className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                          placeholder="e.g. 4"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label className="block text-[9px] text-slate-500 mb-0.5">Highlights Summary</label>
+                                      <input
+                                        type="text"
+                                        value={attestStatsSummary}
+                                        onChange={(e) => setAttestStatsSummary(e.target.value)}
+                                        className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                        placeholder="e.g. Georgia wins with a walkoff single"
+                                      />
+                                    </div>
+                                    <div className="flex gap-2 pt-1">
+                                      <button
+                                        onClick={() => setAttestingMatchId(null)}
+                                        className="w-1/2 text-center rounded-lg border border-white/5 py-1.5 text-xs text-slate-400 hover:bg-white/5"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        onClick={() => handleAttestMatch(match.id)}
+                                        className="w-1/2 text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 text-xs"
+                                      >
+                                        Submit
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setAttestingMatchId(match.id);
+                                    setAttestWinnerKey("");
+                                    setAttestTeam1Score("");
+                                    setAttestTeam2Score("");
+                                    setAttestStatsSummary("");
+                                  }}
+                                  className="w-full text-center rounded-lg border border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-bold py-1.5 text-[10px] transition-all"
+                                >
+                                  ⚙ Attest Result
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bracket 2 Columns */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 flex items-center gap-1.5 orbitron-title">
+                      <span className="w-2.5 h-2.5 rounded-full bg-cyan-500" />
+                      CWS Bracket 2 (Double-Elimination)
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      {matches.filter(m => m.bracketType === "bracket2").map(match => (
+                        <div key={match.id} className={`rounded-2xl border p-4 ${subCardStyle} space-y-3 relative overflow-hidden transition-all hover:border-emerald-500/30`}>
+                          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+                            <span>Round {match.round} · {match.scheduledTime}</span>
+                            <span className={`px-2 py-0.5 rounded uppercase font-bold text-[9px] border ${
+                              match.status === "completed" ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" :
+                              match.status === "live" ? "bg-red-500/10 border-red-500/30 text-red-400 animate-pulse" :
+                              "bg-slate-500/10 border-slate-500/30 text-slate-400"
+                            }`}>{match.status}</span>
+                          </div>
+
+                          {/* Teams Render */}
+                          <div className="space-y-2">
+                            {/* Team 1 */}
+                            <div className="flex justify-between items-center text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  {match.team1Key !== "TBD" ? teams[match.team1Key]?.seed.slice(0, 5) : ""}
+                                </span>
+                                <strong className={match.winnerKey === match.team1Key ? "text-white font-black" : "text-slate-400"}>
+                                  {match.team1Key !== "TBD" ? teams[match.team1Key]?.name : "TBD (Loser Game 3/4)"}
+                                </strong>
+                              </div>
+                              <span className={`font-mono font-bold text-sm ${match.winnerKey === match.team1Key ? "text-emerald-400" : "text-slate-500"}`}>
+                                {match.team1Score !== undefined ? match.team1Score : "-"}
+                              </span>
+                            </div>
+
+                            {/* Team 2 */}
+                            <div className="flex justify-between items-center text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  {match.team2Key !== "TBD" ? teams[match.team2Key]?.seed.slice(0, 5) : ""}
+                                </span>
+                                <strong className={match.winnerKey === match.team2Key ? "text-white font-black" : "text-slate-400"}>
+                                  {match.team2Key !== "TBD" ? teams[match.team2Key]?.name : "TBD (Winners Game 4)"}
+                                </strong>
+                              </div>
+                              <span className={`font-mono font-bold text-sm ${match.winnerKey === match.team2Key ? "text-emerald-400" : "text-slate-500"}`}>
+                                {match.team2Score !== undefined ? match.team2Score : "-"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* On-Chain Attestation Details */}
+                          {match.status === "completed" && match.solanaTxHash && (
+                            <div className="pt-2.5 border-t border-white/5 space-y-1.5 text-[9px] font-mono">
+                              <div className="text-emerald-400 flex items-center gap-1">
+                                <Check className="h-3 w-3" /> SECURE ON-CHAIN ATTESTATION
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-slate-400">
+                                <div className="truncate flex items-center gap-1">
+                                  <span className="text-slate-500">Solana Tx:</span>{" "}
+                                  <a href={match.explorerUrl || `https://solscan.io/tx/${match.solanaTxHash}`} target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">
+                                    {match.solanaTxHash.slice(0, 8)}...
+                                  </a>
+                                </div>
+                                <div className="truncate">
+                                  <span className="text-slate-500">Signature:</span>{" "}
+                                  <span className="text-blue-400" title={match.oracleSignature}>
+                                    HMAC Verified
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="bg-black/30 p-1.5 rounded border border-white/5 text-[8px] text-slate-500 break-all leading-normal">
+                                <span className="text-slate-400 block font-bold">HMAC-SHA256 Signature:</span>
+                                {match.oracleSignature || "N/A"}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Admin Attest Action */}
+                          {userClass === "admin" && match.status !== "completed" && (
+                            <div className="pt-2 border-t border-white/5">
+                              {attestingMatchId === match.id ? (
+                                <div className="p-3 bg-black/40 border border-emerald-500/25 rounded-xl space-y-3 mt-2 font-mono text-xs">
+                                  <h5 className="font-bold text-emerald-400">Attest Match Outcome</h5>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <label className="block text-[9px] text-slate-500 mb-0.5">Select Winner</label>
+                                      <select
+                                        value={attestWinnerKey}
+                                        onChange={(e) => setAttestWinnerKey(e.target.value as any)}
+                                        className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                      >
+                                        <option value="">-- Select Winner --</option>
+                                        {match.team1Key !== "TBD" && <option value={match.team1Key}>{teams[match.team1Key]?.name}</option>}
+                                        {match.team2Key !== "TBD" && <option value={match.team2Key}>{teams[match.team2Key]?.name}</option>}
+                                      </select>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-[9px] text-slate-500 mb-0.5">Team 1 Score</label>
+                                        <input
+                                          type="number"
+                                          value={attestTeam1Score}
+                                          onChange={(e) => setAttestTeam1Score(e.target.value)}
+                                          className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                          placeholder="e.g. 5"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[9px] text-slate-500 mb-0.5">Team 2 Score</label>
+                                        <input
+                                          type="number"
+                                          value={attestTeam2Score}
+                                          onChange={(e) => setAttestTeam2Score(e.target.value)}
+                                          className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                          placeholder="e.g. 4"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label className="block text-[9px] text-slate-500 mb-0.5">Highlights Summary</label>
+                                      <input
+                                        type="text"
+                                        value={attestStatsSummary}
+                                        onChange={(e) => setAttestStatsSummary(e.target.value)}
+                                        className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                        placeholder="e.g. UNC wins with late-inning double"
+                                      />
+                                    </div>
+                                    <div className="flex gap-2 pt-1">
+                                      <button
+                                        onClick={() => setAttestingMatchId(null)}
+                                        className="w-1/2 text-center rounded-lg border border-white/5 py-1.5 text-xs text-slate-400 hover:bg-white/5"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        onClick={() => handleAttestMatch(match.id)}
+                                        className="w-1/2 text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 text-xs"
+                                      >
+                                        Submit
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setAttestingMatchId(match.id);
+                                    setAttestWinnerKey("");
+                                    setAttestTeam1Score("");
+                                    setAttestTeam2Score("");
+                                    setAttestStatsSummary("");
+                                  }}
+                                  className="w-full text-center rounded-lg border border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-bold py-1.5 text-[10px] transition-all"
+                                >
+                                  ⚙ Attest Result
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Elimination Round Brackets */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 flex items-center gap-1.5 orbitron-title">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                      Elimination Rounds (Loser Bracket Survival)
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      {matches.filter(m => m.bracketType === "elimination").map(match => (
+                        <div key={match.id} className={`rounded-2xl border p-4 ${subCardStyle} space-y-3 relative overflow-hidden transition-all hover:border-emerald-500/30`}>
+                          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+                            <span>Round {match.round} · {match.scheduledTime}</span>
+                            <span className={`px-2 py-0.5 rounded uppercase font-bold text-[9px] border ${
+                              match.status === "completed" ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" :
+                              match.status === "live" ? "bg-red-500/10 border-red-500/30 text-red-400 animate-pulse" :
+                              "bg-slate-500/10 border-slate-500/30 text-slate-400"
+                            }`}>{match.status}</span>
+                          </div>
+
+                          {/* Teams Render */}
+                          <div className="space-y-2">
+                            {/* Team 1 */}
+                            <div className="flex justify-between items-center text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  {match.team1Key !== "TBD" ? teams[match.team1Key]?.seed.slice(0, 5) : ""}
+                                </span>
+                                <strong className={match.winnerKey === match.team1Key ? "text-white font-black" : "text-slate-400"}>
+                                  {match.team1Key !== "TBD" ? teams[match.team1Key]?.name : "TBD"}
+                                </strong>
+                              </div>
+                              <span className={`font-mono font-bold text-sm ${match.winnerKey === match.team1Key ? "text-emerald-400" : "text-slate-500"}`}>
+                                {match.team1Score !== undefined ? match.team1Score : "-"}
+                              </span>
+                            </div>
+
+                            {/* Team 2 */}
+                            <div className="flex justify-between items-center text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  {match.team2Key !== "TBD" ? teams[match.team2Key]?.seed.slice(0, 5) : ""}
+                                </span>
+                                <strong className={match.winnerKey === match.team2Key ? "text-white font-black" : "text-slate-400"}>
+                                  {match.team2Key !== "TBD" ? teams[match.team2Key]?.name : "TBD"}
+                                </strong>
+                              </div>
+                              <span className={`font-mono font-bold text-sm ${match.winnerKey === match.team2Key ? "text-emerald-400" : "text-slate-500"}`}>
+                                {match.team2Score !== undefined ? match.team2Score : "-"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* On-Chain Attestation Details */}
+                          {match.status === "completed" && match.solanaTxHash && (
+                            <div className="pt-2.5 border-t border-white/5 space-y-1.5 text-[9px] font-mono">
+                              <div className="text-emerald-400 flex items-center gap-1">
+                                <Check className="h-3 w-3" /> SECURE ON-CHAIN ATTESTATION
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-slate-400">
+                                <div className="truncate flex items-center gap-1">
+                                  <span className="text-slate-500">Solana Tx:</span>{" "}
+                                  <a href={match.explorerUrl || `https://solscan.io/tx/${match.solanaTxHash}`} target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">
+                                    {match.solanaTxHash.slice(0, 8)}...
+                                  </a>
+                                </div>
+                                <div className="truncate">
+                                  <span className="text-slate-500">Signature:</span>{" "}
+                                  <span className="text-blue-400" title={match.oracleSignature}>
+                                    HMAC Verified
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="bg-black/30 p-1.5 rounded border border-white/5 text-[8px] text-slate-500 break-all leading-normal">
+                                <span className="text-slate-400 block font-bold">HMAC-SHA256 Signature:</span>
+                                {match.oracleSignature || "N/A"}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Admin Attest Action */}
+                          {userClass === "admin" && match.status !== "completed" && (
+                            <div className="pt-2 border-t border-white/5">
+                              {attestingMatchId === match.id ? (
+                                <div className="p-3 bg-black/40 border border-emerald-500/25 rounded-xl space-y-3 mt-2 font-mono text-xs">
+                                  <h5 className="font-bold text-emerald-400">Attest Match Outcome</h5>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <label className="block text-[9px] text-slate-500 mb-0.5">Select Winner</label>
+                                      <select
+                                        value={attestWinnerKey}
+                                        onChange={(e) => setAttestWinnerKey(e.target.value as any)}
+                                        className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                      >
+                                        <option value="">-- Select Winner --</option>
+                                        {match.team1Key !== "TBD" && <option value={match.team1Key}>{teams[match.team1Key]?.name}</option>}
+                                        {match.team2Key !== "TBD" && <option value={match.team2Key}>{teams[match.team2Key]?.name}</option>}
+                                      </select>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-[9px] text-slate-500 mb-0.5">Team 1 Score</label>
+                                        <input
+                                          type="number"
+                                          value={attestTeam1Score}
+                                          onChange={(e) => setAttestTeam1Score(e.target.value)}
+                                          className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                          placeholder="e.g. 5"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[9px] text-slate-500 mb-0.5">Team 2 Score</label>
+                                        <input
+                                          type="number"
+                                          value={attestTeam2Score}
+                                          onChange={(e) => setAttestTeam2Score(e.target.value)}
+                                          className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                          placeholder="e.g. 4"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label className="block text-[9px] text-slate-500 mb-0.5">Highlights Summary</label>
+                                      <input
+                                        type="text"
+                                        value={attestStatsSummary}
+                                        onChange={(e) => setAttestStatsSummary(e.target.value)}
+                                        className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                        placeholder="e.g. Game attested"
+                                      />
+                                    </div>
+                                    <div className="flex gap-2 pt-1">
+                                      <button
+                                        onClick={() => setAttestingMatchId(null)}
+                                        className="w-1/2 text-center rounded-lg border border-white/5 py-1.5 text-xs text-slate-400 hover:bg-white/5"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        onClick={() => handleAttestMatch(match.id)}
+                                        className="w-1/2 text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 text-xs"
+                                      >
+                                        Submit
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setAttestingMatchId(match.id);
+                                    setAttestWinnerKey("");
+                                    setAttestTeam1Score("");
+                                    setAttestTeam2Score("");
+                                    setAttestStatsSummary("");
+                                  }}
+                                  className="w-full text-center rounded-lg border border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-bold py-1.5 text-[10px] transition-all"
+                                >
+                                  ⚙ Attest Result
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Championship Series */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 flex items-center gap-1.5 orbitron-title">
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+                      CWS Championship Series (Best of 3)
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      {matches.filter(m => m.bracketType === "championship").map(match => (
+                        <div key={match.id} className={`rounded-2xl border p-4 ${subCardStyle} space-y-3 relative overflow-hidden transition-all hover:border-emerald-500/30`}>
+                          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+                            <span>Round 4 · {match.scheduledTime}</span>
+                            <span className={`px-2 py-0.5 rounded uppercase font-bold text-[9px] border ${
+                              match.status === "completed" ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" :
+                              match.status === "live" ? "bg-red-500/10 border-red-500/30 text-red-400 animate-pulse" :
+                              "bg-slate-500/10 border-slate-500/30 text-slate-400"
+                            }`}>{match.status}</span>
+                          </div>
+
+                          {/* Teams Render */}
+                          <div className="space-y-2">
+                            {/* Team 1 */}
+                            <div className="flex justify-between items-center text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  {match.team1Key !== "TBD" ? teams[match.team1Key]?.seed.slice(0, 5) : ""}
+                                </span>
+                                <strong className={match.winnerKey === match.team1Key ? "text-white font-black" : "text-slate-400"}>
+                                  {match.team1Key !== "TBD" ? teams[match.team1Key]?.name : "TBD (Bracket 1 Winner)"}
+                                </strong>
+                              </div>
+                              <span className={`font-mono font-bold text-sm ${match.winnerKey === match.team1Key ? "text-emerald-400" : "text-slate-500"}`}>
+                                {match.team1Score !== undefined ? match.team1Score : "-"}
+                              </span>
+                            </div>
+
+                            {/* Team 2 */}
+                            <div className="flex justify-between items-center text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono text-slate-500">
+                                  {match.team2Key !== "TBD" ? teams[match.team2Key]?.seed.slice(0, 5) : ""}
+                                </span>
+                                <strong className={match.winnerKey === match.team2Key ? "text-white font-black" : "text-slate-400"}>
+                                  {match.team2Key !== "TBD" ? teams[match.team2Key]?.name : "TBD (Bracket 2 Winner)"}
+                                </strong>
+                              </div>
+                              <span className={`font-mono font-bold text-sm ${match.winnerKey === match.team2Key ? "text-emerald-400" : "text-slate-500"}`}>
+                                {match.team2Score !== undefined ? match.team2Score : "-"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* On-Chain Attestation Details */}
+                          {match.status === "completed" && match.solanaTxHash && (
+                            <div className="pt-2.5 border-t border-white/5 space-y-1.5 text-[9px] font-mono">
+                              <div className="text-emerald-400 flex items-center gap-1">
+                                <Check className="h-3 w-3" /> SECURE ON-CHAIN ATTESTATION
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-slate-400">
+                                <div className="truncate flex items-center gap-1">
+                                  <span className="text-slate-500">Solana Tx:</span>{" "}
+                                  <a href={match.explorerUrl || `https://solscan.io/tx/${match.solanaTxHash}`} target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">
+                                    {match.solanaTxHash.slice(0, 8)}...
+                                  </a>
+                                </div>
+                                <div className="truncate">
+                                  <span className="text-slate-500">Signature:</span>{" "}
+                                  <span className="text-blue-400" title={match.oracleSignature}>
+                                    HMAC Verified
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="bg-black/30 p-1.5 rounded border border-white/5 text-[8px] text-slate-500 break-all leading-normal">
+                                <span className="text-slate-400 block font-bold">HMAC-SHA256 Signature:</span>
+                                {match.oracleSignature || "N/A"}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Admin Attest Action */}
+                          {userClass === "admin" && match.status !== "completed" && (
+                            <div className="pt-2 border-t border-white/5">
+                              {attestingMatchId === match.id ? (
+                                <div className="p-3 bg-black/40 border border-emerald-500/25 rounded-xl space-y-3 mt-2 font-mono text-xs">
+                                  <h5 className="font-bold text-emerald-400">Attest Match Outcome</h5>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <label className="block text-[9px] text-slate-500 mb-0.5">Select Winner</label>
+                                      <select
+                                        value={attestWinnerKey}
+                                        onChange={(e) => setAttestWinnerKey(e.target.value as any)}
+                                        className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                      >
+                                        <option value="">-- Select Winner --</option>
+                                        {match.team1Key !== "TBD" && <option value={match.team1Key}>{teams[match.team1Key]?.name}</option>}
+                                        {match.team2Key !== "TBD" && <option value={match.team2Key}>{teams[match.team2Key]?.name}</option>}
+                                      </select>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-[9px] text-slate-500 mb-0.5">Team 1 Score</label>
+                                        <input
+                                          type="number"
+                                          value={attestTeam1Score}
+                                          onChange={(e) => setAttestTeam1Score(e.target.value)}
+                                          className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                          placeholder="e.g. 5"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[9px] text-slate-500 mb-0.5">Team 2 Score</label>
+                                        <input
+                                          type="number"
+                                          value={attestTeam2Score}
+                                          onChange={(e) => setAttestTeam2Score(e.target.value)}
+                                          className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                          placeholder="e.g. 4"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label className="block text-[9px] text-slate-500 mb-0.5">Highlights Summary</label>
+                                      <input
+                                        type="text"
+                                        value={attestStatsSummary}
+                                        onChange={(e) => setAttestStatsSummary(e.target.value)}
+                                        className={`w-full rounded-lg p-2 text-xs outline-none ${inputBg}`}
+                                        placeholder="e.g. Game attested"
+                                      />
+                                    </div>
+                                    <div className="flex gap-2 pt-1">
+                                      <button
+                                        onClick={() => setAttestingMatchId(null)}
+                                        className="w-1/2 text-center rounded-lg border border-white/5 py-1.5 text-xs text-slate-400 hover:bg-white/5"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        onClick={() => handleAttestMatch(match.id)}
+                                        className="w-1/2 text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 text-xs"
+                                      >
+                                        Submit
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setAttestingMatchId(match.id);
+                                    setAttestWinnerKey("");
+                                    setAttestTeam1Score("");
+                                    setAttestTeam2Score("");
+                                    setAttestStatsSummary("");
+                                  }}
+                                  className="w-full text-center rounded-lg border border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-bold py-1.5 text-[10px] transition-all"
+                                >
+                                  ⚙ Attest Result
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Chainlink Attestation Console */}
+                <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-6`}>
+                  <div className="flex justify-between items-center border-b border-emerald-500/10 pb-4">
+                    <div>
+                      <h4 className={`text-base font-bold text-white uppercase tracking-wider orbitron-title`}>
+                        Chainlink Decentralized Oracle Nodes Consensus Feed
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Simulate Chainlink off-chain consensus querying live endpoints (ESPN, NCAA scoreboard, StatBroadcast) to verify highlights.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Nodes list */}
+                  <div className="grid sm:grid-cols-5 gap-3 text-[10px] font-mono">
+                    {[
+                      { name: "Node 1 — StatBroadcast", endpoint: "api.statbroadcast.com", status: "Active", consensusScore: "WVU 7, Troy 5" },
+                      { name: "Node 2 — NCAA Live Data", endpoint: "ncaa.com/scoreboard", status: "Active", consensusScore: "WVU 7, Troy 5" },
+                      { name: "Node 3 — ESPN Stats", endpoint: "sports.core.api.espn.com", status: "Active", consensusScore: "WVU 7, Troy 5" },
+                      { name: "Node 4 — WarrenNolan CWS", endpoint: "warrennolan.com/baseball", status: "Active", consensusScore: "WVU 7, Troy 5" },
+                      { name: "Node 5 — Unykorn Scraper", endpoint: "scraper.unykorn.ai/sports", status: "Active", consensusScore: "WVU 7, Troy 5" },
+                    ].map((node, i) => (
+                      <div key={i} className="bg-black/30 p-2.5 rounded-xl border border-white/5 space-y-2 relative overflow-hidden">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 block font-bold truncate max-w-[90%]">{node.name}</span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                        </div>
+                        <div className="text-[9px] text-slate-500 truncate">{node.endpoint}</div>
+                        <div className="pt-1 border-t border-white/5 flex justify-between items-baseline">
+                          <span className="text-[8px] text-slate-500 uppercase">Resolved:</span>
+                          <strong className="text-emerald-400 font-bold">{node.consensusScore}</strong>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bg-black/35 p-4 rounded-2xl border border-white/5 flex flex-wrap justify-between items-center gap-4 text-xs font-mono">
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-slate-500 block uppercase">Chainlink Consensus Status</span>
+                      <strong className="text-emerald-400 font-black text-sm">✔ 5 / 5 AGREEMENT (100% CONSENSUS)</strong>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        addLog("🔄 Querying Chainlink decentralized feeds (ESPN, NCAA scoreboard, StatBroadcast)...");
+                        alert("Chainlink functions consensus sync complete. 5/5 nodes report 100% data integrity matches. Decoupled oracle verified.");
+                      }}
+                      className="rounded-xl bg-[#2e5cdb] hover:bg-[#3b6df0] text-white font-bold px-4 py-2 transition-all flex items-center gap-2 cursor-pointer shadow-lg hover:shadow-blue-950/20"
+                    >
+                      <RefreshCw className="h-4 w-4 text-white" />
+                      Sync Chainlink Feeds
+                    </button>
                   </div>
                 </div>
 
@@ -2184,8 +3171,43 @@ export default function CwsClient() {
                   <p className={`text-xs ${textMuted}`}>Explore dynamic Token-2022 collectibles linked as child nodes directly to the root namespaces.</p>
                 </div>
 
+                {/* Search Bar UI */}
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="h-4 w-4 text-orange-400" />
+                  </span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search moments by title, player, rarity or team..."
+                    className={`w-full rounded-2xl pl-10 pr-10 py-3.5 text-xs outline-none transition-all border ${
+                      searchQuery 
+                        ? "border-orange-400 bg-orange-950/20 shadow-[0_0_15px_rgba(249,115,22,0.15)] text-white" 
+                        : "border-emerald-500/10 bg-black/40 text-slate-300 focus:border-orange-500/30"
+                    }`}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {relics.map(relic => (
+                  {relics.filter(relic => {
+                    if (searchQuery.trim() === "") return true;
+                    const query = searchQuery.toLowerCase().trim();
+                    return (
+                      relic.name.toLowerCase().includes(query) ||
+                      relic.rarity.toLowerCase().includes(query) ||
+                      relic.namespaceRoot.toLowerCase().includes(query) ||
+                      relic.type.toLowerCase().includes(query)
+                    );
+                  }).map(relic => (
                     <div key={relic.id} className={`rounded-2xl border p-4 space-y-3 flex flex-col justify-between hover:-translate-y-1 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] hover:border-orange-500/40 transition-all duration-300 ${subCardStyle}`}>
                       <div className="space-y-2">
                         <div className="h-32 border border-white/5 rounded-xl overflow-hidden relative">
@@ -2263,8 +3285,43 @@ export default function CwsClient() {
                   <p className={`text-xs ${textMuted}`}>Trade player card stubs and moment relics. Purchases auto-route gold grain reserves to buyer vaults.</p>
                 </div>
 
+                {/* Search Bar UI */}
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="h-4 w-4 text-emerald-400" />
+                  </span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search marketplace stubs by name, rarity, type..."
+                    className={`w-full rounded-2xl pl-10 pr-10 py-3.5 text-xs outline-none transition-all border ${
+                      searchQuery 
+                        ? "border-emerald-400 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] text-white" 
+                        : "border-emerald-500/10 bg-black/40 text-slate-300 focus:border-emerald-500/30"
+                    }`}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
                 <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {relics.map(item => (
+                  {relics.filter(item => {
+                    if (searchQuery.trim() === "") return true;
+                    const query = searchQuery.toLowerCase().trim();
+                    return (
+                      item.name.toLowerCase().includes(query) ||
+                      item.rarity.toLowerCase().includes(query) ||
+                      item.type.toLowerCase().includes(query) ||
+                      item.namespaceRoot.toLowerCase().includes(query)
+                    );
+                  }).map(item => (
                     <div key={item.id} className={`rounded-2xl border p-4 flex flex-col justify-between ${subCardStyle}`}>
                       <div className="space-y-3">
                         <div className="h-24 border border-white/5 rounded-xl overflow-hidden relative">

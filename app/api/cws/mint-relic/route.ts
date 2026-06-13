@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "relicId is required" }, { status: 400 });
     }
 
-    let relic = getRelicById(relicId);
+    let relic: any = getRelicById(relicId);
     let metadata;
 
     if (!relic) {

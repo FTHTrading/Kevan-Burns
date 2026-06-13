@@ -115,9 +115,9 @@ export async function GET(req: NextRequest) {
   // If we have a mint log, return it directly but ensure we tell the client we have the full log
   if (mintLog) {
     return NextResponse.json({
+      ...mintLog,
       success: true,
       source:  "onchain-mint-log",
-      ...mintLog,
     });
   }
 
