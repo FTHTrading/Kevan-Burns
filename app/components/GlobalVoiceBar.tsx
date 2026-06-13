@@ -5,7 +5,7 @@ import { NARRATION_PRESETS } from "@/lib/voice/narration";
 import VoiceNarrator from "./VoiceNarrator";
 
 // Pages where voice guide should NOT appear
-const EXCLUDED_PATHS = ["/login", "/api", "/namespaces/cockpit"];
+const EXCLUDED_PATHS = ["/login", "/api", "/namespaces/cockpit", "/cws"];
 
 // Page context hints for Grok narration generation on pages without static presets
 const PAGE_CONTEXT: Record<string, { title: string; context: string }> = {
@@ -30,10 +30,18 @@ const PAGE_CONTEXT: Record<string, { title: string; context: string }> = {
 };
 
 export default function GlobalVoiceBar() {
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
 
-  // Skip excluded paths
-  if (EXCLUDED_PATHS.some((p) => pathname.startsWith(p))) return null;
+  const isLegalRoute =
+    pathname === "/legacy-vault" ||
+    pathname.startsWith("/vault") ||
+    pathname.startsWith("/executor") ||
+    pathname === "/pricing" ||
+    pathname === "/onboard" ||
+    pathname === "/vault-explained" ||
+    pathname === "/lifetime";
+
+  if (!isLegalRoute) return null;
 
   // Find page context — exact or prefix match
   const clean = pathname.replace(/\/$/, "");

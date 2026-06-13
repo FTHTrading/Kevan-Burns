@@ -1,592 +1,1304 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Globe, Shield, FileText, Wallet, Search, ArrowRight,
   Terminal, Sparkles, Send, Moon, Sun, Info, HelpCircle,
   Database, Network, Cpu, Lock, Award, Coins, Zap,
   RefreshCw, Scale, Layers, TrendingUp, Activity, ArrowUpRight,
-  Flame, Trophy, Play, Check, ShoppingCart, MessageSquare
+  Flame, Trophy, Play, Check, ShoppingCart, MessageSquare,
+  User, Plus, Trash2, Settings, DollarSign, AlertCircle,
+  CheckCircle, XCircle, ChevronRight, ChevronDown, Building, Heart
 } from "lucide-react";
 
-type TabType = "bracket" | "nft" | "extension" | "compliance" | "registry" | "marketplace";
+// User Classes:
+// 1. Protocol Admin: pre-mints and manages registry policy.
+// 2. Athlete/Coach Owner: unlocks full control of their namespace root, accepts NIL offers, manages vaults, mints relics, launches tokens.
+// 3. Fans & Sponsors: buy subnames, make offers, purchase drops, fund vaults.
+type UserClass = "admin" | "athlete" | "fan";
 
-interface TeamDetail {
+// Suffix/Team Mapping
+type TeamKey = "georgia" | "troy" | "wvu" | "unc" | "olemiss" | "alabama" | "oklahoma" | "texas";
+
+// Claim States:
+// reserved, pending verification, claimable, claimed, delegated, suspended, retired, memorialized
+type ClaimState = "reserved" | "pending_verification" | "claimable" | "claimed" | "delegated" | "suspended" | "retired" | "memorialized";
+
+interface AthleteNamespace {
+  id: string;
   name: string;
-  seed: string;
-  bracket: 1 | 2;
-  stats: { w: number; l: number; hr: number; era: number };
-  roster: string[];
-  pipeline: string;
-  nilWorth: string;
+  role: "player" | "coach";
+  handle: string; // e.g. "daniel.jackson.dawgs"
+  suffix: string; // e.g. ".dawgs"
+  teamKey: TeamKey;
+  claimState: ClaimState;
+  ownerWallet: string | null;
+  trustee: string | null;
+  metrics: {
+    battingAvg?: string;
+    homeRuns?: number;
+    rbis?: number;
+    strikeouts?: number;
+    era?: string;
+    wins?: number;
+    saves?: number;
+    hits?: number;
+    stolenBases?: number;
+    [key: string]: number | string | undefined;
+  };
+  milestones: string[];
 }
 
-interface DynamicNFTState {
-  mint: string;
+interface NILOffer {
+  id: string;
+  type: "Sponsorship" | "Fan Pool" | "Brand License" | "Booster Club Stream";
+  value: number; // In OMAHA26 stablecoins
+  term: string;
+  sponsor: string;
+  deliverables: string;
+  complianceState: "Passed (O.C.G.A. § 53-13)" | "Pending Audit" | "Flagged";
+  escrowRoute: string; // designated vault
+  expiration: string;
+  status: "pending" | "accepted" | "rejected" | "escrowed";
+  conversionAction: string;
+}
+
+interface VaultState {
+  id: string;
   name: string;
-  symbol: string;
-  uri: string;
-  image: string;
-  level: number;
-  rarity: "Common" | "Rare" | "Epic" | "Legendary";
-  homeRuns: number;
-  rbi: number;
-  strikeouts: number;
-  cwsStage: "Regional" | "Super Regional" | "Omaha Bound" | "Championship";
-  milestones: string[];
+  type: "NIL Income" | "Family Trust" | "Campaign Reserve" | "Sponsor Escrow" | "Milestone Reserve" | "Relic Custody";
+  balance: number;
+  goldGrains: number;
+  trustee: string;
+  description: string;
+  deadManSwitch: boolean;
+  payoutInterval: string;
 }
 
 interface MarketItem {
   id: string;
   name: string;
-  type: string;
+  type: "Player Card" | "Moment Relic" | "Namespace Suffix";
   price: number;
   backingGoldGrains: number;
   owner: string;
   image: string;
-  rarity: string;
+  rarity: "Common" | "Rare" | "Epic" | "Legendary";
+  namespaceRoot: string;
+}
+
+// On-chain mint result state per athlete/relic
+interface OnChainRecord {
+  cid: string;
+  ipfsUrl: string;
+  solanaTxHash: string;
+  explorerUrl: string;
+  mintedAt: string;
+  status: "minting" | "minted" | "error";
+  error?: string;
 }
 
 export default function CwsClient() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [activeTab, setActiveTab] = useState<TabType>("bracket");
+  const [activeTab, setActiveTab] = useState<"registry" | "control-hub" | "offers" | "vaults" | "simulation" | "relics" | "marketplace">("registry");
+  
+  // Protocol State Engine
+  const [userClass, setUserClass] = useState<UserClass>("fan");
+  const [activeTeamFilter, setActiveTeamFilter] = useState<TeamKey>("georgia");
+  const [stablecoinBalance, setStablecoinBalance] = useState(5000);
+  const [utilityBalance, setUtilityBalance] = useState(2000);
+  const [blockHeight, setBlockHeight] = useState(13042105);
+  const [txCount, setTxCount] = useState(896);
 
-  // Scoreboard / Simulator States
-  const [inning, setInning] = useState("Bottom 9th");
-  const [outs, setOuts] = useState(2);
-  const [strikes, setStrikes] = useState(2);
-  const [balls, setBalls] = useState(3);
-  const [score, setScore] = useState({ troy: 3, georgia: 4 });
-  const [bases, setBases] = useState({ first: true, second: false, third: true });
-  const [simulatorLog, setSimulatorLog] = useState<string[]>([
-    "[Play-by-Play] Daniel Jackson steps up to the plate. Full count: 3 Balls, 2 Strikes, 2 Outs.",
-    "[Play-by-Play] Base runners on 1st and 3rd. Georgia leads by 1 in the bottom of the 9th."
-  ]);
-
-  // Suffix Registry States
-  const [suffixInput, setSuffixInput] = useState("");
-  const [claimOutput, setClaimOutput] = useState("Search a collegiate handle to preview routing lanes.");
-
-  // NIL Generator States
-  const [nilName, setNilName] = useState("Daniel Jackson");
-  const [nilSchool, setNilSchool] = useState("Georgia Bulldogs");
-  const [nilMonthly, setNilMonthly] = useState("12500");
-  const [nilStatus, setNilStatus] = useState("idle");
-  const [nilDeed, setNilDeed] = useState("");
-
-  // AI Scout Search & AI Twin States
-  const [aiInput, setAiInput] = useState("");
-  const [aiResponse, setAiResponse] = useState(
-    "Scout Oracle: Deployed L1 chain feeds active. Search players, simulate play-by-plays, or query Token-2022 byte arrays. Type 'generate relic' or ask a scouting question."
-  );
-  const [aiLoading, setAiLoading] = useState(false);
-
-  // Card 3D Tilt State
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-
-  // Marketplace states
-  const [usdfBalance, setUsdfBalance] = useState(1500);
-  const [marketItems, setMarketItems] = useState<MarketItem[]>([
-    {
-      id: "m1",
-      name: "Daniel Jackson - Rookie SFT",
-      type: "Player Card",
-      price: 250,
-      backingGoldGrains: 40,
-      owner: "0xAthens...8a39",
-      image: "https://images.unsplash.com/photo-1544045560-7297be6472ff?w=400&q=80",
-      rarity: "Epic"
-    },
-    {
-      id: "m2",
-      name: "Troy 2026 Omaha Relic Stub",
-      type: "Moment Relic",
-      price: 120,
-      backingGoldGrains: 18,
-      owner: "0xTroy...ef23",
-      image: "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=400&q=80",
-      rarity: "Rare"
-    },
-    {
-      id: "m3",
-      name: ".dawgs Faction Namespace SFT",
-      type: "Namespace Suffix",
-      price: 600,
-      backingGoldGrains: 95,
-      owner: "0xAthens...8a39",
-      image: "https://images.unsplash.com/photo-1508349698387-a257ed957c7f?w=400&q=80",
-      rarity: "Legendary"
-    }
-  ]);
-  const [marketLogs, setMarketLogs] = useState<string[]>([
-    "[Market] Node connected. Active trade membranes: Stellar DEX & Solana SPL."
-  ]);
-
-  // Blockchain Stats
-  const [blockHeight, setBlockHeight] = useState(12982105);
-  const [txCount, setTxCount] = useState(452);
+  // On-chain state: { [athleteId | relicId]: OnChainRecord }
+  const [onChainState, setOnChainState] = useState<Record<string, OnChainRecord>>({});
+  const [genesisMinting, setGenesisMinting] = useState(false);
+  const [genesisManifest, setGenesisManifest] = useState<any>(null);
 
   useEffect(() => {
-    document.title = "CWS On-Chain Empire | Road to Omaha Protocol";
-    const timer = setInterval(() => {
-      setBlockHeight((h) => h + 1);
-      setTxCount((t) => t + Math.floor(Math.random() * 8) + 1);
-    }, 3000);
-    return () => clearInterval(timer);
+    const fetchMintLog = async () => {
+      try {
+        const res = await fetch("/api/cws/root");
+        const data = await res.json();
+        if (data.success) {
+          const newState: Record<string, OnChainRecord> = {};
+          // Map namespaces
+          data.namespaces?.forEach((ns: any) => {
+            if (ns.cid && ns.solanaTxHash) {
+              const record: OnChainRecord = {
+                cid: ns.cid,
+                ipfsUrl: ns.ipfsUrl,
+                solanaTxHash: ns.solanaTxHash,
+                explorerUrl: ns.explorerUrl || `https://solscan.io/tx/${ns.solanaTxHash}`,
+                mintedAt: new Date().toISOString(),
+                status: "minted",
+              };
+              newState[ns.handle] = record;
+              // Also support lookup by athlete ID
+              const matchingAthlete = namespaces.find(a => a.handle === ns.handle);
+              if (matchingAthlete) {
+                newState[matchingAthlete.id] = record;
+              }
+            }
+          });
+          // Map relics
+          data.relics?.forEach((r: any) => {
+            if (r.cid && r.solanaTxHash) {
+              const record: OnChainRecord = {
+                cid: r.cid,
+                ipfsUrl: r.ipfsUrl,
+                solanaTxHash: r.solanaTxHash,
+                explorerUrl: r.explorerUrl || `https://solscan.io/tx/${r.solanaTxHash}`,
+                mintedAt: new Date().toISOString(),
+                status: "minted",
+              };
+              newState[r.id] = record;
+            }
+          });
+          setOnChainState(newState);
+          setGenesisManifest(data);
+        }
+      } catch (err) {
+        console.error("Failed to load on-chain mint log:", err);
+      }
+    };
+    fetchMintLog();
   }, []);
+  
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([
+    "[Protocol Initialized] Sovereign CWS Sports Protocol v1.0.0 is online.",
+    "[Registry] Connected to Unykorn Root Registry — Solana Mainnet-Beta.",
+    "[IPFS] Pinata provider active — FRA1 + NYC1 dual-region pinning.",
+    "[FINAL: CWS Game 1] West Virginia 7, Troy 5 — WVU advances to Winner's Bracket.",
+    "[RELIC MINTED] Armani Guzman CWS Steal of Home — First Since 2000 — LEGENDARY SFT.",
+    "[RELIC MINTED] Tyrus Hall 8th-Inning Walk-Off 2-Run Single — 4 RBI Game — LEGENDARY.",
+    "[STAT UPDATE] Ian Korn: W (6-1) — 6 IP, 2H, 1ER, 0BB, 2K in relief.",
+    "[STAT UPDATE] Ben McDougal: Save — Recorded final out on Jimmy Janicki foul-out.",
+    "[STAT UPDATE] Sean Smith: Solo HR (3rd Inning) — CWS power contribution.",
+    "[NEXT GAME] WVU vs. UNC/OleMiss winner — Sunday June 14, Winner's Bracket.",
+    "[NEXT GAME] Troy vs. UNC/OleMiss loser — Sunday June 14, Elimination Game."
+  ]);
 
   // CWS 2026 Teams Database
-  const teams: Record<string, TeamDetail> = {
+  const teams: Record<TeamKey, {
+    name: string;
+    seed: string;
+    suffix: string;
+    nilWorth: string;
+    powerRating: number;
+    battingPower: number;
+    pitchingPower: number;
+    defenseRating: number;
+    championshipOdds: string;
+    strengths: string[];
+    weaknesses: string[];
+    backingGoldGrains: number;
+  }> = {
+    georgia: {
+      name: "Georgia Bulldogs",
+      seed: "No. 3 Seed / SEC Champ",
+      suffix: ".dawgs",
+      nilWorth: "$450,000",
+      powerRating: 96,
+      battingPower: 98,
+      pitchingPower: 94,
+      defenseRating: 95,
+      championshipOdds: "+280",
+      strengths: ["Historic HR Record (174)", "Deep Bullpen Rotation"],
+      weaknesses: ["High Expectations Pressure", "Struggles vs elite offspeed"],
+      backingGoldGrains: 850
+    },
     troy: {
       name: "Troy Trojans",
       seed: "Sun Belt Champ",
-      bracket: 1,
-      stats: { w: 46, l: 18, hr: 88, era: 3.42 },
-      roster: ["Tyler Vance (SS)", "Jake Vance (P)", "Marcus Cole (C)", "Cody Bell (OF)"],
-      pipeline: "Sun Belt / Alabama Pipelines",
-      nilWorth: "$145,000"
+      suffix: ".trojans",
+      nilWorth: "$145,000",
+      powerRating: 89,
+      battingPower: 91,
+      pitchingPower: 86,
+      defenseRating: 90,
+      championshipOdds: "+1200",
+      strengths: ["All-American Jimmy Janicki", "Fast Baserunners"],
+      weaknesses: ["Bullpen Depth", "High Strikeout Rate"],
+      backingGoldGrains: 250
     },
     wvu: {
       name: "West Virginia Mountaineers",
-      seed: "Big 12 Regular Season",
-      bracket: 1,
-      stats: { w: 43, l: 20, hr: 74, era: 3.98 },
-      roster: ["Logan Vance (P)", "Sam Miller (OF)", "Derek King (INF)"],
-      pipeline: "Mid-Atlantic / Ohio Pipelines",
-      nilWorth: "$120,000"
+      seed: "No. 16 Seed / Big 12 Regular Season",
+      suffix: ".mountaineers",
+      nilWorth: "$180,000",
+      powerRating: 90,
+      battingPower: 88,
+      pitchingPower: 91,
+      defenseRating: 90,
+      championshipOdds: "+900",
+      strengths: ["Armani Guzman Basesteals", "Veteran Reliever Ian Korn"],
+      weaknesses: ["Starter Longevity", "Plate Discipline"],
+      backingGoldGrains: 350
     },
     unc: {
       name: "North Carolina Tar Heels",
-      seed: "ACC Tournament Champ",
-      bracket: 1,
-      stats: { w: 48, l: 14, hr: 96, era: 3.12 },
-      roster: ["Alex Vance (3B)", "Luke Davis (OF)", "Gavin Gallaher (SS)"],
-      pipeline: "East Coast / North Carolina Recruits",
-      nilWorth: "$210,000"
+      seed: "No. 5 Seed / ACC Champ",
+      suffix: ".tarheels",
+      nilWorth: "$320,000",
+      powerRating: 93,
+      battingPower: 94,
+      pitchingPower: 91,
+      defenseRating: 92,
+      championshipOdds: "+550",
+      strengths: ["Vance Honeycutt Defense", "Starting Pitcher Jason DeCaro"],
+      weaknesses: ["Bench Depth", "Struggles vs LHP"],
+      backingGoldGrains: 550
     },
     olemiss: {
       name: "Ole Miss Rebels",
       seed: "SEC Wildcard Pool",
-      bracket: 1,
-      stats: { w: 42, l: 22, hr: 91, era: 4.15 },
-      roster: ["Sam Vance (OF)", "Hunter Elliott (P)", "TJ McCants (OF)"],
-      pipeline: "Mississippi / Texas Pipelines",
-      nilWorth: "$185,000"
-    },
-    oklahoma: {
-      name: "Oklahoma Sooners",
-      seed: "Big 12 Champ",
-      bracket: 2,
-      stats: { w: 45, l: 19, hr: 82, era: 3.75 },
-      roster: ["Matt Vance (OF)", "Jackson Nicklaus (INF)", "Easton Carmichael (C)"],
-      pipeline: "Oklahoma / Texas Pipeline",
-      nilWorth: "$195,000"
+      suffix: ".rebels",
+      nilWorth: "$185,000",
+      powerRating: 88,
+      battingPower: 90,
+      pitchingPower: 85,
+      defenseRating: 89,
+      championshipOdds: "+1400",
+      strengths: ["Andrew Fischer Slug", "Experienced Infield"],
+      weaknesses: ["ERA Spikes", "Walks Allowed"],
+      backingGoldGrains: 320
     },
     alabama: {
       name: "Alabama Crimson Tide",
-      seed: "SEC Tournament Runner-up",
-      bracket: 2,
-      stats: { w: 44, l: 21, hr: 85, era: 3.82 },
-      roster: ["Chris Vance (P)", "Mac Guscette (C)", "Justin Lebron (SS)"],
-      pipeline: "Georgia / Florida / Alabama Pipelines",
-      nilWorth: "$220,000"
+      seed: "No. 7 Seed / SEC Runner-up",
+      suffix: ".tide",
+      nilWorth: "$220,000",
+      powerRating: 91,
+      battingPower: 92,
+      pitchingPower: 89,
+      defenseRating: 91,
+      championshipOdds: "+650",
+      strengths: ["Gage Miller Plate Control", "Strong Relievers"],
+      weaknesses: ["Strikeout Propensity", "Steal Defense"],
+      backingGoldGrains: 420
+    },
+    oklahoma: {
+      name: "Oklahoma Sooners",
+      seed: "Big 12 Tournament Champ",
+      suffix: ".sooners",
+      nilWorth: "$195,000",
+      powerRating: 90,
+      battingPower: 89,
+      pitchingPower: 91,
+      defenseRating: 90,
+      championshipOdds: "+800",
+      strengths: ["Easton Carmichael Catcher Play", "High OBP"],
+      weaknesses: ["Outfield Speed", "Double-Play Grounders"],
+      backingGoldGrains: 350
     },
     texas: {
       name: "Texas Longhorns",
-      seed: "SEC Regular Season Runner-up",
-      bracket: 2,
-      stats: { w: 47, l: 16, hr: 104, era: 3.25 },
-      roster: ["Zach Vance (1B)", "Jalin Flores (SS)", "Kimble Schuessler (C)"],
-      pipeline: "Texas / California Pipelines",
-      nilWorth: "$310,000"
-    },
-    georgia: {
-      name: "Georgia Bulldogs",
-      seed: "SEC Top Seed / Transfer Pool",
-      bracket: 2,
-      stats: { w: 49, l: 13, hr: 120, era: 3.05 },
-      roster: ["Daniel Jackson (OF - Transfer)", "Slate Alford (3B)", "Charlie Condon (INF/OF)"],
-      pipeline: "Georgia / Transfer Portal Specialists",
-      nilWorth: "$450,000"
+      seed: "No. 6 Seed / SEC Runner-up",
+      suffix: ".longhorns",
+      nilWorth: "$310,000",
+      powerRating: 94,
+      battingPower: 96,
+      pitchingPower: 92,
+      defenseRating: 93,
+      championshipOdds: "+400",
+      strengths: ["Jared Thomas Batting", "Max Belyeu Outfield Power"],
+      weaknesses: ["Left-handed Relievers", "High Pitch Counts"],
+      backingGoldGrains: 580
     }
   };
 
-  const [selectedTeam, setSelectedTeam] = useState<string>("georgia");
+  // Core Namespaces Database - REAL CWS ROSTER PLAYERS (No Placeholders)
+  const [namespaces, setNamespaces] = useState<AthleteNamespace[]>([
+    // Georgia Bulldogs (.dawgs)
+    {
+      id: "ns_uga_dj",
+      name: "Daniel Jackson",
+      role: "player",
+      handle: "daniel.jackson.dawgs",
+      suffix: ".dawgs",
+      teamKey: "georgia",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".385", homeRuns: 28, rbis: 82, stolenBases: 15 },
+      milestones: ["Dick Howser Trophy Winner", "SEC Player of the Year", "Omaha Qualified"]
+    },
+    {
+      id: "ns_uga_kb",
+      name: "Kolby Branch",
+      role: "player",
+      handle: "kolby.branch.dawgs",
+      suffix: ".dawgs",
+      teamKey: "georgia",
+      claimState: "claimed",
+      ownerWallet: "0xAthensBranch...8f3c",
+      trustee: "Branch Family Trust",
+      metrics: { battingAvg: ".295", homeRuns: 18, rbis: 58 },
+      milestones: ["SEC All-Defensive Shortstop"]
+    },
+    {
+      id: "ns_uga_jv",
+      name: "Joey Volchko",
+      role: "player",
+      handle: "joey.volchko.dawgs",
+      suffix: ".dawgs",
+      teamKey: "georgia",
+      claimState: "claimable",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { era: "3.24", wins: 9, strikeouts: 104 },
+      milestones: ["Stanford Transfer Starter", "SEC Pitcher of the Week"]
+    },
 
-  // Dynamic Token Extension NFT State
-  const [nftState, setNftState] = useState<DynamicNFTState>({
-    mint: "57VqZpdg...Token2022MintAddress",
-    name: "Daniel Jackson - Dynamic Card",
-    symbol: "CWS-DJ",
-    uri: "ipfs://QmDanielJacksonBaseMetadataJSON",
-    image: "https://images.unsplash.com/photo-1544045560-7297be6472ff?w=400&q=80",
-    level: 1,
-    rarity: "Common",
-    homeRuns: 3,
-    rbi: 8,
-    strikeouts: 12,
-    cwsStage: "Omaha Bound",
-    milestones: ["Regional Champion", "Omaha Qualified"]
-  });
+    // West Virginia Mountaineers (.mountaineers)
+    {
+      id: "ns_wvu_ag",
+      name: "Armani Guzman",
+      role: "player",
+      handle: "armani.guzman.mountaineers",
+      suffix: ".mountaineers",
+      teamKey: "wvu",
+      claimState: "claimed",
+      ownerWallet: "0xGuzmanWVU...7c2d",
+      trustee: "Guzman Fiduciary Safe",
+      metrics: { battingAvg: ".352", homeRuns: 11, stolenBases: 39, rbis: 48 },
+      milestones: ["CWS Steal of Home — First Since 2000", "WVU Single-Season Stolen Base Record", "Regional MVP", "First Run of 2026 CWS via Steal of Home", "RBI Double in Game 1"]
+    },
+    {
+      id: "ns_wvu_th",
+      name: "Tyrus Hall",
+      role: "player",
+      handle: "tyrus.hall.mountaineers",
+      suffix: ".mountaineers",
+      teamKey: "wvu",
+      claimState: "claimed",
+      ownerWallet: "0xTyrusHall...9e1a",
+      trustee: "Hall Family Safe",
+      metrics: { battingAvg: ".312", homeRuns: 7, rbis: 52, hits: 2 },
+      milestones: ["CWS Game 1 Hero — 4 RBIs", "8th Inning 2-Run Walk-Off Single", "2-Run Double Earlier in Game 1", "Omaha Opening Walk-Off Hero"]
+    },
+    {
+      id: "ns_wvu_ik",
+      name: "Ian Korn",
+      role: "player",
+      handle: "ian.korn.mountaineers",
+      suffix: ".mountaineers",
+      teamKey: "wvu",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { era: "2.84", wins: 7, saves: 4, strikeouts: 78 },
+      milestones: ["CWS Game 1 Winner (6-1)", "6 IP in Relief — 2 H, 1 ER, 2 K", "Carried WVU Through 8 Innings", "All-Big 12 First Team"]
+    },
+    {
+      id: "ns_wvu_ss",
+      name: "Sean Smith",
+      role: "player",
+      handle: "sean.smith.mountaineers",
+      suffix: ".mountaineers",
+      teamKey: "wvu",
+      claimState: "claimable",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".298", homeRuns: 14, rbis: 45 },
+      milestones: ["CWS Game 1 Solo Home Run (3rd Inning)", "DH/Utility Power Bat", "WVU Postseason Run Producer"]
+    },
+    {
+      id: "ns_wvu_cc",
+      name: "Chansen Cole",
+      role: "player",
+      handle: "chansen.cole.mountaineers",
+      suffix: ".mountaineers",
+      teamKey: "wvu",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { era: "4.12", wins: 9, strikeouts: 88 },
+      milestones: ["WVU CWS Opening Game Starter", "Big 12 Season Workhorse", "WVU Postseason Rotation Ace"]
+    },
+    {
+      id: "ns_wvu_bm",
+      name: "Ben McDougal",
+      role: "player",
+      handle: "ben.mcdougal.mountaineers",
+      suffix: ".mountaineers",
+      teamKey: "wvu",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { era: "2.15", saves: 8, strikeouts: 42, wins: 3 },
+      milestones: ["CWS Game 1 Save — Foul-Out to End Troy Threat", "LHP Veteran Closer", "NCBWA Stopper Watchlist"]
+    },
+    {
+      id: "ns_wvu_bw",
+      name: "Brock Wills",
+      role: "player",
+      handle: "brock.wills.mountaineers",
+      suffix: ".mountaineers",
+      teamKey: "wvu",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".278", homeRuns: 8, rbis: 38, stolenBases: 12 },
+      milestones: ["UNC Wilmington Transfer", "Outfield Anchor", "WVU Postseason Contributor"]
+    },
+    {
+      id: "ns_wvu_ps",
+      name: "Paul Schoenfeld",
+      role: "player",
+      handle: "paul.schoenfeld.mountaineers",
+      suffix: ".mountaineers",
+      teamKey: "wvu",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".302", homeRuns: 9, rbis: 41, stolenBases: 9 },
+      milestones: ["Colorado Mesa Transfer", "WVU Outfield Depth", "Super Regional Contributor"]
+    },
+    {
+      id: "ns_wvu_bk",
+      name: "Brodie Kresser",
+      role: "player",
+      handle: "brodie.kresser.mountaineers",
+      suffix: ".mountaineers",
+      teamKey: "wvu",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".267", homeRuns: 5, rbis: 32 },
+      milestones: ["Starting Infield Cornerstone", "Big 12 Regular Season Co-Champ", "WVU 46-15 Season Contributor"]
+    },
 
-  const [nftLogs, setNftLogs] = useState<string[]>([
-    "[Token-2022] Evolving NFT minted with MetadataPointer pointing to self.",
-    "[Token-2022] Initial TLV fields initialized: home_runs=3, rbi=8, stage=Omaha Bound."
+    // Troy Trojans (.trojans)
+    {
+      id: "ns_troy_jj",
+      name: "Jimmy Janicki",
+      role: "player",
+      handle: "jimmy.janicki.trojans",
+      suffix: ".trojans",
+      teamKey: "troy",
+      claimState: "claimed",
+      ownerWallet: "0xJanickiTroy...4b2f",
+      trustee: "Janicki Family Trust",
+      metrics: { battingAvg: ".341", homeRuns: 19, rbis: 85, hits: 92 },
+      milestones: ["Sun Belt Player of the Year", "All-American Catcher", "CWS Game 1: Solo HR to Tie in 7th", "2 Hits, 1 RBI, 2 Runs — CWS Opener", "Troy First-Ever CWS Appearance"]
+    },
+    {
+      id: "ns_troy_ap",
+      name: "Aaron Piasecki",
+      role: "player",
+      handle: "aaron.piasecki.trojans",
+      suffix: ".trojans",
+      teamKey: "troy",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".346", hits: 93, homeRuns: 10, rbis: 48, stolenBases: 18 },
+      milestones: ["First-Team All-Sun Belt Shortstop", "Troy Season Batting Leader", "67 Games Started"]
+    },
+    {
+      id: "ns_troy_sm",
+      name: "Steven Meier",
+      role: "player",
+      handle: "steven.meier.trojans",
+      suffix: ".trojans",
+      teamKey: "troy",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".321", homeRuns: 9, rbis: 44, hits: 68 },
+      milestones: ["Sun Belt All-Conference", "60 Games Started", "Troy Lineup Backbone"]
+    },
+    {
+      id: "ns_troy_dn",
+      name: "Drew Nelson",
+      role: "player",
+      handle: "drew.nelson.trojans",
+      suffix: ".trojans",
+      teamKey: "troy",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".307", homeRuns: 6, rbis: 49, hits: 74 },
+      milestones: ["67 Games Started", "Troy Postseason RBI Producer", "Gainesville Regional Hero"]
+    },
+    {
+      id: "ns_troy_bc",
+      name: "Blake Cavill",
+      role: "player",
+      handle: "blake.cavill.trojans",
+      suffix: ".trojans",
+      teamKey: "troy",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".279", homeRuns: 13, rbis: 50, hits: 67 },
+      milestones: ["Power Bat Off the Bench", "OPS .931", "Sun Belt Power Threat"]
+    },
+    {
+      id: "ns_troy_jp",
+      name: "Josh Pyne",
+      role: "player",
+      handle: "josh.pyne.trojans",
+      suffix: ".trojans",
+      teamKey: "troy",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".291", homeRuns: 10, rbis: 37, hits: 78 },
+      milestones: ["66 Games Started", "Troy Leadoff Presence", "Postseason Run Scorer"]
+    },
+    {
+      id: "ns_troy_sd",
+      name: "Sean Darnell",
+      role: "player",
+      handle: "sean.darnell.trojans",
+      suffix: ".trojans",
+      teamKey: "troy",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".249", homeRuns: 4, rbis: 45, hits: 58 },
+      milestones: ["CWS Game 1: RBI Double", "68 Games Started", "Troy Defensive Stalwart"]
+    },
+    {
+      id: "ns_troy_jb",
+      name: "Jabe Boroff",
+      role: "player",
+      handle: "jabe.boroff.trojans",
+      suffix: ".trojans",
+      teamKey: "troy",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".264", homeRuns: 11, rbis: 32, hits: 24 },
+      milestones: ["CWS Game 1: RBI Single", "OPS 1.063 — Highest on Team", "Designated Hitter Power Bat"]
+    },
+
+    // North Carolina Tar Heels (.tarheels)
+    {
+      id: "ns_unc_vh",
+      name: "Vance Honeycutt",
+      role: "player",
+      handle: "vance.honeycutt.tarheels",
+      suffix: ".tarheels",
+      teamKey: "unc",
+      claimState: "claimable",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".324", homeRuns: 22, stolenBases: 28 },
+      milestones: ["UNC All-Time HR Leader", "ACC Defensive Player of the Year"]
+    },
+    {
+      id: "ns_unc_jd",
+      name: "Jason DeCaro",
+      role: "player",
+      handle: "jason.decaro.tarheels",
+      suffix: ".tarheels",
+      teamKey: "unc",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { era: "3.58", wins: 8, strikeouts: 95 },
+      milestones: ["Freshman All-American Starter"]
+    },
+
+    // Ole Miss Rebels (.rebels)
+    {
+      id: "ns_ole_af",
+      name: "Andrew Fischer",
+      role: "player",
+      handle: "andrew.fischer.rebels",
+      suffix: ".rebels",
+      teamKey: "olemiss",
+      claimState: "claimed",
+      ownerWallet: "0xFischerOle...1a4f",
+      trustee: "Fischer Asset LLC",
+      metrics: { battingAvg: ".310", homeRuns: 21, rbis: 61 },
+      milestones: ["First-Team All-SEC 3B"]
+    },
+
+    // Alabama Crimson Tide (.tide)
+    {
+      id: "ns_bama_gm",
+      name: "Gage Miller",
+      role: "player",
+      handle: "gage.miller.tide",
+      suffix: ".tide",
+      teamKey: "alabama",
+      claimState: "claimed",
+      ownerWallet: "0xMillerBama...9b3c",
+      trustee: "Miller Estate Fiduciary",
+      metrics: { battingAvg: ".381", homeRuns: 18, rbis: 56 },
+      milestones: ["Bama Lead-off Slugging Anchor"]
+    },
+
+    // Oklahoma Sooners (.sooners)
+    {
+      id: "ns_ou_ec",
+      name: "Easton Carmichael",
+      role: "player",
+      handle: "easton.carmichael.sooners",
+      suffix: ".sooners",
+      teamKey: "oklahoma",
+      claimState: "reserved",
+      ownerWallet: null,
+      trustee: null,
+      metrics: { battingAvg: ".362", homeRuns: 10, rbis: 52 },
+      milestones: ["All-Big 12 First-Team Catcher"]
+    },
+
+    // Texas Longhorns (.longhorns)
+    {
+      id: "ns_ut_jt",
+      name: "Jared Thomas",
+      role: "player",
+      handle: "jared.thomas.longhorns",
+      suffix: ".longhorns",
+      teamKey: "texas",
+      claimState: "claimed",
+      ownerWallet: "0xThomasTexas...6a2e",
+      trustee: "Thomas Trust Fund",
+      metrics: { battingAvg: ".358", homeRuns: 16, stolenBases: 17 },
+      milestones: ["SEC First-Team First Baseman"]
+    }
   ]);
 
-  // Evolve Action
-  const triggerStatMutation = (stat: "hr" | "rbi" | "so" | "stage") => {
-    setNftState((prev) => {
-      let nextHr = prev.homeRuns;
-      let nextRbi = prev.rbi;
-      let nextSo = prev.strikeouts;
-      let nextStage = prev.cwsStage;
-      let nextLevel = prev.level;
-      let nextRarity = prev.rarity;
-      let nextMilestones = [...prev.milestones];
-      let newLog = "";
+  // Offers Inbox Database (Nike, Adidas, Collectives submitting contracts)
+  const [offers, setOffers] = useState<NILOffer[]>([
+    {
+      id: "off_1",
+      type: "Brand License",
+      value: 125000,
+      term: "12 Months",
+      sponsor: "Nike Athletics",
+      deliverables: "Wear custom Nike spikes in CWS games; shoot 3 commercial reels; host 1 signature signing session at Omaha Fanfest.",
+      complianceState: "Passed (O.C.G.A. § 53-13)",
+      escrowRoute: "NIL Income Vault",
+      expiration: "2026-07-30",
+      status: "pending",
+      conversionAction: "Auto-mint Nike Athlete Relic SFT"
+    },
+    {
+      id: "off_2",
+      type: "Booster Club Stream",
+      value: 45000,
+      term: "Season-long",
+      sponsor: "DawgNation Collective",
+      deliverables: "Host 2 digital fan club meetings on Unykorn Discord; sign 50 commemorative CWS moment relics.",
+      complianceState: "Passed (O.C.G.A. § 53-13)",
+      escrowRoute: "Campaign Reserve Vault",
+      expiration: "2026-06-30",
+      status: "pending",
+      conversionAction: "Route 20% to Family Trust, 80% to immediate payout"
+    },
+    {
+      id: "off_3",
+      type: "Sponsorship",
+      value: 75000,
+      term: "One-off Event",
+      sponsor: "Gatorade Sports Science",
+      deliverables: "Hydration study broadcast live on ESPN Omaha; wear Gatorade biosensors during batting practice.",
+      complianceState: "Pending Audit",
+      escrowRoute: "Sponsor Escrow Vault",
+      expiration: "2026-06-20",
+      status: "pending",
+      conversionAction: "Issue 500 Gatorade-backed fan utility tokens"
+    }
+  ]);
 
-      if (stat === "hr") {
-        nextHr += 1;
-        nextRbi += Math.floor(Math.random() * 3) + 1;
-        newLog = `[Oracle Trigger] Player recorded Home Run! Updating home_runs to ${nextHr}, rbi to ${nextRbi}.`;
-        
-        if (nextHr >= 5 && prev.level < 2) {
-          nextLevel = 2;
-          nextRarity = "Rare";
-          nextMilestones.push("Power Hitter Upgrade");
-          newLog += " Level Up! Evolved to Level 2 (Rare).";
-        }
-      } else if (stat === "rbi") {
-        nextRbi += 1;
-        newLog = `[Oracle Trigger] RBI registered. Updating rbi to ${nextRbi}.`;
-      } else if (stat === "so") {
-        nextSo += 1;
-        newLog = `[Oracle Trigger] Pitcher Strikeout registered. Updating strikeouts to ${nextSo}.`;
-      } else if (stat === "stage") {
-        const stages: DynamicNFTState["cwsStage"][] = ["Regional", "Super Regional", "Omaha Bound", "Championship"];
-        const curIdx = stages.indexOf(prev.cwsStage);
-        if (curIdx < 3) {
-          nextStage = stages[curIdx + 1];
-          nextLevel += 1;
-          newLog = `[Bracket Oracle] Team advanced to ${nextStage}! Evolving card layout. Level Up to ${nextLevel}.`;
-          
-          if (nextStage === "Omaha Bound") {
-            nextRarity = "Epic";
-            nextMilestones.push("Omaha Qualified");
-          } else if (nextStage === "Championship") {
-            nextRarity = "Legendary";
-            nextMilestones.push("CWS Finalist");
+  // Generational Wealth Vaults (Backed by Zurich Gold safe reserves)
+  const [vaults, setVaults] = useState<VaultState[]>([
+    {
+      id: "vlt_nil",
+      name: "Athlete's NIL Payout Vault",
+      type: "NIL Income",
+      balance: 15000,
+      goldGrains: 250,
+      trustee: "Athlete (Self)",
+      description: "Direct revenue stream for immediate commercial contracts, sponsorship payouts, and merchandising shares.",
+      deadManSwitch: false,
+      payoutInterval: "Instant"
+    },
+    {
+      id: "vlt_family",
+      name: "Family Estate Fiduciary Trust",
+      type: "Family Trust",
+      balance: 120000,
+      goldGrains: 2200,
+      trustee: "Guardian & Attorney Co-signers",
+      description: "Tax-aware generational estate trust. RUFADAA succession fallback enabled for designated heirs.",
+      deadManSwitch: true,
+      payoutInterval: "Bi-Annual / Milestone Controlled"
+    },
+    {
+      id: "vlt_relic",
+      name: "Physical Gold-Backed Relic Reserve",
+      type: "Relic Custody",
+      balance: 35000,
+      goldGrains: 650,
+      trustee: "Zurich Bullion Safe Custodian",
+      description: "Holds RWA physical gold grain assets anchoring the baseline intrinsic value of all minted moment relics.",
+      deadManSwitch: false,
+      payoutInterval: "Locked in Custody"
+    }
+  ]);
+
+  // Star Player Moments - AUTHENTIC CWS GAME 1 HIGHLIGHTS (WVU 7, Troy 5)
+  const [relics, setRelics] = useState<MarketItem[]>([
+    {
+      id: "m_wvu_guzman",
+      name: "Armani Guzman — CWS Steal of Home (1st Since 2000)",
+      type: "Moment Relic",
+      price: 1850,
+      backingGoldGrains: 340,
+      owner: "armani.guzman.mountaineers",
+      image: "https://images.unsplash.com/photo-1544045560-7297be6472ff?w=400&q=80",
+      rarity: "Legendary",
+      namespaceRoot: "armani.guzman.mountaineers"
+    },
+    {
+      id: "m_wvu_hall_single",
+      name: "Tyrus Hall — 8th Inning Walk-Off 2-Run Single (4 RBI Day)",
+      type: "Moment Relic",
+      price: 920,
+      backingGoldGrains: 175,
+      owner: "tyrus.hall.mountaineers",
+      image: "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=400&q=80",
+      rarity: "Legendary",
+      namespaceRoot: "tyrus.hall.mountaineers"
+    },
+    {
+      id: "m_wvu_hall_double",
+      name: "Tyrus Hall — 2-Run Double (Early Game 1 Lead)",
+      type: "Moment Relic",
+      price: 480,
+      backingGoldGrains: 90,
+      owner: "tyrus.hall.mountaineers",
+      image: "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=400&q=80",
+      rarity: "Epic",
+      namespaceRoot: "tyrus.hall.mountaineers"
+    },
+    {
+      id: "m_wvu_smith",
+      name: "Sean Smith — Solo Home Run (3rd Inning, CWS Game 1)",
+      type: "Moment Relic",
+      price: 520,
+      backingGoldGrains: 95,
+      owner: "sean.smith.mountaineers",
+      image: "https://images.unsplash.com/photo-1508349698387-a257ed957c7f?w=400&q=80",
+      rarity: "Epic",
+      namespaceRoot: "sean.smith.mountaineers"
+    },
+    {
+      id: "m_troy_janicki",
+      name: "Jimmy Janicki — Solo HR to Tie Game 1 in 7th (CWS)",
+      type: "Moment Relic",
+      price: 650,
+      backingGoldGrains: 120,
+      owner: "jimmy.janicki.trojans",
+      image: "https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?w=400&q=80",
+      rarity: "Epic",
+      namespaceRoot: "jimmy.janicki.trojans"
+    },
+    {
+      id: "m_wvu_korn",
+      name: "Ian Korn — 6 IP Relief, 2 H, 1 ER, CWS Win (6-1)",
+      type: "Moment Relic",
+      price: 620,
+      backingGoldGrains: 115,
+      owner: "ian.korn.mountaineers",
+      image: "https://images.unsplash.com/photo-1508349698387-a257ed957c7f?w=400&q=80",
+      rarity: "Epic",
+      namespaceRoot: "ian.korn.mountaineers"
+    },
+    {
+      id: "m_wvu_mcdougal",
+      name: "Ben McDougal — CWS Closing Save (Final Out on Janicki Foul)",
+      type: "Moment Relic",
+      price: 380,
+      backingGoldGrains: 65,
+      owner: "ben.mcdougal.mountaineers",
+      image: "https://images.unsplash.com/photo-1508349698387-a257ed957c7f?w=400&q=80",
+      rarity: "Rare",
+      namespaceRoot: "ben.mcdougal.mountaineers"
+    },
+    {
+      id: "m_troy_darnell",
+      name: "Sean Darnell — RBI Double (Troy CWS Debut)",
+      type: "Moment Relic",
+      price: 220,
+      backingGoldGrains: 35,
+      owner: "sean.darnell.trojans",
+      image: "https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?w=400&q=80",
+      rarity: "Rare",
+      namespaceRoot: "sean.darnell.trojans"
+    },
+    {
+      id: "m_troy_boroff",
+      name: "Jabe Boroff — RBI Single (Troy CWS Historic Debut)",
+      type: "Moment Relic",
+      price: 195,
+      backingGoldGrains: 28,
+      owner: "jabe.boroff.trojans",
+      image: "https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?w=400&q=80",
+      rarity: "Common",
+      namespaceRoot: "jabe.boroff.trojans"
+    }
+  ]);
+
+  // Selected registry active pointer
+  const [selectedAthleteId, setSelectedAthleteId] = useState<string>("ns_uga_dj");
+  
+  // Interactive forms & states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [customOfferAmount, setCustomOfferAmount] = useState("50000");
+  const [customOfferTerm, setCustomOfferTerm] = useState("12 Months");
+  const [customOfferSponsor, setCustomOfferSponsor] = useState("Adidas Global");
+  const [customOfferDeliverables, setCustomOfferDeliverables] = useState("Perform 2 Instagram promo posts; host 1 signature signing session at Omaha.");
+  const [customOfferEscrow, setCustomOfferEscrow] = useState("NIL Income Vault");
+
+  // Claim Flow state engine
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [claimingAthlete, setClaimingAthlete] = useState<AthleteNamespace | null>(null);
+  const [claimStep, setClaimStep] = useState(1);
+  const [claimLogs, setClaimLogs] = useState<string[]>([]);
+  const [identityVerified, setIdentityVerified] = useState(false);
+  const [walletBound, setWalletBound] = useState(false);
+
+  // Subname Registration
+  const [newSubnamePrefix, setNewSubnamePrefix] = useState("");
+  const [selectedSubnameType, setSelectedSubnameType] = useState<"fan" | "family" | "sponsor">("fan");
+
+  // Custom Relic creator fields
+  const [relicTitle, setRelicTitle] = useState("Diving Catch to Seal the Inning");
+  const [relicGrains, setRelicGrains] = useState("45");
+  const [relicPrice, setRelicPrice] = useState("250");
+  const [relicRarity, setRelicRarity] = useState<"Common" | "Rare" | "Epic" | "Legendary">("Epic");
+  const [relicDescription, setRelicDescription] = useState("Making a spectacular flying catch at the warning track to save two runs in Game 2.");
+  const [relicValidationUrl, setRelicValidationUrl] = useState("https://d1baseball.com/cws/highlights");
+  const [relicGameContext, setRelicGameContext] = useState("Omaha Game 2 vs Georgia");
+  const [relicContractType, setRelicContractType] = useState<"Collectible Memo Anchor" | "Yield Share SFT" | "NIL Sponsorship SFT">("Collectible Memo Anchor");
+
+  const selectedAthlete = namespaces.find(ns => ns.id === selectedAthleteId) || namespaces[0];
+
+  const addLog = (msg: string) => {
+    setTerminalLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 15)]);
+  };
+
+  // Switch Active filter
+  const selectTeamFilter = (key: TeamKey) => {
+    setActiveTeamFilter(key);
+    const firstMatch = namespaces.find(ns => ns.teamKey === key);
+    if (firstMatch) {
+      setSelectedAthleteId(firstMatch.id);
+    }
+  };
+
+  // Claim Process Flow handlers
+  const openClaimFlow = (athlete: AthleteNamespace) => {
+    setClaimingAthlete(athlete);
+    setClaimStep(1);
+    setIdentityVerified(false);
+    setWalletBound(false);
+    setClaimLogs(["[Claim Engine] Initializing pre-minted claim flow for " + athlete.handle]);
+    setIsClaimModalOpen(true);
+  };
+
+  const executeClaimStep = () => {
+    if (claimStep === 1) {
+      setWalletBound(true);
+      setClaimLogs(prev => [...prev, "✔ Wallet bound to Solana Devnet: 0xAthlete" + Math.random().toString(36).substring(3, 8).toUpperCase()]);
+      setClaimStep(2);
+    } else if (claimStep === 2) {
+      setIdentityVerified(true);
+      setClaimLogs(prev => [...prev, "✔ IAL2 Government ID Match successful.", "✔ W3C Verifiable Credentials BBS+ selective check PASSED."]);
+      setClaimStep(3);
+    } else if (claimStep === 3) {
+      setClaimLogs(prev => [...prev, "⚡ Submitting contract call to transfer root namespace ownership...", "⚡ Gas fees covered by Unykorn Protocol Operator."]);
+      setTimeout(() => {
+        // Update registry
+        setNamespaces(prev => prev.map(ns => {
+          if (ns.id === claimingAthlete?.id) {
+            return {
+              ...ns,
+              claimState: "claimed",
+              ownerWallet: "0xAthleteWallet" + Math.random().toString(36).substring(2, 6).toUpperCase()
+            };
           }
+          return ns;
+        }));
+        addLog(`✔ Namespace ${claimingAthlete?.handle} claimed by athlete!`);
+        setClaimLogs(prev => [...prev, "✔ SUCCESS! Root namespace transferred to Athlete Wallet.", "✔ Generational vaults activated.", "✔ NIL Offer inbox listening active."]);
+        setClaimStep(4);
+      }, 1500);
+    }
+  };
+
+  // Submit NIL sponsorship
+  const submitNILOffer = (e: React.FormEvent) => {
+    e.preventDefault();
+    const valueNum = parseInt(customOfferAmount);
+    if (stablecoinBalance < valueNum) {
+      alert("Insufficient stablecoin balance to deposit in NIL escrow!");
+      return;
+    }
+
+    const newOffer: NILOffer = {
+      id: "off_" + Date.now(),
+      type: "Sponsorship",
+      value: valueNum,
+      term: customOfferTerm,
+      sponsor: customOfferSponsor,
+      deliverables: customOfferDeliverables,
+      complianceState: "Passed (O.C.G.A. § 53-13)",
+      escrowRoute: customOfferEscrow,
+      expiration: "2026-12-31",
+      status: "pending",
+      conversionAction: "Auto-mint NIL Deed SFT"
+    };
+
+    setOffers(prev => [newOffer, ...prev]);
+    setStablecoinBalance(prev => prev - valueNum); // Escrow lock
+    addLog(`✔ Escrowed $${valueNum.toLocaleString()} offer for ${selectedAthlete.handle}.`);
+    alert("NIL sponsorship submitted! Escrow funds locked in protocol membrane.");
+  };
+
+  // Handle Offer Actions
+  const handleOfferAction = (offerId: string, action: "accept" | "reject") => {
+    setOffers(prev => prev.map(off => {
+      if (off.id === offerId) {
+        if (action === "accept") {
+          // Route funds to vault
+          setVaults(vts => vts.map(v => {
+            if (v.type === "NIL Income" && off.escrowRoute === "NIL Income Vault") {
+              return { ...v, balance: v.balance + off.value, goldGrains: v.goldGrains + Math.floor(off.value / 500) };
+            }
+            if (v.type === "Family Trust" && off.escrowRoute === "Family Trust Vault") {
+              return { ...v, balance: v.balance + off.value, goldGrains: v.goldGrains + Math.floor(off.value / 400) };
+            }
+            return v;
+          }));
+          addLog(`✔ Accepted offer from ${off.sponsor}. Routed to ${off.escrowRoute}.`);
+          return { ...off, status: "accepted" };
         } else {
-          newLog = `[Bracket Oracle] Evolving NFT already reached ultimate Championship stage.`;
+          // Refund
+          setStablecoinBalance(bal => bal + off.value);
+          addLog(`✘ Rejected offer from ${off.sponsor}. Escrow refunded.`);
+          return { ...off, status: "rejected" };
         }
       }
-
-      setNftLogs((logs) => [newLog, ...logs.slice(0, 10)]);
-
-      setAiResponse(
-        `Athletic metrics processed. ${prev.name} has evolved to ${nextRarity} (Level ${nextLevel}) with ${nextHr} HRs and ${nextRbi} RBIs at the ${nextStage} stage. Dynamic on-chain extensions successfully updated.`
-      );
-
-      return {
-        ...prev,
-        homeRuns: nextHr,
-        rbi: nextRbi,
-        strikeouts: nextSo,
-        cwsStage: nextStage,
-        level: nextLevel,
-        rarity: nextRarity,
-        milestones: nextMilestones
-      };
-    });
+      return off;
+    }));
   };
 
-  // Card Mouse Move Tilt Effect
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const xc = rect.width / 2;
-    const yc = rect.height / 2;
-    const rotateX = -(y - yc) / 10;
-    const rotateY = (x - xc) / 10;
-    setTilt({ x: rotateX, y: rotateY });
-  };
+  // Register Custom Subname
+  const registerSubname = () => {
+    if (!newSubnamePrefix.trim()) {
+      alert("Please enter a custom name prefix.");
+      return;
+    }
+    const cost = selectedSubnameType === "fan" ? 9.99 : selectedSubnameType === "family" ? 19.99 : 499.00;
+    if (stablecoinBalance < cost) {
+      alert("Insufficient balance to purchase this subname.");
+      return;
+    }
 
-  const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0 });
-  };
+    setStablecoinBalance(prev => prev - cost);
+    setVaults(vts => vts.map(v => {
+      if (v.type === "Campaign Reserve") {
+        return { ...v, balance: v.balance + cost };
+      }
+      return v;
+    }));
 
-  // Interactive Play-by-Play Game Simulator Actions
-  const handleSimAction = (action: "pitch" | "powerswing" | "bunt" | "steal") => {
-    let outcome = "";
-    let solLog = "";
+    const completeSubname = `${newSubnamePrefix.trim().toLowerCase()}.${selectedSubnameType}.${selectedAthlete.handle}`;
+    addLog(`✔ Registered subnamespace: ${completeSubname} (Cost: ${cost} OMAHA26)`);
     
-    if (action === "pitch") {
-      const outcomes = ["Strike", "Ball", "Foul Ball", "Ball", "Strike"];
+    // Add to athlete relics list as an owned domain SFT
+    const newSFT: MarketItem = {
+      id: "relic_" + Date.now(),
+      name: `Subname Domain: ${completeSubname}`,
+      type: "Namespace Suffix",
+      price: cost,
+      backingGoldGrains: selectedSubnameType === "fan" ? 2 : selectedSubnameType === "family" ? 5 : 100,
+      owner: "0xMyWalletUser",
+      image: "https://images.unsplash.com/photo-1508349698387-a257ed957c7f?w=400&q=80",
+      rarity: selectedSubnameType === "sponsor" ? "Epic" : "Common",
+      namespaceRoot: selectedAthlete.handle
+    };
+    setRelics(prev => [newSFT, ...prev]);
+
+    alert(`Successfully registered subname domain SFT: ${completeSubname}!`);
+    setNewSubnamePrefix("");
+  };
+
+  // Mint Custom Relic
+  const handleMintRelic = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const grains = parseInt(relicGrains) || 10;
+    const priceNum = parseInt(relicPrice) || 100;
+    const relicId = "relic_" + Date.now();
+    
+    const newRelic: MarketItem = {
+      id: relicId,
+      name: `${selectedAthlete.name} - ${relicTitle}`,
+      type: "Moment Relic",
+      price: priceNum,
+      backingGoldGrains: grains,
+      owner: selectedAthlete.handle,
+      image: "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=400&q=80",
+      rarity: relicRarity,
+      namespaceRoot: selectedAthlete.handle
+    };
+
+    setRelics(prev => [newRelic, ...prev]);
+    // Deduct physical gold grains from relic custody vault to back this SFT
+    setVaults(vts => vts.map(v => {
+      if (v.type === "Relic Custody") {
+        return { ...v, goldGrains: Math.max(0, v.goldGrains - grains) };
+      }
+      return v;
+    }));
+
+    addLog(`✔ Athlete minted SFT Moment: ${relicTitle} (${relicRarity}). Backed by ${grains} grains gold.`);
+    
+    // Now trigger real on-chain minting to Solana Mainnet + Pinata IPFS!
+    const customPayload = {
+      id: relicId,
+      name: `${selectedAthlete.name} - ${relicTitle}`,
+      athleteHandle: selectedAthlete.handle,
+      teamKey: selectedAthlete.teamKey,
+      gameRef: relicGameContext,
+      rarity: relicRarity,
+      price: priceNum,
+      backingGoldGrains: grains,
+      description: relicDescription,
+      validationSource: relicValidationUrl,
+      contractType: relicContractType
+    };
+
+    await mintRelicOnChain(relicId, customPayload);
+  };
+
+  // Play-by-play game simulation
+  const [playByPlayLogs, setPlayByPlayLogs] = useState<string[]>([]);
+  const executePlaySim = (action: string) => {
+    let outcome = "";
+
+    // Pick active roster player for selected team context
+    const teamPlayers = namespaces.filter(ns => ns.teamKey === activeTeamFilter);
+    const randomPlayer = teamPlayers[Math.floor(Math.random() * teamPlayers.length)] || selectedAthlete;
+
+    if (action === "swing") {
+      const outcomes = [
+        { txt: `${randomPlayer.name} crushes a massive 420ft Home Run over left field! (+1 HR, +2 RBIs)`, stats: { homeRuns: 1, rbis: 2 } },
+        { txt: `${randomPlayer.name} hits a line-drive double down the third base line. (+1 Hit)`, stats: { hits: 1 } },
+        { txt: `Strikeout! ${randomPlayer.name} whiffs on a nasty curveball.`, stats: { strikeouts: 1 } }
+      ];
       const res = outcomes[Math.floor(Math.random() * outcomes.length)];
-      if (res === "Strike") {
-        setStrikes((s) => {
-          if (s >= 2) {
-            setOuts((o) => (o >= 2 ? 0 : o + 1));
-            outcome = "Strikeout! Batter is retired.";
-            return 0;
-          }
-          outcome = "Strike! Beautiful slider on the outer edge.";
-          return s + 1;
-        });
-      } else if (res === "Ball") {
-        setBalls((b) => {
-          if (b >= 3) {
-            setBases((prev) => {
-              if (prev.first) {
-                if (prev.second) {
-                  return { ...prev, third: true };
-                }
-                return { ...prev, second: true };
-              }
-              return { ...prev, first: true };
+      outcome = res.txt;
+      
+      // Update stats
+      if (res.stats) {
+        setNamespaces(prev => prev.map(ns => {
+          if (ns.id === randomPlayer.id) {
+            const updatedMetrics = { ...ns.metrics };
+            Object.entries(res.stats).forEach(([k, v]) => {
+              updatedMetrics[k] = (Number(updatedMetrics[k] || 0) + v);
             });
-            outcome = "Base on Balls! Batter walks to first.";
-            return 0;
+            return { ...ns, metrics: updatedMetrics };
           }
-          outcome = "Ball! Pitch missed high and tight.";
-          return b + 1;
-        });
-      } else {
-        outcome = "Foul ball. Injected into the stands.";
+          return ns;
+        }));
       }
-      solLog = `[Token-2022 Oracle] Pitch simulation executed. Inning: ${inning}, Out state: ${outs}.`;
-    } else if (action === "powerswing") {
-      const roll = Math.random();
-      if (roll < 0.15) {
-        // Home Run!
-        outcome = "CRUSHED! Daniel Jackson hits a massive 450ft HOME RUN to center field!";
-        let runs = 1;
-        if (bases.first) runs++;
-        if (bases.second) runs++;
-        if (bases.third) runs++;
-        setScore((s) => ({ ...s, georgia: s.georgia + runs }));
-        setBases({ first: false, second: false, third: false });
-        triggerStatMutation("hr");
-      } else if (roll < 0.45) {
-        outcome = "Line drive single to left field! Runners advance.";
-        setBases((prev) => {
-          const nextBases = { ...prev };
-          if (prev.third) {
-            setScore((s) => ({ ...s, georgia: s.georgia + 1 }));
-            nextBases.third = false;
-          }
-          if (prev.second) {
-            nextBases.third = true;
-            nextBases.second = false;
-          }
-          if (prev.first) {
-            nextBases.second = true;
-          }
-          nextBases.first = true;
-          return nextBases;
-        });
-        triggerStatMutation("rbi");
-      } else {
-        outcome = "Power swing and a miss! Whiffed on the changeup.";
-        setStrikes((s) => {
-          if (s >= 2) {
-            setOuts((o) => (o >= 2 ? 0 : o + 1));
-            return 0;
-          }
-          return s + 1;
-        });
-      }
-      solLog = `[Token-2022 Oracle] Power swing executed. Updating on-chain SFT stats.`;
-    } else if (action === "bunt") {
-      outcome = "Perfect sacrifice bunt down the third-base line! Runner advances.";
-      setBases((prev) => {
-        const nextBases = { ...prev, first: false };
-        if (prev.first) nextBases.second = true;
-        if (prev.second) nextBases.third = true;
-        if (prev.third) {
-          setScore((s) => ({ ...s, georgia: s.georgia + 1 }));
-          nextBases.third = false;
-        }
-        return nextBases;
-      });
-      setOuts((o) => (o >= 2 ? 0 : o + 1));
-      solLog = `[Token-2022 Oracle] Sac-bunt routed. Adjusting base positions.`;
     } else if (action === "steal") {
       const roll = Math.random();
-      if (roll < 0.6) {
-        outcome = "SAFE! Stole second base with a headfirst slide!";
-        setBases((prev) => ({ ...prev, second: true, first: false }));
+      if (roll < 0.7) {
+        outcome = `SAFE! ${randomPlayer.name} steals home with a sliding play! (+1 SB)`;
+        setNamespaces(prev => prev.map(ns => {
+          if (ns.id === randomPlayer.id) {
+            const updated = { ...ns.metrics };
+            updated.stolenBases = Number(updated.stolenBases || 0) + 1;
+            return { ...ns, metrics: updated };
+          }
+          return ns;
+        }));
       } else {
-        outcome = "OUT! Picked off attempting to steal second.";
-        setBases((prev) => ({ ...prev, first: false }));
-        setOuts((o) => (o >= 2 ? 0 : o + 1));
+        outcome = `OUT! ${randomPlayer.name} caught attempting to steal second base.`;
       }
-      solLog = `[Token-2022 Oracle] Base stealing telemetry processed.`;
+    } else {
+      outcome = `Pitcher fires a 96 MPH fastball. Strikeout! Batter retired.`;
     }
 
-    setSimulatorLog((prev) => [`[Play-by-Play] ${outcome}`, ...prev.slice(0, 15)]);
-    setNftLogs((logs) => [solLog, ...logs.slice(0, 10)]);
+    setPlayByPlayLogs(prev => [`[Oracle Live CWS Telemetry] ${outcome}`, ...prev.slice(0, 10)]);
+    addLog(`Play simulated. Upgraded on-chain metrics for ${randomPlayer.handle}.`);
   };
 
-  // AI Agent Scout Search
-  const handleAsk = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!aiInput.trim()) return;
+  // ── On-Chain Mainnet Mint Handlers ──────────────────────────────────────────
 
-    setAiLoading(true);
-    setAiResponse("Analyzing sports database metrics...");
-    
-    // Check for custom triggers/actions
-    const query = aiInput.toLowerCase().trim();
-    if (query.includes("generate") || query.includes("draft") || query.includes("mint")) {
-      setTimeout(() => {
-        const newMint = "SFT" + Math.random().toString(36).substring(2, 9).toUpperCase();
-        setAiResponse(`[AI Agent Generation] Compiled a new CWS baseball prospect card!
-Name: Custom Player Relic
-Mint Address: ${newMint}
-Extension Config: TokenMetadata with MetadataPointer pointing to ${newMint}.
-Status: Drafted locally. Ready to lock to Stellar gold-backing anchor.`);
-        setSimulatorLog((prev) => [`[AI Agent] Drafted new prospect NFT stub: ${newMint}`, ...prev]);
-        setAiLoading(false);
-        setAiInput("");
-      }, 1000);
-      return;
-    }
-
+  /** Mint a single athlete namespace to Pinata IPFS + Solana mainnet */
+  const mintNamespaceOnChain = async (athleteId: string) => {
+    setOnChainState(prev => ({ ...prev, [athleteId]: { cid: "", ipfsUrl: "", solanaTxHash: "", explorerUrl: "", mintedAt: "", status: "minting" } }));
+    addLog(`⛓ Initiating mainnet mint for namespace: ${athleteId}...`);
     try {
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
+      const res  = await fetch("/api/cws/mint-namespace", {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: `Scouting database inquiry: ${aiInput}` }]
-        })
+        body:    JSON.stringify({ athleteId }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        setAiResponse(data.content);
-      } else {
-        setAiResponse("AI Scout node offline.");
-      }
-    } catch {
-      setAiResponse("Scouting connection timed out.");
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Mint failed");
+
+      setOnChainState(prev => ({
+        ...prev,
+        [athleteId]: {
+          cid:          data.cid,
+          ipfsUrl:      data.ipfsUrl,
+          solanaTxHash: data.solanaTxHash,
+          explorerUrl:  data.explorerUrl,
+          mintedAt:     data.timestamp,
+          status:       "minted",
+        },
+      }));
+      setTxCount(c => c + 1);
+      addLog(`✅ MINTED: ${data.handle} → IPFS ${data.cid.slice(0, 16)}... | Solana: ${data.solanaTxHash.slice(0, 12)}...`);
+    } catch (err: any) {
+      setOnChainState(prev => ({ ...prev, [athleteId]: { ...prev[athleteId], status: "error", error: err.message } }));
+      addLog(`✘ Mint error for ${athleteId}: ${err.message}`);
+    }
+  };
+
+  /** Mint a single relic SFT to Pinata IPFS + Solana mainnet */
+  const mintRelicOnChain = async (relicId: string, customRelic?: any) => {
+    setOnChainState(prev => ({ ...prev, [relicId]: { cid: "", ipfsUrl: "", solanaTxHash: "", explorerUrl: "", mintedAt: "", status: "minting" } }));
+    addLog(`⛓ Initiating mainnet relic mint: ${relicId}...`);
+    try {
+      const res  = await fetch("/api/cws/mint-relic", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ relicId, customRelic }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Relic mint failed");
+
+      setOnChainState(prev => ({
+        ...prev,
+        [relicId]: {
+          cid:          data.cid,
+          ipfsUrl:      data.ipfsUrl,
+          solanaTxHash: data.solanaTxHash,
+          explorerUrl:  data.explorerUrl,
+          mintedAt:     data.timestamp,
+          status:       "minted",
+        },
+      }));
+      setTxCount(c => c + 1);
+      addLog(`✅ RELIC MINTED: ${data.name} → IPFS ${data.cid.slice(0, 16)}... | Solana: ${data.solanaTxHash.slice(0, 12)}...`);
+    } catch (err: any) {
+      setOnChainState(prev => ({ ...prev, [relicId]: { ...prev[relicId], status: "error", error: err.message } }));
+      addLog(`✘ Relic mint error for ${relicId}: ${err.message}`);
+    }
+  };
+
+  /** Genesis batch-mint — ALL namespaces + ALL relics in one call (admin only) */
+  const executeGenesisMint = async () => {
+    if (!confirm("⚠️ This will mint ALL 26 CWS athlete namespaces + 9 relics to Solana MAINNET. This uses real SOL and creates real on-chain records. Continue?")) return;
+    setGenesisMinting(true);
+    addLog("🚀 GENESIS BATCH MINT INITIATED — All CWS 2026 namespaces + relics → Mainnet...");
+    try {
+      const res  = await fetch("/api/cws/genesis", {
+        method:  "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          "x-genesis-key": process.env.NEXT_PUBLIC_GENESIS_KEY ?? "genesis-unykorn-cws-2026",
+        },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Genesis mint failed");
+
+      // Update all minted namespaces in state
+      const newState: Record<string, OnChainRecord> = {};
+      data.namespaces?.forEach((ns: any) => {
+        if (ns.cid) {
+          newState[ns.handle] = {
+            cid:          ns.cid,
+            ipfsUrl:      ns.ipfsUrl,
+            solanaTxHash: ns.solanaTxHash,
+            explorerUrl:  ns.explorerUrl,
+            mintedAt:     new Date().toISOString(),
+            status:       "minted",
+          };
+        }
+      });
+      data.relics?.forEach((r: any) => {
+        if (r.cid) {
+          newState[r.id] = {
+            cid:          r.cid,
+            ipfsUrl:      r.ipfsUrl,
+            solanaTxHash: r.solanaTxHash,
+            explorerUrl:  r.explorerUrl,
+            mintedAt:     new Date().toISOString(),
+            status:       "minted",
+          };
+        }
+      });
+
+      setOnChainState(prev => ({ ...prev, ...newState }));
+      setGenesisManifest(data);
+      setTxCount(c => c + (data.summary?.totalMinted ?? 35));
+      addLog(`🏆 GENESIS COMPLETE — ${data.summary?.totalMinted} minted, ${data.summary?.totalFailed} failed in ${data.summary?.durationMs}ms`);
+      if (data.rootManifest?.cid) addLog(`🌐 Root Manifest CID: ${data.rootManifest.cid}`);
+    } catch (err: any) {
+      addLog(`✘ Genesis mint error: ${err.message}`);
     } finally {
-      setAiLoading(false);
-      setAiInput("");
+      setGenesisMinting(false);
     }
-  };
-
-  // Marketplace purchases
-  const buyMarketItem = (item: MarketItem) => {
-    if (usdfBalance < item.price) {
-      setMarketLogs((prev) => [`[Market Error] Insufficient USDF balance to purchase: ${item.name}`, ...prev]);
-      return;
-    }
-    setUsdfBalance((prev) => prev - item.price);
-    setMarketLogs((prev) => [
-      `[Market Transaction] Purchased ${item.name} for ${item.price} USDF! Backed by ${item.backingGoldGrains} grains Zurich Gold.`,
-      `[Market Transaction] Anchor transfer complete. SFT hash updated: did:unykorn:mkt:${item.id}`,
-      ...prev
-    ]);
-    // Remove or change owner
-    setMarketItems((items) =>
-      items.map((i) => (i.id === item.id ? { ...i, owner: "0xMyWallet...3b92" } : i))
-    );
-  };
-
-  const placeBid = (item: MarketItem, bidAmount: number) => {
-    setMarketLogs((prev) => [
-      `[Market Bid] Placed bid of ${bidAmount} USDF on ${item.name}. Routing escrow through Stellar trust.`,
-      ...prev
-    ]);
-  };
-
-  const handleClaimPreview = () => {
-    const name = suffixInput.trim().replace(/\s+/g, "");
-    if (!name) {
-      setClaimOutput("Enter a faction prefix (e.g. Dawgs, Trojans, Mountaineers).");
-      return;
-    }
-    setClaimOutput(`Faction Suffix routing preview for ".${name.toLowerCase()}":
-- Fan SFT: register.${name.toLowerCase()} (Solana Non-Transferable Mint)
-- NIL Holding: escrow.${name.toLowerCase()} (Stellar Anchor vault)
-- Live Stats: play.${name.toLowerCase()} (Oracle endpoint)`);
-  };
-
-  const handleGenerateNil = () => {
-    setNilStatus("generating");
-    setTimeout(() => {
-      const output = `==========================================================
-NIL SOVEREIGN COMPLIANCE DEED (RUFADAA / OCGA § 53-13)
-==========================================================
-ATHLETE: ${nilName}
-AFFILIATION: ${nilSchool}
-ESCROW HOLDING: $${parseInt(nilMonthly).toLocaleString()} USDF Equivalent
-ROUTING: did:unykorn:nil:${nilName.toLowerCase().replace(/\s+/g, "-")}
-VAULT HASH: 0x9b3fecb27a8dc0e5bc86edae42aee402e187
-
-TERMS:
-1. Licensing rights are encrypted client-side with AES-256-GCM.
-2. Metered payouts execute via x402 membranes.
-3. RUFADAA succession fallback enabled for designated heirs.
-
-AUTHENTICATION:
-[Solana Signature: did:unykorn:sol:${Math.random().toString(36).substring(7)}]
-[Stellar Hash Pointer: did:unykorn:stellar:${Math.random().toString(36).substring(7)}]
-`;
-      setNilDeed(output);
-      setNilStatus("success");
-    }, 1200);
   };
 
   const isDark = theme === "dark";
 
+  // Stylings
   const mainBg = isDark ? "bg-[#06140f] text-[#d1e8df]" : "bg-[#f4fcf8] text-[#1c382e]";
-  const cardStyle = isDark ? "bg-[#0c241b]/80 border-emerald-500/20 text-[#d1e8df]" : "bg-white border-emerald-200 text-slate-800";
-  const subCardStyle = isDark ? "bg-black/50 border-white/5" : "bg-[#eaf5ef] border-emerald-500/10";
+  const cardStyle = isDark ? "bg-[#0c241b]/80 border-emerald-500/20 text-[#d1e8df]" : "bg-white border-emerald-200 text-slate-800 shadow-sm";
+  const subCardStyle = isDark ? "bg-black/40 border-white/5" : "bg-[#eaf5ef] border-emerald-500/10";
   const textTitle = isDark ? "text-white" : "text-[#1c382e]";
-  const textMuted = isDark ? "text-emerald-400/70" : "text-emerald-800/80";
+  const textMuted = isDark ? "text-emerald-400/70" : "text-emerald-850";
   const terminalBg = isDark ? "bg-black/90 text-emerald-400 border-white/10" : "bg-slate-900 text-emerald-300 border-slate-950";
   const inputBg = isDark ? "bg-black/60 border-emerald-500/30 text-white" : "bg-white border-emerald-300 text-slate-900";
 
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 relative overflow-hidden ${mainBg}`}>
       
-      {/* Dynamic Stadium Game Scoreboard */}
+      {/* Live Blockchain Header */}
       <div className={`border-b px-4 py-2 transition-colors duration-200 relative z-30 ${
         isDark ? "bg-[#030a08]/90 border-emerald-500/20 text-emerald-400" : "bg-[#daf2e7] border-emerald-300 text-[#0f3022] font-bold"
       }`}>
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs font-mono tracking-wider">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 font-bold">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping" />
-              LIVE CWS ORACLE
+              <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse" />
+              SOVEREIGN SPORTS PROTOCOL L0 ACTIVE
             </span>
-            <div className="flex items-center gap-2 border-l border-emerald-500/20 pl-4">
-              <span className="text-[10px] text-slate-500">TROY</span>
-              <strong className="text-sm text-red-500">{score.troy}</strong>
-              <span className="text-slate-500">vs</span>
-              <span className="text-[10px] text-slate-500">UGA</span>
-              <strong className="text-sm text-emerald-400">{score.georgia}</strong>
+            <div className="hidden md:flex items-center gap-2 border-l border-emerald-500/20 pl-4">
+              <span className="text-slate-500">Block height:</span>
+              <strong className="text-emerald-400 font-bold">{blockHeight}</strong>
+              <span className="text-slate-500">Tx count:</span>
+              <strong className="text-emerald-400 font-bold">{txCount}</strong>
             </div>
-            <span className="border-l border-emerald-500/20 pl-4">{inning}</span>
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <span>B: <strong className="text-white">{balls}</strong></span>
-              <span>S: <strong className="text-white">{strikes}</strong></span>
-              <span>O: <strong className="text-white">{outs}</strong></span>
+            <div className="flex items-center bg-black/40 border border-emerald-500/20 px-2 py-0.5 rounded-md text-[10px] font-mono text-emerald-400 gap-1.5">
+              <Coins className="h-3 w-3" />
+              <span>{stablecoinBalance.toLocaleString()} $OMAHA26</span>
             </div>
-            <div className="flex gap-2">
-              <span className={`w-2 h-2 rounded-sm border ${bases.first ? "bg-red-500 border-red-500" : "border-emerald-500/30"}`} title="1st Base" />
-              <span className={`w-2 h-2 rounded-sm border ${bases.second ? "bg-red-500 border-red-500" : "border-emerald-500/30"}`} title="2nd Base" />
-              <span className={`w-2 h-2 rounded-sm border ${bases.third ? "bg-red-500 border-red-500" : "border-emerald-500/30"}`} title="3rd Base" />
+            <div className="flex items-center bg-black/40 border border-emerald-500/20 px-2 py-0.5 rounded-md text-[10px] font-mono text-orange-400 gap-1.5">
+              <Zap className="h-3 w-3" />
+              <span>{utilityBalance.toLocaleString()} $UGA26</span>
             </div>
-            <span className="hidden sm:inline border-l border-emerald-500/20 pl-4">Block Height: {blockHeight}</span>
           </div>
         </div>
       </div>
@@ -607,629 +1319,1185 @@ AUTHENTICATION:
       <header className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between z-20 relative border-b border-emerald-500/10">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-emerald-500 to-emerald-300 bg-clip-text text-transparent orbitron-title">
+            <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-emerald-400 via-emerald-300 to-cyan-400 bg-clip-text text-transparent orbitron-title neon-glow-emerald">
               Unykorn Athletic
             </span>
           </Link>
-          <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">
-            Sports OS
+          <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+            CWS OS
           </span>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Global Selectors */}
+        <div className="flex items-center gap-3 md:gap-6">
+          
+          {/* User Class Switcher */}
+          <div className="flex items-center gap-1.5 bg-black/45 border border-emerald-500/20 rounded-xl p-1">
+            <span className="text-[10px] uppercase font-mono text-slate-400 px-2 hidden sm:inline">Role:</span>
+            {(["fan", "athlete", "admin"] as UserClass[]).map(role => (
+              <button
+                key={role}
+                onClick={() => {
+                  setUserClass(role);
+                  addLog(`User class switched to: ${role.toUpperCase()}`);
+                }}
+                className={`text-[10px] font-bold px-3 py-1 rounded-lg uppercase tracking-wider transition-all ${
+                  userClass === role 
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                {role}
+              </button>
+            ))}
+            </div>
+
+          {/* Genesis Batch Mint — Admin Only */}
+          {userClass === "admin" && (
+            <button
+              onClick={executeGenesisMint}
+              disabled={genesisMinting}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                genesisMinting
+                  ? "border-amber-500/30 bg-amber-500/10 text-amber-400 cursor-wait"
+                  : "border-emerald-500/40 bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer"
+              }`}
+              title="Genesis: Batch-mint ALL CWS namespaces + relics to Solana Mainnet"
+            >
+              {genesisMinting
+                ? <><span className="animate-spin">⛓</span> Minting Genesis...</>
+                : <><Sparkles className="h-3 w-3" /> Genesis Mint All</>
+              }
+            </button>
+          )}
+
           <button 
             onClick={() => setTheme(prev => prev === "dark" ? "light" : "dark")}
-            className="p-2 rounded-xl border border-emerald-500/20 hover:border-emerald-500/40 bg-white/5 backdrop-blur transition-all"
+            className="p-2.5 rounded-xl border border-emerald-500/20 hover:border-emerald-500/40 bg-white/5 backdrop-blur transition-all"
             title="Toggle Theme"
           >
             {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-emerald-600" />}
           </button>
-          <Link href="/" className="text-xs font-bold border border-emerald-500/20 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all">
-            Registry Shell
-          </Link>
-          <div className="flex items-center bg-black/40 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-xs font-mono text-emerald-400 gap-1.5">
-            <Coins className="h-3.5 w-3.5" />
-            <span>Balance: {usdfBalance} USDF</span>
-          </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <main className="max-w-7xl mx-auto px-6 py-12 relative z-10 space-y-12">
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/25 bg-emerald-500/5 text-emerald-400 text-xs uppercase tracking-widest font-mono">
-            <Flame className="h-3.5 w-3.5 text-red-500 animate-pulse" />
-            <span>Road to Omaha Sovereign Sports Protocol</span>
+      {/* Main Body */}
+      <main className="max-w-7xl mx-auto px-6 py-12 relative z-10 space-y-10">
+        
+        {/* Core Strategic Positioning Line Banner */}
+        <div className="bg-gradient-to-r from-[#03150e]/80 via-[#020b08]/80 to-[#040e1f]/80 border border-emerald-500/30 backdrop-blur-xl rounded-3xl p-6 md:p-8 text-center space-y-4 shadow-2xl shadow-emerald-950/50 max-w-4xl mx-auto relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/15 rounded-full blur-3xl" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-emerald-400/40 bg-emerald-500/10 text-emerald-300 text-xs font-mono uppercase tracking-widest orbitron-title neon-glow-emerald">
+            <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-spin" />
+            Namespace-First Sovereign Identity Layer
           </div>
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-none orbitron-title text-slate-900 dark:text-white">
-            CWS On-Chain Empire
-          </h1>
-          <p className="text-sm sm:text-base text-slate-800 dark:text-slate-300 leading-relaxed">
-            Minting dynamic, stats-evolving player cards and relics on Solana via **Token-2022 extensions**. Evolve stats, register custom collegiate fan suffixes, and anchor compliant NIL deeds securely.
+          <blockquote className="text-base md:text-xl font-extrabold text-white tracking-wide leading-relaxed italic">
+            “Every player and coach gets a free pre-minted official namespace. Claiming it unlocks their sovereign sports identity, NIL offers, vaults, internal mints, token rights, fan expansions, and permanent on-chain history.”
+          </blockquote>
+          <p className="text-xs text-emerald-400 font-mono tracking-wider">
+            ⚡ UNYKORN SPORT INFRASTRUCTURE: SECURE, GOLD-BACKED, ESTATE-PROTECTED ⚡
           </p>
         </div>
 
-        {/* Dynamic Tab Navigation */}
+        {/* Dashboard Navigation */}
         <div className="flex flex-wrap justify-center gap-2 border-b border-emerald-500/10 pb-4">
           {[
-            { id: "bracket", label: "Omaha Bracket", icon: <Globe className="h-4 w-4" /> },
-            { id: "nft", label: "Evolving NFT Showcase", icon: <Trophy className="h-4 w-4" /> },
-            { id: "extension", label: "Token-2022 Byte View", icon: <Cpu className="h-4 w-4" /> },
-            { id: "compliance", label: "NIL Compliance", icon: <Scale className="h-4 w-4" /> },
-            { id: "registry", label: "Faction Namespaces", icon: <Network className="h-4 w-4" /> },
-            { id: "marketplace", label: "Secondary Market", icon: <ShoppingCart className="h-4 w-4" /> }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
-                activeTab === tab.id
-                  ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
-                  : isDark ? "bg-slate-900/60 border border-white/5 hover:text-white" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
+            { id: "registry", label: "Registry & Claims", icon: <Globe className="h-4 w-4" /> },
+            { id: "control-hub", label: "Athlete Control Panel", icon: <Settings className="h-4 w-4" />, visible: userClass === "athlete" || userClass === "admin" },
+            { id: "offers", label: "NIL Offers Inbox", icon: <MessageSquare className="h-4 w-4" /> },
+            { id: "vaults", label: "Fiduciary Wealth Vaults", icon: <Lock className="h-4 w-4" /> },
+            { id: "simulation", label: "Oracle Match Simulator", icon: <Activity className="h-4 w-4" /> },
+            { id: "relics", label: "Namespace SFT Showcase", icon: <Trophy className="h-4 w-4" /> },
+            { id: "marketplace", label: "Secondary Ledger", icon: <ShoppingCart className="h-4 w-4" /> }
+          ].map((tab) => {
+            if (tab.visible === false) return null;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === tab.id
+                    ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
+                    : isDark ? "bg-slate-900/60 border border-white/5 hover:text-white" : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Main Interface Layout */}
+        {/* Layout Grid */}
         <div className="grid lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Main Left Panels */}
           <div className="lg:col-span-8 space-y-6">
 
-            {/* 1. BRACKET & TEAMS EXPLORER */}
-            {activeTab === "bracket" && (
-              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
-                <h3 className={`text-xl font-bold mb-2 ${textTitle} orbitron-title`}>2026 Omaha Bracket & Teams</h3>
-                <p className={`text-xs mb-6 ${textMuted}`}>Select a team to query their official Sun Belt/SEC stats, roster pipelines, and estimated NIL valuation pools.</p>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                  {Object.keys(teams).map((key) => (
-                    <button
-                      key={key}
-                      onClick={() => setSelectedTeam(key)}
-                      className={`rounded-xl border p-3 text-center transition-all cursor-pointer ${
-                        selectedTeam === key
-                          ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold"
-                          : isDark ? "bg-black/30 border-white/5 hover:border-white/20" : "bg-white border-slate-200 hover:border-slate-350"
-                      }`}
-                    >
-                      <strong className="block text-xs uppercase tracking-wider">{teams[key].name.split(" ")[0]}</strong>
-                      <span className="text-[9px] text-slate-500">{teams[key].seed}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Team Details Output */}
-                <div className={`rounded-2xl border p-5 grid sm:grid-cols-2 gap-6 ${subCardStyle}`}>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400">Scouting Profile</h4>
-                      <h3 className={`text-2xl font-black ${textTitle} mt-0.5`}>{teams[selectedTeam].name}</h3>
-                      <p className="text-[10px] text-slate-500 font-mono">Bracket Group {teams[selectedTeam].bracket}</p>
-                    </div>
-
-                    <div className="grid grid-cols-4 gap-2 text-center font-mono">
-                      <div className={`rounded-lg p-2 border ${isDark ? "bg-black/30" : "bg-white"}`}>
-                        <span className="text-[8px] text-slate-500 block">WINS</span>
-                        <strong className="text-sm text-emerald-400">{teams[selectedTeam].stats.w}</strong>
-                      </div>
-                      <div className={`rounded-lg p-2 border ${isDark ? "bg-black/30" : "bg-white"}`}>
-                        <span className="text-[8px] text-slate-500 block">LOSSES</span>
-                        <strong className="text-sm text-rose-500">{teams[selectedTeam].stats.l}</strong>
-                      </div>
-                      <div className={`rounded-lg p-2 border ${isDark ? "bg-black/30" : "bg-white"}`}>
-                        <span className="text-[8px] text-slate-500 block">HR</span>
-                        <strong className="text-sm text-orange-400">{teams[selectedTeam].stats.hr}</strong>
-                      </div>
-                      <div className={`rounded-lg p-2 border ${isDark ? "bg-black/30" : "bg-white"}`}>
-                        <span className="text-[8px] text-slate-500 block">ERA</span>
-                        <strong className="text-sm text-blue-400">{teams[selectedTeam].stats.era}</strong>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-slate-500 block">Pipeline Origin</span>
-                      <p className="text-xs mt-0.5">{teams[selectedTeam].pipeline}</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-slate-500 block">Active Team Roster</span>
-                      <ul className="text-xs space-y-1.5 mt-2">
-                        {teams[selectedTeam].roster.map((player, idx) => (
-                          <li key={idx} className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            <span>{player}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className={`rounded-xl border p-3.5 flex justify-between items-center ${isDark ? "bg-black/20" : "bg-white"}`}>
-                      <div>
-                        <span className="text-[8px] text-slate-500 block uppercase font-bold">Estimated NIL Value Pool</span>
-                        <strong className="text-lg font-black text-emerald-400">{teams[selectedTeam].nilWorth}</strong>
-                      </div>
-                      <Award className="h-8 w-8 text-emerald-500 opacity-60" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bracket Layout Preview */}
-                <div className="mt-8 border-t border-emerald-500/10 pt-6">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Bracket Progression (2026 Omaha Setup)</h4>
-                  <div className="grid grid-cols-2 gap-4 text-xs font-mono">
-                    <div className={`border p-4 rounded-xl space-y-2 ${isDark ? "bg-black/20" : "bg-white"}`}>
-                      <p className="font-bold text-emerald-400 border-b border-white/5 pb-1">Bracket 1 (Double Elim)</p>
-                      <div className="flex justify-between"><span>Troy Trojans</span><span className="text-emerald-400">Sun Belt</span></div>
-                      <div className="flex justify-between"><span>West Virginia</span><span className="text-emerald-400">Big 12</span></div>
-                      <div className="flex justify-between"><span>North Carolina</span><span className="text-emerald-400">ACC</span></div>
-                      <div className="flex justify-between"><span>Ole Miss Rebels</span><span className="text-emerald-400">SEC</span></div>
-                    </div>
-                    <div className={`border p-4 rounded-xl space-y-2 ${isDark ? "bg-black/20" : "bg-white"}`}>
-                      <p className="font-bold text-emerald-400 border-b border-white/5 pb-1">Bracket 2 (Double Elim)</p>
-                      <div className="flex justify-between"><span>Oklahoma Sooners</span><span className="text-emerald-400">Big 12</span></div>
-                      <div className="flex justify-between"><span>Alabama Tide</span><span className="text-emerald-400">SEC</span></div>
-                      <div className="flex justify-between"><span>Texas Longhorns</span><span className="text-emerald-400">SEC</span></div>
-                      <div className="flex justify-between"><span>Georgia Bulldogs</span><span className="text-emerald-400">SEC (1)</span></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 2. EVOLVING NFT SHOWCASE */}
-            {activeTab === "nft" && (
-              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
-                <h3 className={`text-xl font-bold mb-2 ${textTitle} orbitron-title`}>3D Evolving NFT Showcase</h3>
-                <p className={`text-xs mb-6 ${textMuted}`}>Simulate dynamic sports metrics. Hover over the card to experience depth effects, and watch stats update live.</p>
-
-                <div className="grid md:grid-cols-12 gap-8 items-stretch">
-                  
-                  {/* 3D NFT Card Graphic */}
-                  <div className="md:col-span-5 flex justify-center">
-                    <div 
-                      onMouseMove={handleMouseMove}
-                      onMouseLeave={handleMouseLeave}
-                      style={{
-                        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-                        transition: "transform 0.1s ease",
-                      }}
-                      className={`w-64 h-96 rounded-2xl border-4 p-4 relative overflow-hidden flex flex-col justify-between shadow-2xl transition-all ${
-                        nftState.rarity === "Legendary" ? "border-amber-400 shadow-amber-500/20 bg-gradient-to-b from-amber-950/70 to-black" :
-                        nftState.rarity === "Epic" ? "border-purple-500 shadow-purple-500/20 bg-gradient-to-b from-purple-950/70 to-black" :
-                        nftState.rarity === "Rare" ? "border-orange-500 shadow-orange-500/20 bg-gradient-to-b from-orange-950/70 to-black" :
-                        "border-emerald-600 shadow-emerald-500/10 bg-gradient-to-b from-[#0c261e] to-black"
-                      }`}
-                    >
-                      {/* Leather/Mesh texture background */}
-                      <div className="absolute inset-0 pointer-events-none opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
-                      
-                      {/* Top Badge / Rarity */}
-                      <div className="flex justify-between items-center z-10">
-                        <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase border ${
-                          nftState.rarity === "Legendary" ? "bg-amber-500/20 border-amber-400/40 text-amber-300" :
-                          nftState.rarity === "Epic" ? "bg-purple-500/20 border-purple-400/40 text-purple-300" :
-                          nftState.rarity === "Rare" ? "bg-orange-500/20 border-orange-400/40 text-orange-300" :
-                          "bg-emerald-500/20 border-emerald-400/40 text-emerald-300"
-                        }`}>
-                          {nftState.rarity}
-                        </span>
-                        <span className="text-[10px] font-bold text-emerald-400 font-mono">
-                          LVL {nftState.level}
-                        </span>
-                      </div>
-
-                      {/* Graphic Placeholder */}
-                      <div className="h-44 border border-white/10 rounded-xl my-2 overflow-hidden relative bg-slate-900 flex items-center justify-center">
-                        <img 
-                          src={nftState.image} 
-                          alt="Athlete" 
-                          className="w-full h-full object-cover opacity-80"
-                        />
-                        <div className="absolute bottom-1 right-1 bg-black/60 text-[8px] font-mono px-1.5 py-0.5 rounded text-white">
-                          IPFS Asset
-                        </div>
-                      </div>
-
-                      {/* Info & Stats */}
-                      <div className="space-y-1 z-10 text-white">
-                        <h4 className="font-bold text-xs uppercase leading-none text-white">{nftState.name}</h4>
-                        <p className="text-[8px] text-slate-400 font-mono">Stage: {nftState.cwsStage}</p>
-                        
-                        <div className="grid grid-cols-3 gap-1 text-center font-mono text-[9px] pt-1">
-                          <div className="bg-black/60 border border-white/10 p-1 rounded">
-                            <span className="text-[6px] text-slate-500 block">HR</span>
-                            <strong className="text-orange-400 text-xs">{nftState.homeRuns}</strong>
-                          </div>
-                          <div className="bg-black/60 border border-white/10 p-1 rounded">
-                            <span className="text-[6px] text-slate-500 block">RBI</span>
-                            <strong className="text-emerald-400 text-xs">{nftState.rbi}</strong>
-                          </div>
-                          <div className="bg-black/60 border border-white/10 p-1 rounded">
-                            <span className="text-[6px] text-slate-500 block">SO</span>
-                            <strong className="text-blue-400 text-xs">{nftState.strikeouts}</strong>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-1.5 text-center text-[7px] text-slate-500 font-mono border-t border-white/5 pt-1">
-                        Mint: {nftState.mint.substring(0, 10)}...
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mutator Actions */}
-                  <div className="md:col-span-7 space-y-5 flex flex-col justify-between">
-                    <div className="space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Mutator Actions</h4>
-                      
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => triggerStatMutation("hr")}
-                          className="rounded-xl border border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 py-2.5 text-xs font-bold transition-all cursor-pointer text-orange-400 flex items-center justify-center gap-1.5"
-                        >
-                          Simulate HR (+1)
-                        </button>
-                        <button
-                          onClick={() => triggerStatMutation("rbi")}
-                          className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 py-2.5 text-xs font-bold transition-all cursor-pointer text-emerald-400 flex items-center justify-center gap-1.5"
-                        >
-                          Simulate RBI (+1)
-                        </button>
-                        <button
-                          onClick={() => triggerStatMutation("so")}
-                          className="rounded-xl border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 py-2.5 text-xs font-bold transition-all cursor-pointer text-blue-400 flex items-center justify-center gap-1.5"
-                        >
-                          Simulate SO (+1)
-                        </button>
-                        <button
-                          onClick={() => triggerStatMutation("stage")}
-                          className="rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 py-2.5 text-xs font-bold transition-all cursor-pointer text-amber-400 flex items-center justify-center gap-1.5"
-                        >
-                          Advance CWS Stage
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">On-Chain Mutation Logs</h4>
-                      <div className={`rounded-xl p-3 border font-mono text-[9px] h-32 overflow-y-auto space-y-1.5 ${terminalBg}`}>
-                        {nftLogs.map((log, index) => (
-                          <div key={index} className="text-slate-350">{log}</div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            )}
-
-            {/* 3. TOKEN EXTENSIONS INSPECTOR */}
-            {activeTab === "extension" && (
-              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
-                <h3 className={`text-xl font-bold mb-2 ${textTitle} orbitron-title`}>Solana Token-2022 Byte View</h3>
-                <p className={`text-xs mb-6 ${textMuted}`}>Natively store key-value traits on the mint account layout. Zero external metadata accounts, 100% on-chain auditability.</p>
-
-                <div className="space-y-4">
-                  <div className={`rounded-xl p-4 border ${isDark ? "bg-black/30" : "bg-white"}`}>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">TLV (Type-Length-Value) layout</h4>
-                    
-                    <div className="space-y-3 font-mono text-xs">
-                      <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                        <span className="text-slate-500">Extension Type:</span>
-                        <span className="text-emerald-400 font-bold">MetadataPointer (0x12)</span>
-                      </div>
-                      <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                        <span className="text-slate-500">Metadata Pointer Target:</span>
-                        <span className="text-slate-350 break-all">{nftState.mint}</span>
-                      </div>
-                      <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                        <span className="text-slate-500">Extension Type:</span>
-                        <span className="text-emerald-400 font-bold">TokenMetadata (0x13)</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={`rounded-xl p-4 border ${isDark ? "bg-black/30" : "bg-white"}`}>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">additional_metadata Key-Value map</h4>
-                    
-                    <div className="space-y-2 font-mono text-xs">
-                      {[
-                        { key: "level", value: nftState.level.toString() },
-                        { key: "rarity", value: nftState.rarity },
-                        { key: "home_runs", value: nftState.homeRuns.toString() },
-                        { key: "rbi", value: nftState.rbi.toString() },
-                        { key: "cws_stage", value: nftState.cwsStage },
-                        { key: "milestones", value: JSON.stringify(nftState.milestones) }
-                      ].map((item) => (
-                        <div key={item.key} className="flex justify-between items-center border-b border-white/5 pb-1">
-                          <span className="text-slate-500">{item.key}:</span>
-                           <span className="text-emerald-400 font-bold">{item.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 4. NIL LEGAL COMPLIANCE */}
-            {activeTab === "compliance" && (
-              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
-                <h3 className={`text-xl font-bold mb-2 ${textTitle} orbitron-title`}>NIL Compliance Vault</h3>
-                <p className={`text-xs mb-6 ${textMuted}`}>Draft RUFADAA-compliant NIL trust deeds. Encrypt locally client-side and commit hash anchors to Stellar/Solana.</p>
-
-                <div className="space-y-4">
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1.5">Athlete Name</label>
-                      <input 
-                        type="text" 
-                        value={nilName}
-                        onChange={(e) => setNilName(e.target.value)}
-                        className={`w-full rounded-xl p-2.5 text-xs outline-none ${inputBg}`}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1.5">School / Team</label>
-                      <input 
-                        type="text" 
-                        value={nilSchool}
-                        onChange={(e) => setNilSchool(e.target.value)}
-                        className={`w-full rounded-xl p-2.5 text-xs outline-none ${inputBg}`}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1.5">Monthly Escrow (USD)</label>
-                      <input 
-                        type="number" 
-                        value={nilMonthly}
-                        onChange={(e) => setNilMonthly(e.target.value)}
-                        className={`w-full rounded-xl p-2.5 text-xs outline-none ${inputBg}`}
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleGenerateNil}
-                    disabled={nilStatus === "generating"}
-                    className="w-full text-center rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 text-xs transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    {nilStatus === "generating" ? "Generating Compliance Deed..." : "Compile NIL Compliance Deed"}
-                  </button>
-
-                  {nilDeed && (
-                    <div className="space-y-2">
-                      <span className="text-[10px] uppercase font-bold text-slate-500 block">Deed Output & Signatures</span>
-                      <pre className={`rounded-xl p-4 font-mono text-[9px] overflow-x-auto whitespace-pre ${terminalBg}`}>
-                        {nilDeed}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* 5. FACTION NAMESPACES */}
+            {/* TAB 1: REGISTRY & CLAIMS */}
             {activeTab === "registry" && (
-              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
-                <h3 className={`text-xl font-bold mb-2 ${textTitle} orbitron-title`}>Collegiate Suffix Registry</h3>
-                <p className={`text-xs mb-6 ${textMuted}`}>Claim a custom suffix for your fan group, university, or athletic pool. Integrates directly with the dynamic Unykorn OS routing.</p>
-
-                <div className="space-y-6">
-                  <div className="flex gap-2 bg-black/60 border border-emerald-500/20 rounded-xl p-1.5 shadow-inner">
-                    <input 
-                      type="text" 
-                      value={suffixInput}
-                      onChange={(e) => setSuffixInput(e.target.value)}
-                      placeholder="Enter faction handle (e.g. dawgs, trojans)"
-                      className="flex-grow bg-transparent border-0 text-xs text-white outline-none px-3 py-2"
-                      onKeyDown={(e) => { if (e.key === "Enter") handleClaimPreview(); }}
-                    />
-                    <button 
-                      onClick={handleClaimPreview}
-                      className="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 text-xs transition-all cursor-pointer"
-                    >
-                      Search Suffix
-                    </button>
+              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-6`}>
+                
+                {/* Header Controls */}
+                <div className="flex flex-wrap justify-between items-center gap-4 border-b border-emerald-500/10 pb-4">
+                  <div>
+                    <h3 className={`text-xl font-bold ${textTitle} orbitron-title`}>Sovereign Identity Directory</h3>
+                    <p className={`text-xs ${textMuted}`}>Query the official on-chain registry mapping athletes, coaches, and staff roots.</p>
                   </div>
 
-                  <div className={`rounded-xl p-4 border font-mono text-xs ${isDark ? "bg-black/30" : "bg-white"}`}>
-                    {claimOutput}
+                  {/* Team Filter Dropdown */}
+                  <div className="flex items-center gap-2 bg-black/40 border border-emerald-500/30 rounded-xl p-1.5">
+                    <span className="text-[10px] font-mono text-slate-500 pl-2 uppercase">CWS Team Filter:</span>
+                    <select
+                      value={activeTeamFilter}
+                      onChange={(e) => {
+                        selectTeamFilter(e.target.value as TeamKey);
+                        addLog(`Swapped active team context to: ${e.target.value.toUpperCase()}`);
+                      }}
+                      className="bg-slate-900 text-xs font-bold text-white border-0 outline-none rounded-lg p-1 px-2 cursor-pointer focus:ring-0"
+                    >
+                      <option value="georgia">🐶 Georgia Bulldogs</option>
+                      <option value="troy">⚔ Troy Trojans</option>
+                      <option value="wvu">⛰ West Virginia Mountaineers</option>
+                      <option value="unc">🐑 North Carolina Tar Heels</option>
+                      <option value="olemiss">🔴 Ole Miss Rebels</option>
+                      <option value="alabama">🐘 Alabama Crimson Tide</option>
+                      <option value="oklahoma">⭕ Oklahoma Sooners</option>
+                      <option value="texas">🤘 Texas Longhorns</option>
+                    </select>
                   </div>
                 </div>
+
+                {/* Suffix Pricing Matrix Banner */}
+                <div className="rounded-2xl border border-amber-400/25 bg-amber-500/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-400 font-mono uppercase">
+                    <Scale className="h-4 w-4" /> Namespace Pricing Matrix & Suffix Tree
+                  </div>
+                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 text-[11px] font-mono">
+                    <div className="bg-black/30 p-2.5 rounded-lg border border-white/5">
+                      <strong className="text-white block">Official personnel:</strong>
+                      <span className="text-emerald-400 font-bold">FREE ($0.00)</span>
+                      <p className="text-[9px] text-slate-400 mt-1">Operator sponsored root claim.</p>
+                    </div>
+                    <div className="bg-black/30 p-2.5 rounded-lg border border-white/5">
+                      <strong className="text-white block">Fan subnames:</strong>
+                      <span className="text-amber-400">9.99 OMAHA26 / yr</span>
+                      <p className="text-[9px] text-slate-400 mt-1">E.g. fan.name.dawgs</p>
+                    </div>
+                    <div className="bg-black/30 p-2.5 rounded-lg border border-white/5">
+                      <strong className="text-white block">Brand Branches:</strong>
+                      <span className="text-orange-400">499.00 OMAHA26 / yr</span>
+                      <p className="text-[9px] text-slate-400 mt-1">E.g. nike.name.dawgs</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Directory List filtered by Sport */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-mono uppercase tracking-wider text-slate-500">Rosters & Pre-minted Registry Pointers</h4>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {namespaces.filter(ns => ns.teamKey === activeTeamFilter).map(athlete => {
+                      const isSelected = selectedAthleteId === athlete.id;
+                      return (
+                        <div 
+                          key={athlete.id}
+                          onClick={() => setSelectedAthleteId(athlete.id)}
+                          className={`rounded-2xl border p-4 transition-all duration-300 cursor-pointer relative flex flex-col justify-between hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-950/30 ${
+                            isSelected 
+                              ? "border-emerald-400 bg-emerald-950/30 shadow-[0_0_20px_rgba(16,185,129,0.25)] ring-1 ring-emerald-500/50" 
+                              : "border-emerald-500/10 hover:border-emerald-500/40"
+                          } ${subCardStyle}`}
+                        >
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <span className="text-[9px] font-mono text-slate-500 uppercase">{athlete.role}</span>
+                                <h4 className={`text-sm font-bold ${textTitle}`}>{athlete.name}</h4>
+                              </div>
+                              
+                              {/* Claim Badge State */}
+                              <span className={`text-[8px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border ${
+                                athlete.claimState === "claimed" ? "bg-emerald-500/20 border-emerald-400/40 text-emerald-400" :
+                                athlete.claimState === "reserved" ? "bg-amber-500/20 border-amber-400/40 text-amber-400" :
+                                athlete.claimState === "pending_verification" ? "bg-blue-500/20 border-blue-400/40 text-blue-400 animate-pulse" :
+                                athlete.claimState === "claimable" ? "bg-purple-500/20 border-purple-400/40 text-purple-400" :
+                                "bg-rose-500/20 border-rose-400/40 text-rose-400"
+                              }`}>
+                                {athlete.claimState.replace("_", " ")}
+                              </span>
+                            </div>
+
+                            <div className="bg-black/35 p-2 rounded-lg border border-white/5 font-mono text-[10px] space-y-1">
+                              <div className="flex justify-between text-slate-400">
+                                <span>Namespace Root:</span>
+                                <strong className="text-white">{athlete.handle}</strong>
+                              </div>
+                              <div className="flex justify-between text-slate-400">
+                                <span>Affiliation:</span>
+                                <span>{teams[athlete.teamKey].name}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* On-Chain Status Panel */}
+                          {(() => {
+                            const oc = onChainState[athlete.id] || onChainState[athlete.handle];
+                            if (oc?.status === "minted") {
+                              return (
+                                <div className="mt-3 space-y-1.5">
+                                  <div className="flex items-center gap-1 text-[9px] font-mono text-emerald-400">
+                                    <Check className="h-2.5 w-2.5" /> ON-CHAIN · MAINNET
+                                  </div>
+                                  <a href={oc.ipfsUrl} target="_blank" rel="noopener noreferrer"
+                                     className="block text-[9px] font-mono text-blue-400 hover:text-blue-300 truncate"
+                                     title={oc.cid}>
+                                    📦 IPFS: {oc.cid.slice(0, 20)}...
+                                  </a>
+                                  <a href={oc.explorerUrl} target="_blank" rel="noopener noreferrer"
+                                     className="block text-[9px] font-mono text-amber-400 hover:text-amber-300 truncate"
+                                     title={oc.solanaTxHash}>
+                                    🔗 Solscan: {oc.solanaTxHash.slice(0, 16)}...
+                                  </a>
+                                </div>
+                              );
+                            }
+                            if (oc?.status === "minting") {
+                              return (
+                                <div className="mt-3 flex items-center gap-1.5 text-[9px] font-mono text-amber-400 animate-pulse">
+                                  <span className="animate-spin">⛓</span> Anchoring to mainnet...
+                                </div>
+                              );
+                            }
+                            if (oc?.status === "error") {
+                              return (
+                                <div className="mt-3 text-[9px] font-mono text-red-400">✘ {oc.error?.slice(0, 40)}</div>
+                              );
+                            }
+                            return null;
+                          })()}
+
+                          <div className="mt-4 pt-2 border-t border-white/5 flex justify-between items-center gap-2">
+                            <span className="text-[10px] font-mono text-slate-500">
+                              {athlete.claimState === "claimed" ? "Locked to Wallet" : "Custodian Custody"}
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                              {/* ⛓ Mint Mainnet button */}
+                              {(() => {
+                                const oc = onChainState[athlete.id] || onChainState[athlete.handle];
+                                if (oc?.status === "minted") return null;
+                                return (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); mintNamespaceOnChain(athlete.id); }}
+                                    disabled={oc?.status === "minting"}
+                                    className={`rounded-lg font-bold px-2.5 py-1 text-[9px] transition-all cursor-pointer flex items-center gap-1 ${
+                                      oc?.status === "minting"
+                                        ? "bg-amber-500/20 text-amber-400 cursor-wait"
+                                        : "bg-blue-600 hover:bg-blue-500 text-white"
+                                    }`}
+                                  >
+                                    {oc?.status === "minting" ? "..." : "⛓ Mainnet"}
+                                  </button>
+                                );
+                              })()}
+
+                              {athlete.claimState !== "claimed" ? (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openClaimFlow(athlete);
+                                  }}
+                                  className="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 text-[10px] transition-all cursor-pointer"
+                                >
+                                  Claim Namespace
+                                </button>
+                              ) : (
+                                <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
+                                  <Check className="h-3 w-3" /> Claimed
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Suffix Hierarchy Tree Preview */}
+                <div className={`rounded-2xl border p-4 ${subCardStyle} space-y-3`}>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 block">
+                    Sovereign Hierarchical Suffix Tree for {selectedAthlete.handle}
+                  </span>
+                  
+                  <div className="font-mono text-xs space-y-2 border-l-2 border-emerald-500/20 pl-4 ml-2">
+                    <div className="flex items-center gap-2 text-white font-bold">
+                      <span className="text-emerald-400">● {selectedAthlete.handle}</span>
+                      <span className="text-[9px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-1.5 rounded">Root Address</span>
+                    </div>
+
+                    <div className="pl-4 border-l border-emerald-500/10 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">├── family.{selectedAthlete.handle}</span>
+                        <span className="text-[9px] text-slate-500">Route: Estate Fiduciary Vault</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">├── team.{selectedAthlete.handle}</span>
+                        <span className="text-[9px] text-slate-500">Route: Team Manager Multi-sig</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">├── sponsor.{selectedAthlete.handle}</span>
+                        <span className="text-[9px] text-slate-500">Route: Inbound Escrow membranes</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">└── fan.{selectedAthlete.handle}</span>
+                        <span className="text-[9px] text-slate-500">Route: Custom Fan SFT Registry</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             )}
 
-            {/* 6. SECONDARY MARKETPLACE */}
-            {activeTab === "marketplace" && (
-              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
-                <h3 className={`text-xl font-bold mb-2 ${textTitle} orbitron-title`}>Secondary Marketplace Ledger</h3>
-                <p className={`text-xs mb-6 ${textMuted}`}>Trade prospect cards and moment relics in real-time. Buy with USDF or check gold-backed reserves.</p>
+            {/* TAB 2: ATHLETE CONTROL HUB */}
+            {activeTab === "control-hub" && (
+              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-6`}>
+                <div className="border-b border-emerald-500/10 pb-4 flex justify-between items-center">
+                  <div>
+                    <h3 className={`text-xl font-bold ${textTitle} orbitron-title`}>Root Control Workspace</h3>
+                    <p className={`text-xs ${textMuted}`}>Claimed Athlete and Coach workspace for issuing assets, delegating authority, and accepting deals.</p>
+                  </div>
+                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/35 px-3 py-1 rounded-full text-xs font-mono uppercase tracking-wider font-bold">
+                    {selectedAthlete.handle}
+                  </span>
+                </div>
 
-                <div className="grid sm:grid-cols-3 gap-4 mb-6">
-                  {marketItems.map((item) => (
-                    <div key={item.id} className={`rounded-2xl border p-4 flex flex-col justify-between ${subCardStyle}`}>
-                      <div className="space-y-3">
-                        <div className="h-28 border border-white/5 rounded-xl overflow-hidden relative">
-                          <img src={item.image} alt={item.name} className="w-full h-full object-cover opacity-80" />
-                          <span className={`absolute top-1 right-1 text-[8px] font-bold px-1.5 py-0.5 rounded ${
-                            item.rarity === "Legendary" ? "bg-amber-500/30 text-amber-300" :
-                            item.rarity === "Epic" ? "bg-purple-500/30 text-purple-300" :
-                            "bg-orange-500/30 text-orange-300"
-                          }`}>{item.rarity}</span>
-                        </div>
-                        <div>
-                          <span className="text-[8px] text-slate-500 font-mono uppercase font-bold">{item.type}</span>
-                          <h4 className="font-bold text-xs text-white leading-tight mt-0.5">{item.name}</h4>
-                          <p className="text-[9px] text-slate-400 font-mono mt-1">Owner: {item.owner.substring(0, 10)}...</p>
+                {/* Status check for claimed */}
+                {selectedAthlete.claimState !== "claimed" ? (
+                  <div className="text-center py-10 space-y-4">
+                    <AlertCircle className="h-12 w-12 text-amber-400 mx-auto" />
+                    <h4 className="text-base font-bold text-white">Registry Pointer is Not Yet Claimed</h4>
+                    <p className="text-xs text-slate-400 max-w-md mx-auto">
+                      You must claim this official namespace or toggle the top right user persona switch to simulated "Athlete Owner" mode to unlock full workspace control keys.
+                    </p>
+                    <button
+                      onClick={() => openClaimFlow(selectedAthlete)}
+                      className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 text-xs transition-all cursor-pointer"
+                    >
+                      Begin Claim Flow
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    
+                    {/* Issuance Deck */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                      
+                      {/* Subname Creator */}
+                      <div className={`rounded-2xl border p-5 space-y-4 ${subCardStyle}`}>
+                        <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-white/5 pb-2">
+                          <Plus className="h-4 w-4 text-emerald-400" />
+                          Issue Custom Subname Domain
+                        </h4>
+
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Select Suffix Class</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {(["fan", "family", "sponsor"] as const).map(type => (
+                                <button
+                                  key={type}
+                                  type="button"
+                                  onClick={() => setSelectedSubnameType(type)}
+                                  className={`text-[10px] font-bold p-2 rounded-xl border transition-all ${
+                                    selectedSubnameType === type
+                                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                                      : "border-white/5 text-slate-400"
+                                  }`}
+                                >
+                                  .{type} (Cost: {type === "fan" ? "9.99" : type === "family" ? "19.99" : "499"})
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Desired Prefix</label>
+                            <input
+                              type="text"
+                              value={newSubnamePrefix}
+                              onChange={(e) => setNewSubnamePrefix(e.target.value)}
+                              className={`w-full rounded-xl p-2.5 text-xs outline-none ${inputBg}`}
+                              placeholder="e.g. mom, fanclub, booster"
+                            />
+                          </div>
+
+                          <button
+                            onClick={registerSubname}
+                            className="w-full text-center rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 text-xs transition-all cursor-pointer"
+                          >
+                            Register & Issue Subname SFT
+                          </button>
                         </div>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-white/5 space-y-3">
-                        <div className="flex justify-between items-center text-xs">
-                          <div>
-                            <span className="text-[7px] text-slate-500 block">PRICE</span>
-                            <span className="font-bold text-emerald-400 font-mono">{item.price} USDF</span>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-[7px] text-slate-500 block">GOLD BACKING</span>
-                            <span className="font-mono text-amber-400">{item.backingGoldGrains} grains</span>
-                          </div>
-                        </div>
+                      {/* Relic Mint Console */}
+                      <div className={`rounded-2xl border p-5 space-y-4 ${subCardStyle}`}>
+                        <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-white/5 pb-2 orbitron-title text-orange-400">
+                          <Sparkles className="h-4 w-4 text-orange-400 animate-pulse" />
+                          Web3 Content Creator Highlight SFT Mint
+                        </h4>
 
-                        {item.owner.startsWith("0xMyWallet") ? (
-                          <div className="text-center text-[10px] font-bold text-emerald-400 py-1 border border-emerald-500/30 rounded bg-emerald-500/5">
-                            Owned By You
+                        <form onSubmit={handleMintRelic} className="space-y-3">
+                          <div>
+                            <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Moment Title / Achievement</label>
+                            <input
+                              type="text"
+                              value={relicTitle}
+                              onChange={(e) => setRelicTitle(e.target.value)}
+                              className={`w-full rounded-xl p-2.5 text-xs outline-none ${inputBg}`}
+                              placeholder="e.g. 9th Inning Catch of the Century"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Play Description (IRL Highlight)</label>
+                            <textarea
+                              value={relicDescription}
+                              onChange={(e) => setRelicDescription(e.target.value)}
+                              className={`w-full rounded-xl p-2 text-xs outline-none ${inputBg} h-16`}
+                              placeholder="Describe the play detail, players involved, score, inning etc."
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Game Context</label>
+                              <input
+                                type="text"
+                                value={relicGameContext}
+                                onChange={(e) => setRelicGameContext(e.target.value)}
+                                className={`w-full rounded-xl p-2 text-xs outline-none ${inputBg}`}
+                                placeholder="e.g. Game 2 vs. Texas"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">News Validation URL</label>
+                              <input
+                                type="url"
+                                value={relicValidationUrl}
+                                onChange={(e) => setRelicValidationUrl(e.target.value)}
+                                className={`w-full rounded-xl p-2 text-xs outline-none ${inputBg}`}
+                                placeholder="e.g. https://d1baseball.com/cws"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Gold grains</label>
+                              <input
+                                type="number"
+                                value={relicGrains}
+                                onChange={(e) => setRelicGrains(e.target.value)}
+                                className={`w-full rounded-xl p-2 text-xs outline-none ${inputBg}`}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Price ($OMAHA)</label>
+                              <input
+                                type="number"
+                                value={relicPrice}
+                                onChange={(e) => setRelicPrice(e.target.value)}
+                                className={`w-full rounded-xl p-2 text-xs outline-none ${inputBg}`}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Rarity</label>
+                              <select
+                                value={relicRarity}
+                                onChange={(e) => setRelicRarity(e.target.value as any)}
+                                className={`w-full rounded-xl p-2 text-xs outline-none ${inputBg}`}
+                              >
+                                <option value="Common">Common</option>
+                                <option value="Rare">Rare</option>
+                                <option value="Epic">Epic</option>
+                                <option value="Legendary">Legendary</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Smart Contract Schema</label>
+                            <select
+                              value={relicContractType}
+                              onChange={(e) => setRelicContractType(e.target.value as any)}
+                              className={`w-full rounded-xl p-2 text-xs outline-none ${inputBg}`}
+                            >
+                              <option value="Collectible Memo Anchor">📜 Collectible SPL Memo Anchor (SFT)</option>
+                              <option value="Yield Share SFT">💰 Revenue Yield Share SFT (Token-2022)</option>
+                              <option value="NIL Sponsorship SFT">💼 NIL Escrow Membraned Sponsorship</option>
+                            </select>
+                          </div>
+
+                          <button
+                            type="submit"
+                            className="w-full text-center rounded-xl bg-orange-600 hover:bg-orange-50 text-white font-bold py-2 text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 orbitron-title shadow-lg hover:shadow-orange-950/20"
+                          >
+                            <Sparkles className="h-3.5 w-3.5" /> Deploy Contract & Mint Highlight SFT
+                          </button>
+                        </form>
+                      </div>
+
+                    </div>
+
+                    {/* Permissions tree visualization */}
+                    <div className={`rounded-2xl border p-4 ${subCardStyle} space-y-4`}>
+                      <h4 className="text-xs font-mono uppercase tracking-wider text-slate-500">Root Permissions Matrix Tree</h4>
+                      <div className="grid sm:grid-cols-4 gap-4 text-xs font-mono">
+                        <div className="bg-black/30 p-3 rounded-lg border border-white/5 text-center">
+                          <strong className="text-slate-400 block mb-1">Mint Moment SFT</strong>
+                          <span className="text-emerald-400 font-bold block">✔ OWNER ONLY</span>
+                          <span className="text-[9px] text-slate-500 block mt-1">Delegates permitted</span>
+                        </div>
+                        <div className="bg-black/30 p-3 rounded-lg border border-white/5 text-center">
+                          <strong className="text-slate-400 block mb-1">Launch Fan Token</strong>
+                          <span className="text-emerald-400 font-bold block">✔ OWNER ONLY</span>
+                          <span className="text-[9px] text-slate-500 block mt-1">Stellar DEX binding</span>
+                        </div>
+                        <div className="bg-black/30 p-3 rounded-lg border border-white/5 text-center">
+                          <strong className="text-slate-400 block mb-1">Access Vaults</strong>
+                          <span className="text-amber-400 font-bold block">✔ FIDUCIARY SWITCH</span>
+                          <span className="text-[9px] text-slate-500 block mt-1">Multi-sig trustees</span>
+                        </div>
+                        <div className="bg-black/30 p-3 rounded-lg border border-white/5 text-center">
+                          <strong className="text-slate-400 block mb-1">Create Subnames</strong>
+                          <span className="text-emerald-400 font-bold block">✔ DELEGATED ADMIN</span>
+                          <span className="text-[9px] text-slate-500 block mt-1">Operator hooks active</span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+              </div>
+            )}
+
+            {/* TAB 3: NIL OFFERS INBOX */}
+            {activeTab === "offers" && (
+              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-6`}>
+                
+                <div className="flex justify-between items-center border-b border-emerald-500/10 pb-4">
+                  <div>
+                    <h3 className={`text-xl font-bold ${textTitle} orbitron-title`}>NIL Escrow Offer Inbox</h3>
+                    <p className={`text-xs ${textMuted}`}>Brands, booster clubs, and sponsors submit escrowed offers directly into the namespace.</p>
+                  </div>
+                  <span className="text-xs font-mono bg-purple-500/10 border border-purple-500/35 text-purple-400 px-3 py-1 rounded-full font-bold">
+                    {offers.filter(o => o.status === "pending").length} Inbound Pointers
+                  </span>
+                </div>
+
+                {/* Offer Submission Form (Visible to Fans/Sponsors) */}
+                <details className="group rounded-2xl border border-purple-500/25 bg-purple-500/5 p-4">
+                  <summary className="text-xs font-bold text-purple-400 hover:text-purple-300 cursor-pointer list-none flex justify-between items-center select-none">
+                    <span className="flex items-center gap-1.5">
+                      <Send className="h-4 w-4" />
+                      Sponsors: Submit New NIL Escrow Deal
+                    </span>
+                    <span className="transition-transform group-open:rotate-180">▼</span>
+                  </summary>
+                  <form onSubmit={submitNILOffer} className="mt-4 grid sm:grid-cols-2 gap-4 text-xs font-mono">
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Sponsor Brand Name</label>
+                      <input
+                        type="text"
+                        value={customOfferSponsor}
+                        onChange={(e) => setCustomOfferSponsor(e.target.value)}
+                        className={`w-full rounded-xl p-2.5 text-xs outline-none ${inputBg}`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Contract Term</label>
+                      <input
+                        type="text"
+                        value={customOfferTerm}
+                        onChange={(e) => setCustomOfferTerm(e.target.value)}
+                        className={`w-full rounded-xl p-2.5 text-xs outline-none ${inputBg}`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Value Escrow Amount ($OMAHA26)</label>
+                      <input
+                        type="number"
+                        value={customOfferAmount}
+                        onChange={(e) => setCustomOfferAmount(e.target.value)}
+                        className={`w-full rounded-xl p-2.5 text-xs outline-none ${inputBg}`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Target Escrow Vault Membrane</label>
+                      <select
+                        value={customOfferEscrow}
+                        onChange={(e) => setCustomOfferEscrow(e.target.value)}
+                        className={`w-full rounded-xl p-2.5 text-xs outline-none ${inputBg}`}
+                      >
+                        <option value="NIL Income Vault">NIL Income Vault (Daily stream)</option>
+                        <option value="Family Trust Vault">Family Trust Vault (Fiduciary locked)</option>
+                        <option value="Sponsor Escrow Vault">Sponsor Escrow Vault (Milestone-based)</option>
+                      </select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Contract Deliverables & Terms</label>
+                      <textarea
+                        value={customOfferDeliverables}
+                        onChange={(e) => setCustomOfferDeliverables(e.target.value)}
+                        rows={2}
+                        className={`w-full rounded-xl p-2.5 text-xs outline-none resize-none ${inputBg}`}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="sm:col-span-2 text-center rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 text-xs transition-all cursor-pointer"
+                    >
+                      Submit Escrow Offer to Namespace
+                    </button>
+                  </form>
+                </details>
+
+                {/* Offer Directory Inbox */}
+                <div className="space-y-4">
+                  {offers.map(off => (
+                    <div key={off.id} className={`rounded-2xl border p-4 space-y-3 relative overflow-hidden ${subCardStyle}`}>
+                      <div className="absolute top-0 right-0 w-2 h-full bg-purple-500/20" />
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="text-[9px] font-mono bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded border border-purple-500/20">
+                            {off.type}
+                          </span>
+                          <h4 className={`text-base font-bold ${textTitle} mt-1`}>{off.sponsor}</h4>
+                        </div>
+                        <div className="text-right font-mono">
+                          <span className="text-[10px] text-slate-500 block">ESCROWED</span>
+                          <strong className="text-base text-purple-400 font-black">{off.value.toLocaleString()} $OMAHA26</strong>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-slate-350 leading-relaxed font-sans">{off.deliverables}</p>
+
+                      <div className="grid sm:grid-cols-3 gap-2 py-2 border-y border-white/5 font-mono text-[10px] text-slate-400">
+                        <div>Term: <strong className="text-white">{off.term}</strong></div>
+                        <div>Target Vault: <strong className="text-white">{off.escrowRoute}</strong></div>
+                        <div>Compliance: <span className="text-emerald-400 font-bold">✔ {off.complianceState}</span></div>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-mono text-slate-500">Exp: {off.expiration}</span>
+                        
+                        {off.status === "pending" ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleOfferAction(off.id, "reject")}
+                              className="rounded-lg border border-red-500/30 hover:bg-red-500/10 text-red-400 font-bold px-3 py-1.5 text-xs transition-all cursor-pointer"
+                            >
+                              Reject & Refund
+                            </button>
+                            <button
+                              onClick={() => handleOfferAction(off.id, "accept")}
+                              className="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 text-xs transition-all cursor-pointer flex items-center gap-1.5"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                              <span>Accept Deal</span>
+                            </button>
                           </div>
                         ) : (
-                          <div className="grid grid-cols-2 gap-1.5">
-                            <button
-                              onClick={() => buyMarketItem(item)}
-                              className="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1"
-                            >
-                              Buy Now
-                            </button>
-                            <button
-                              onClick={() => placeBid(item, item.price + 10)}
-                              className="rounded-lg border border-emerald-500/30 hover:bg-white/5 text-slate-300 font-bold py-1.5 text-[10px] transition-all cursor-pointer"
-                            >
-                              Bid
-                            </button>
-                          </div>
+                          <span className={`text-xs font-bold font-mono px-3 py-1 rounded border uppercase ${
+                            off.status === "accepted" 
+                              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                              : "bg-red-500/10 border-red-500/30 text-red-400"
+                          }`}>
+                            {off.status}
+                          </span>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Marketplace Transactions Log</h4>
-                  <div className={`rounded-xl p-3 border font-mono text-[9px] h-24 overflow-y-auto space-y-1.5 ${terminalBg}`}>
-                    {marketLogs.map((log, index) => (
-                      <div key={index} className="text-slate-350">{log}</div>
-                    ))}
+              </div>
+            )}
+
+            {/* TAB 4: WEALTH VAULTS */}
+            {activeTab === "vaults" && (
+              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-6`}>
+                
+                <div className="flex justify-between items-center border-b border-emerald-500/10 pb-4">
+                  <div>
+                    <h3 className={`text-xl font-bold ${textTitle} orbitron-title`}>Generational Wealth Fiduciary Vaults</h3>
+                    <p className={`text-xs ${textMuted}`}>Tax-optimized reserve structures with dead-man compliance switches and RUFADAA succession fallbacks.</p>
+                  </div>
+                  <span className="text-xs font-mono bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1">
+                    <Shield className="h-3.5 w-3.5 text-amber-400" />
+                    Secure Reserves
+                  </span>
+                </div>
+
+                {/* Audit attestation info banner */}
+                <div className="bg-slate-900 border border-emerald-500/25 rounded-2xl p-4 flex gap-4 items-center">
+                  <div className="w-12 h-12 rounded-full bg-amber-400/15 border border-amber-400/30 flex items-center justify-center shrink-0">
+                    <Award className="h-6 w-6 text-amber-400" />
+                  </div>
+                  <div className="text-xs space-y-1 font-mono">
+                    <strong className="text-white">Zurich RWA Gold grain Ledger Audit Complete</strong>
+                    <p className="text-slate-400 text-[11px] leading-relaxed">
+                      All moment SFT and NIL reserve tokens in custody are backed by physical gold grain bars audited under 5-proof zero knowledge consensus.
+                    </p>
                   </div>
                 </div>
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  {vaults.map(v => (
+                    <div key={v.id} className={`rounded-2xl border p-4 space-y-4 flex flex-col justify-between ${subCardStyle}`}>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-start">
+                          <span className="text-[8px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
+                            {v.type}
+                          </span>
+                          {v.deadManSwitch && (
+                            <span className="text-[8px] font-mono bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded flex items-center gap-1">
+                              <Heart className="h-2.5 w-2.5 animate-pulse" /> Dead-Man Active
+                            </span>
+                          )}
+                        </div>
+
+                        <h4 className="font-bold text-sm text-white leading-tight">{v.name}</h4>
+                        <p className="text-[11px] text-slate-400 leading-relaxed font-sans">{v.description}</p>
+                      </div>
+
+                      <div className="space-y-3 pt-3 border-t border-white/5">
+                        <div className="flex justify-between items-baseline font-mono text-xs">
+                          <span className="text-slate-500 text-[10px]">BALANCE</span>
+                          <strong className="text-white text-base">${v.balance.toLocaleString()}</strong>
+                        </div>
+                        <div className="flex justify-between items-baseline font-mono text-xs">
+                          <span className="text-slate-500 text-[10px]">GOLD BACKING</span>
+                          <strong className="text-amber-400">{v.goldGrains} Grains</strong>
+                        </div>
+                        <div className="text-[9px] font-mono text-slate-500 flex justify-between">
+                          <span>Trustee: {v.trustee}</span>
+                          <span>Interval: {v.payoutInterval}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            )}
+
+            {/* TAB 5: SIMULATOR */}
+            {activeTab === "simulation" && (
+              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-6`}>
+                
+                <div className="flex justify-between items-center border-b border-emerald-500/10 pb-4">
+                  <div>
+                    <h3 className={`text-xl font-bold ${textTitle} orbitron-title`}>Oracle Game Play Simulator</h3>
+                    <p className={`text-xs ${textMuted}`}>Simulate real-time tournament highlights. Match outcomes write statistics directly back to the player's namespace root card.</p>
+                  </div>
+                  <span className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs px-2.5 py-1 rounded-full font-mono font-bold animate-pulse uppercase">
+                    Consensus Oracle
+                  </span>
+                </div>
+
+                <div className="grid md:grid-cols-12 gap-6 items-stretch">
+                  
+                  {/* Action Controls */}
+                  <div className="md:col-span-5 rounded-2xl border p-5 bg-black/30 border-white/5 space-y-4 flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400">Trigger Play Telemetry</h4>
+                      <p className="text-[11px] text-slate-500 mt-1 leading-normal">
+                        Simulate custom sports highlights in the current CWS team context ({activeTeamFilter.toUpperCase()}) to check evolving stats.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      <button
+                        onClick={() => executePlaySim("swing")}
+                        className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <Sparkles className="h-4 w-4" /> Power Swing (Batting Highlight)
+                      </button>
+                      <button
+                        onClick={() => executePlaySim("steal")}
+                        className="w-full rounded-xl border border-orange-500/30 hover:bg-orange-500/10 text-orange-400 font-bold py-2.5 text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        Straight Steal of Home
+                      </button>
+                      <button
+                        onClick={() => executePlaySim("pitch")}
+                        className="w-full rounded-xl border border-blue-500/30 hover:bg-blue-500/10 text-blue-400 font-bold py-2.5 text-xs transition-all cursor-pointer"
+                      >
+                        96 MPH Fastball Strikeout
+                      </button>
+                    </div>
+
+                    <div className="bg-slate-900/50 p-3 rounded-lg border border-white/5 text-[10px] font-mono text-slate-400 leading-normal">
+                      <strong>Automatic Milestone Checks:</strong> When players cross specific stats thresholds, new Moment SFT relics unlock automatically under the namespace root.
+                    </div>
+                  </div>
+
+                  {/* Play logs (7 cols) */}
+                  <div className="md:col-span-7 flex flex-col justify-between space-y-4">
+                    <div className="space-y-1">
+                      <span className="text-xs font-mono uppercase text-slate-500">Live Oracle Feed Stream</span>
+                      <div className={`rounded-xl p-4 border font-mono text-[10px] h-48 overflow-y-auto space-y-2 ${terminalBg}`}>
+                        {playByPlayLogs.length === 0 && <div className="text-slate-500">Awaiting play triggers...</div>}
+                        {playByPlayLogs.map((log, idx) => (
+                          <div key={idx} className="border-b border-white/5 pb-1.5 text-slate-350">{log}</div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-black/35 p-3 rounded-xl border border-white/5 text-xs space-y-2">
+                      <span className="text-[10px] uppercase font-mono font-bold text-slate-400">Active Athlete Card Metrics ({selectedAthlete.name})</span>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono">
+                        {Object.entries(selectedAthlete.metrics).slice(0, 6).map(([k, v]) => (
+                          <div key={k} className="bg-black/40 p-2 rounded border border-white/5">
+                            <span className="text-[8px] text-slate-500 block uppercase">{k}</span>
+                            <strong className="text-white block mt-0.5">{v}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            )}
+
+            {/* TAB 6: RELICS SHOWCASE */}
+            {activeTab === "relics" && (
+              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-6`}>
+                <div>
+                  <h3 className={`text-xl font-bold mb-2 ${textTitle} orbitron-title`}>Namespace Moment Relics & SFTs</h3>
+                  <p className={`text-xs ${textMuted}`}>Explore dynamic Token-2022 collectibles linked as child nodes directly to the root namespaces.</p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {relics.map(relic => (
+                    <div key={relic.id} className={`rounded-2xl border p-4 space-y-3 flex flex-col justify-between hover:-translate-y-1 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] hover:border-orange-500/40 transition-all duration-300 ${subCardStyle}`}>
+                      <div className="space-y-2">
+                        <div className="h-32 border border-white/5 rounded-xl overflow-hidden relative">
+                          <img src={relic.image} alt={relic.name} className="w-full h-full object-cover opacity-80" />
+                          <span className={`absolute top-1 right-1 text-[8px] font-bold px-2 py-0.5 rounded-full border ${
+                            relic.rarity === "Legendary" ? "bg-amber-500/20 border-amber-400/40 text-amber-300" :
+                            relic.rarity === "Epic" ? "bg-purple-500/20 border-purple-400/40 text-purple-300" :
+                            "bg-orange-500/20 border-orange-400/40 text-orange-300"
+                          }`}>{relic.rarity}</span>
+                        </div>
+                        <div>
+                          <span className="text-[8px] text-slate-500 font-mono uppercase font-bold">{relic.type}</span>
+                          <h4 className="font-bold text-sm text-white leading-tight mt-0.5">{relic.name}</h4>
+                          <p className="text-[10px] text-slate-400 font-mono mt-1">Root Namespace: {relic.namespaceRoot}</p>
+                        </div>
+                      </div>
+
+                      {/* On-Chain Status */}
+                      {(() => {
+                        const oc = onChainState[relic.id];
+                        if (oc?.status === "minted") return (
+                          <div className="space-y-1 pt-2 border-t border-white/5">
+                            <div className="text-[8px] font-mono text-emerald-400 flex items-center gap-1"><Check className="h-2 w-2" /> ON-CHAIN · MAINNET</div>
+                            <a href={oc.ipfsUrl} target="_blank" rel="noopener noreferrer" className="block text-[8px] font-mono text-blue-400 hover:text-blue-300 truncate">📦 {oc.cid.slice(0, 22)}...</a>
+                            <a href={oc.explorerUrl} target="_blank" rel="noopener noreferrer" className="block text-[8px] font-mono text-amber-400 hover:text-amber-300 truncate">🔗 {oc.solanaTxHash.slice(0, 18)}...</a>
+                          </div>
+                        );
+                        if (oc?.status === "minting") return <div className="pt-1 text-[8px] font-mono text-amber-400 animate-pulse">⛓ Anchoring to mainnet...</div>;
+                        return null;
+                      })()}
+
+                      <div className="pt-2 border-t border-white/5 flex justify-between items-center text-xs font-mono">
+                        <div>
+                          <span className="text-[7px] text-slate-500 block">BASE VALUE</span>
+                          <span className="text-emerald-400 font-bold">{relic.price} OMAHA26</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-right">
+                            <span className="text-[7px] text-slate-500 block">GOLD GRAINS</span>
+                            <span className="text-amber-400 font-bold">{relic.backingGoldGrains} Grains</span>
+                          </div>
+                          {/* ⛓ Mint Relic Mainnet */}
+                          {(() => {
+                            const oc = onChainState[relic.id];
+                            if (oc?.status === "minted") return null;
+                            return (
+                              <button
+                                onClick={() => mintRelicOnChain(relic.id)}
+                                disabled={oc?.status === "minting"}
+                                className={`rounded-lg text-[8px] font-bold px-2 py-1 transition-all ${
+                                  oc?.status === "minting"
+                                    ? "bg-amber-500/20 text-amber-400 cursor-wait"
+                                    : "bg-blue-600 hover:bg-blue-500 text-white cursor-pointer"
+                                }`}
+                              >
+                                {oc?.status === "minting" ? "..." : "⛓"}
+                              </button>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            )}
+
+            {/* TAB 7: SECONDARY MARKET */}
+            {activeTab === "marketplace" && (
+              <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-6`}>
+                
+                <div>
+                  <h3 className={`text-xl font-bold mb-2 ${textTitle} orbitron-title`}>Secondary Marketplace Ledger</h3>
+                  <p className={`text-xs ${textMuted}`}>Trade player card stubs and moment relics. Purchases auto-route gold grain reserves to buyer vaults.</p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {relics.map(item => (
+                    <div key={item.id} className={`rounded-2xl border p-4 flex flex-col justify-between ${subCardStyle}`}>
+                      <div className="space-y-3">
+                        <div className="h-24 border border-white/5 rounded-xl overflow-hidden relative">
+                          <img src={item.image} alt={item.name} className="w-full h-full object-cover opacity-85" />
+                          <span className="absolute top-1 right-1 text-[8px] bg-black/60 text-white px-2 py-0.5 rounded font-mono">
+                            {item.rarity}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[8px] text-slate-500 font-mono uppercase font-bold">{item.type}</span>
+                          <h4 className="font-bold text-xs text-white leading-tight mt-0.5">{item.name}</h4>
+                          <p className="text-[9px] text-slate-500 font-mono mt-1">Owner: {item.owner}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-white/5 space-y-3">
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <div>
+                            <span className="text-[7px] text-slate-500 block">PRICE</span>
+                            <span className="font-bold text-emerald-400">{item.price} OMAHA26</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[7px] text-slate-500 block">GOLD BACKING</span>
+                            <span className="text-amber-400">{item.backingGoldGrains} Grains</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            if (stablecoinBalance < item.price) {
+                              alert("Insufficient stablecoin balance!");
+                              return;
+                            }
+                            setStablecoinBalance(prev => prev - item.price);
+                            setRelics(prev => prev.map(r => r.id === item.id ? { ...r, owner: "0xMyWalletUser" } : r));
+                            setVaults(vts => vts.map(v => v.type === "Relic Custody" ? { ...v, goldGrains: v.goldGrains + item.backingGoldGrains } : v));
+                            addLog(`✔ Purchased SFT relic ${item.name} for ${item.price} OMAHA26. routed gold to Relic Safe.`);
+                            alert(`Purchase successful! Moment SFT transferred. ${item.backingGoldGrains} grains gold locked in vault reserves.`);
+                          }}
+                          className="w-full text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 text-[10px] transition-all cursor-pointer"
+                        >
+                          Buy SFT Moment
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
               </div>
             )}
 
           </div>
 
-          {/* Right Column: AI Scout Search & Play-by-Play Simulator */}
+          {/* Right Column (Terminal Console & Active Athlete Profile) */}
           <div className="lg:col-span-4 space-y-6">
 
-            {/* AI Scout Search Console */}
-            <div className={`rounded-3xl border p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between min-h-[360px] ${cardStyle}`}>
-              <div className="space-y-4">
+            {/* Active Athlete Namespace Card Card */}
+            <div className={`rounded-3xl border-2 p-6 shadow-2xl backdrop-blur-xl relative overflow-hidden flex flex-col justify-between ${
+              selectedAthlete.claimState === "claimed" ? "border-emerald-500 bg-gradient-to-br from-[#0a2319] to-black" : "border-white/10 bg-slate-950"
+            }`}>
+              {/* Pattern Overlay */}
+              <div className="absolute inset-0 pointer-events-none opacity-5 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
+              
+              <div className="space-y-4 z-10">
                 <div className="flex justify-between items-center">
-                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 font-mono">
-                    <Cpu className="h-3.5 w-3.5 animate-pulse" />
-                    AI Agent Scout Search
-                  </p>
-                  <span className="text-[9px] text-slate-500 font-mono">Solana Oracle</span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded uppercase font-bold">
+                    CWS ATHLETE
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    {selectedAthlete.claimState.replace("_", " ")}
+                  </span>
                 </div>
-                
-                <div className={`rounded-2xl p-4 text-xs leading-relaxed max-h-48 overflow-y-auto font-mono ${terminalBg}`}>
-                  {aiResponse}
+
+                <div className="space-y-1">
+                  <h4 className="text-2xl font-black text-white orbitron-title leading-tight">{selectedAthlete.name}</h4>
+                  <p className="text-xs text-emerald-400 font-mono flex items-center gap-1">
+                    <Globe className="h-3.5 w-3.5" />
+                    {selectedAthlete.handle}
+                  </p>
+                </div>
+
+                <div className="border-t border-white/10 pt-3 space-y-2.5">
+                  <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400 block font-bold">Registry Metrics</span>
+                  <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                    {Object.entries(selectedAthlete.metrics).slice(0, 4).map(([k, v]) => (
+                      <div key={k} className="bg-black/50 p-2 rounded border border-white/5">
+                        <span className="text-[8px] text-slate-500 block uppercase">{k}</span>
+                        <strong className="text-white block mt-0.5">{v}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400 block font-bold">Milestone Records</span>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedAthlete.milestones.map((ms, idx) => (
+                      <span key={idx} className="bg-white/5 border border-white/10 text-slate-300 px-2 py-0.5 rounded text-[9px]">
+                        🏆 {ms}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2 pt-4">
-                <form onSubmit={handleAsk} className="flex gap-2">
-                  <input 
-                    type="text" 
-                    value={aiInput}
-                    onChange={(e) => setAiInput(e.target.value)}
-                    placeholder="Ask metrics or type 'generate relic'..."
-                    className="flex-grow bg-black/50 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-emerald-500/40"
-                  />
-                  <button 
-                    type="submit"
-                    disabled={aiLoading}
-                    className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 text-xs font-bold transition-all cursor-pointer"
-                  >
-                    <Send className="h-3.5 w-3.5 text-white" />
-                  </button>
-                </form>
-              </div>
+              {selectedAthlete.claimState !== "claimed" && (
+                <button
+                  onClick={() => openClaimFlow(selectedAthlete)}
+                  className="w-full text-center rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 text-xs transition-all cursor-pointer mt-6 flex items-center justify-center gap-1.5"
+                >
+                  <Wallet className="h-4 w-4" /> Claim and Setup Fiduciary
+                </button>
+              )}
             </div>
 
-            {/* Play-by-Play Game Simulator */}
+            {/* Protocol Operations Logs */}
             <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle} space-y-4`}>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
-                <Activity className="h-3.5 w-3.5 text-emerald-500" />
-                Play-by-Play Game Simulator
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Terminal className="h-4 w-4 text-emerald-500" />
+                Protocol Operations log
               </h4>
               
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleSimAction("powerswing")}
-                  className="rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 py-2 text-xs font-bold transition-all cursor-pointer text-red-400"
-                >
-                  Power Swing
-                </button>
-                <button
-                  onClick={() => handleSimAction("bunt")}
-                  className="rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 py-2 text-xs font-bold transition-all cursor-pointer text-amber-400"
-                >
-                  Sac-Bunt
-                </button>
-                <button
-                  onClick={() => handleSimAction("pitch")}
-                  className="rounded-xl border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 py-2 text-xs font-bold transition-all cursor-pointer text-blue-400"
-                >
-                  Pitch Ball
-                </button>
-                <button
-                  onClick={() => handleSimAction("steal")}
-                  className="rounded-xl border border-purple-500/20 bg-purple-500/5 hover:bg-purple-500/10 py-2 text-xs font-bold transition-all cursor-pointer text-purple-400"
-                >
-                  Steal Base
-                </button>
-              </div>
-
-              <div className="space-y-1">
-                <span className="text-[8px] text-slate-500 uppercase tracking-widest block">Simulation Feed</span>
-                <div className={`rounded-xl p-3 border font-mono text-[9px] h-40 overflow-y-auto space-y-2 ${terminalBg}`}>
-                  {simulatorLog.map((log, index) => (
-                    <div key={index} className="border-b border-white/5 pb-1 text-slate-350">{log}</div>
-                  ))}
-                </div>
+              <div className={`rounded-xl p-3 font-mono text-[9px] h-52 overflow-y-auto space-y-2 ${terminalBg}`}>
+                {terminalLogs.map((log, index) => (
+                  <div key={index} className="border-b border-white/5 pb-1 text-slate-350">{log}</div>
+                ))}
               </div>
             </div>
 
-            {/* GCP/TimesFM Analytics */}
-            <div className={`rounded-3xl border p-6 shadow-xl backdrop-blur-md ${cardStyle}`}>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1">
-                <Activity className="h-3.5 w-3.5 text-emerald-500" />
-                GCP TimesFM Analytics
-              </h4>
-              <div className="space-y-3 text-xs font-mono">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Scout Horizon:</span>
-                  <span>24 slots (CWS Finals)</span>
+          </div>
+
+        </div>
+
+      </main>
+
+      {/* Claim Process Modal (Simulating Onboarding Flow) */}
+      {isClaimModalOpen && claimingAthlete && (
+        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-[#0c241b] border-2 border-emerald-500/40 rounded-3xl p-6 max-w-md w-full space-y-6 relative text-white">
+            
+            <button
+              onClick={() => setIsClaimModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-sm cursor-pointer"
+            >
+              ✕
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest font-bold">SOVEREIGN NAMESPACE REGISTER</span>
+              <h3 className="text-lg font-black orbitron-title">Claiming Identity: {claimingAthlete.name}</h3>
+              <p className="text-xs text-slate-400 font-mono">{claimingAthlete.handle}</p>
+            </div>
+
+            {/* Process Indicator */}
+            <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 border-b border-white/5 pb-4">
+              <span className={claimStep >= 1 ? "text-emerald-400 font-bold" : ""}>1. Bind Wallet</span>
+              <span className="text-slate-700">➔</span>
+              <span className={claimStep >= 2 ? "text-emerald-400 font-bold" : ""}>2. ID Verify</span>
+              <span className="text-slate-700">➔</span>
+              <span className={claimStep >= 3 ? "text-emerald-400 font-bold" : ""}>3. Consensus Sign</span>
+              <span className="text-slate-700">➔</span>
+              <span className={claimStep >= 4 ? "text-emerald-400 font-bold" : ""}>4. Done</span>
+            </div>
+
+            {/* Step Content */}
+            <div className="space-y-4">
+              {claimStep === 1 && (
+                <div className="space-y-3 text-xs leading-relaxed text-slate-350">
+                  <p>To claim this sports identity registry, bind your active Web3 wallet. Unykorn covers all network setup gas fees.</p>
+                  <button
+                    onClick={executeClaimStep}
+                    className="w-full text-center rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5"
+                  >
+                    Bind Active Wallet
+                  </button>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Predicted Mint Velocity:</span>
-                  <span className="text-emerald-400 font-bold">+18.5% (TROY hype)</span>
+              )}
+
+              {claimStep === 2 && (
+                <div className="space-y-3 text-xs leading-relaxed text-slate-350">
+                  <p>Provide IAL2 credential matching. This uses secure client-side zero knowledge verification to prevent unauthorized claiming.</p>
+                  <button
+                    onClick={executeClaimStep}
+                    className="w-full text-center rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5"
+                  >
+                    Scan Credentials & Verify
+                  </button>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Asset Load Level:</span>
-                  <span className="text-blue-400">OPTIMAL</span>
+              )}
+
+              {claimStep === 3 && (
+                <div className="space-y-3 text-xs leading-relaxed text-slate-350">
+                  <p>Confirm the final registration request. Zero gas fees are deducted. Ownership transfers permanently to your secure account.</p>
+                  <button
+                    onClick={executeClaimStep}
+                    className="w-full text-center rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5"
+                  >
+                    Submit Consensus Signature
+                  </button>
                 </div>
+              )}
+
+              {claimStep === 4 && (
+                <div className="space-y-3 text-xs text-center">
+                  <CheckCircle className="h-12 w-12 text-emerald-400 mx-auto animate-bounce" />
+                  <p className="text-slate-300">Root namespace handle successfully claimed! Fiduciary vaults and offer inboxes are now active.</p>
+                  <button
+                    onClick={() => {
+                      setIsClaimModalOpen(false);
+                      setUserClass("athlete"); // Logged in as Athlete
+                      setActiveTab("control-hub"); // Route to dashboard
+                    }}
+                    className="w-full text-center rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5"
+                  >
+                    Open Athlete Console
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Live progress logs */}
+            <div className="space-y-1">
+              <span className="text-[9px] uppercase font-mono text-slate-500">Claim operations logs</span>
+              <div className="bg-black/50 p-2.5 rounded-xl border border-white/5 font-mono text-[9px] h-24 overflow-y-auto space-y-1 text-slate-400">
+                {claimLogs.map((log, idx) => (
+                  <div key={idx}>{log}</div>
+                ))}
               </div>
             </div>
 
           </div>
         </div>
-
-      </main>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-emerald-500/10 py-10 mt-16 text-xs text-slate-500">

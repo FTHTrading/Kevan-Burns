@@ -1,0 +1,465 @@
+{
+  "success": true,
+  "rootManifest": {
+    "cid": "bafkreibbkj3y6aphrwjtjrp2jyfo4edhg6l7h32ami3ouanuea6o3oadpq",
+    "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreibbkj3y6aphrwjtjrp2jyfo4edhg6l7h32ami3ouanuea6o3oadpq"
+  },
+  "teamCollections": {
+    "georgia": {
+      "cid": "bafkreibqw5b5633cprvgqwwda46nf7vwrs5sztnq2nbk5fiqwadz3dohve",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreibqw5b5633cprvgqwwda46nf7vwrs5sztnq2nbk5fiqwadz3dohve",
+      "solanaTxHash": "48UPWTibZksgDYnszyQM9dHcRbzcHQHNrsyuVhzmVr7fTKN82iWEwSfAMXidZTxfzt7sq8WtH3CprU5dUKbiBGCE",
+      "explorerUrl": "https://solscan.io/tx/48UPWTibZksgDYnszyQM9dHcRbzcHQHNrsyuVhzmVr7fTKN82iWEwSfAMXidZTxfzt7sq8WtH3CprU5dUKbiBGCE"
+    },
+    "troy": {
+      "cid": "bafkreigtl2bncs2vae52rewthfx6ilqleebymg7dmv6g2igcb3i3cb3bz4",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreigtl2bncs2vae52rewthfx6ilqleebymg7dmv6g2igcb3i3cb3bz4",
+      "solanaTxHash": "21iXPRq4YMYZBhNFqmque2uLWqGfBXakBGD1nytfi8oimL2noe5TTuGHqxk2oMtd7XQr4t6obiFBWCh4SvKSeJFd",
+      "explorerUrl": "https://solscan.io/tx/21iXPRq4YMYZBhNFqmque2uLWqGfBXakBGD1nytfi8oimL2noe5TTuGHqxk2oMtd7XQr4t6obiFBWCh4SvKSeJFd"
+    },
+    "wvu": {
+      "cid": "bafkreibkztj755jrop2thv422ocv4f735aytmd3t7ypxxfgmfldy75zaga",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreibkztj755jrop2thv422ocv4f735aytmd3t7ypxxfgmfldy75zaga",
+      "solanaTxHash": "29XcLA4S1QN4SwS7sPyEE9R6RuSBNHbMvNX3AjY1umzaBTCsaUZWNxDtZFgYAQLJCyLkdH6At1Xg3XJtjEidpdLq",
+      "explorerUrl": "https://solscan.io/tx/29XcLA4S1QN4SwS7sPyEE9R6RuSBNHbMvNX3AjY1umzaBTCsaUZWNxDtZFgYAQLJCyLkdH6At1Xg3XJtjEidpdLq"
+    },
+    "unc": {
+      "cid": "bafkreifa6lvnp4h5qzxuyyh6kd5gis54evjanimmzd5ko5dv2g335r3tka",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreifa6lvnp4h5qzxuyyh6kd5gis54evjanimmzd5ko5dv2g335r3tka",
+      "solanaTxHash": "3Y1FHXL2pZye3QsCWXC4nVShrHvp59MCd6bqrV6LTCzjJTX5KTsmGymzKSnqqHLDxTiz76UmeYSZ8MSEZ7WDPBHx",
+      "explorerUrl": "https://solscan.io/tx/3Y1FHXL2pZye3QsCWXC4nVShrHvp59MCd6bqrV6LTCzjJTX5KTsmGymzKSnqqHLDxTiz76UmeYSZ8MSEZ7WDPBHx"
+    },
+    "olemiss": {
+      "cid": "bafkreibqs42gsf3bsj4plq2d6u6tfcnddkxwtsbd4vnrivbvgjbnqmie7e",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreibqs42gsf3bsj4plq2d6u6tfcnddkxwtsbd4vnrivbvgjbnqmie7e",
+      "solanaTxHash": "2eURd4sdZVfM1hxKsNVDf77RwCpQ4xmcgDCodQsUhWvrWLBvE6SrZGCx6KRuTdGdqqcEAqpQygXLGnDoPinpso2s",
+      "explorerUrl": "https://solscan.io/tx/2eURd4sdZVfM1hxKsNVDf77RwCpQ4xmcgDCodQsUhWvrWLBvE6SrZGCx6KRuTdGdqqcEAqpQygXLGnDoPinpso2s"
+    },
+    "alabama": {
+      "cid": "bafkreif76vd4rw7m3cuvixiigakubbt2vf77q25euxvyyjpicclmrsrmjy",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreif76vd4rw7m3cuvixiigakubbt2vf77q25euxvyyjpicclmrsrmjy",
+      "solanaTxHash": "4Sck9hFeboXAp2bJAuYZEpoqi6p6tzFxR91ER11wsP4hMpeiFNpBPfkGgXRpZHTxMGtgbHmhj2BubSxqwtErVRQc",
+      "explorerUrl": "https://solscan.io/tx/4Sck9hFeboXAp2bJAuYZEpoqi6p6tzFxR91ER11wsP4hMpeiFNpBPfkGgXRpZHTxMGtgbHmhj2BubSxqwtErVRQc"
+    },
+    "oklahoma": {
+      "cid": "bafkreignnrsp6zkno6oypko4iw2ndpr2ptklne3zob7dadvkromt7sm5u4",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreignnrsp6zkno6oypko4iw2ndpr2ptklne3zob7dadvkromt7sm5u4",
+      "solanaTxHash": "2A8erTYSBGHiHPfVZguXtcbeuCycczsNxAzgHXHNUkBCZmoELxifL6L1QzZeq3nMeALUTpnZVRQg9fLwKgMz1Yq1",
+      "explorerUrl": "https://solscan.io/tx/2A8erTYSBGHiHPfVZguXtcbeuCycczsNxAzgHXHNUkBCZmoELxifL6L1QzZeq3nMeALUTpnZVRQg9fLwKgMz1Yq1"
+    },
+    "texas": {
+      "cid": "bafkreici2eln2v2ujse6rexcnrauzq7kr6zmvkq7gwzsbay4c5udhfc5qe",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreici2eln2v2ujse6rexcnrauzq7kr6zmvkq7gwzsbay4c5udhfc5qe",
+      "solanaTxHash": "4zXoNeBbY73e6zRUpMRTEBCTS66Ma678Ewgtnng39DnBb2Ty3wiUkioW974P5G9aG82d5qs2VYUwES1f1ctWKaYU",
+      "explorerUrl": "https://solscan.io/tx/4zXoNeBbY73e6zRUpMRTEBCTS66Ma678Ewgtnng39DnBb2Ty3wiUkioW974P5G9aG82d5qs2VYUwES1f1ctWKaYU"
+    }
+  },
+  "namespaces": [
+    {
+      "handle": "daniel.jackson.dawgs",
+      "cid": "bafkreie65uhwtbmw7x2pqrkndfsrseqp5a6qyu2bzi77dtk5nlaie7lzau",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreie65uhwtbmw7x2pqrkndfsrseqp5a6qyu2bzi77dtk5nlaie7lzau",
+      "solanaTxHash": "21XWVgrw8ocVcS8Wpi4uBe1xvhehgz2rQvjn5KbKi3Xx71ocJjcXjaENu6Lg83NEBwXmEPbsiPMeVJwxrn4VxoMH",
+      "explorerUrl": "https://solscan.io/tx/21XWVgrw8ocVcS8Wpi4uBe1xvhehgz2rQvjn5KbKi3Xx71ocJjcXjaENu6Lg83NEBwXmEPbsiPMeVJwxrn4VxoMH"
+    },
+    {
+      "handle": "kolby.branch.dawgs",
+      "cid": "bafkreidk6yzaicsubib4hcyblpszl5w3dakjeq6ddg33vtknf4yse6jxay",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreidk6yzaicsubib4hcyblpszl5w3dakjeq6ddg33vtknf4yse6jxay",
+      "solanaTxHash": "4Cnyfwj19LpuQAFJRtYY7jAs8JtPoKGBrDr78NWd6QQQ489PmWj2XSudQ2kN7RzFyMxyC2CBuBR74x5vYotKPfQC",
+      "explorerUrl": "https://solscan.io/tx/4Cnyfwj19LpuQAFJRtYY7jAs8JtPoKGBrDr78NWd6QQQ489PmWj2XSudQ2kN7RzFyMxyC2CBuBR74x5vYotKPfQC"
+    },
+    {
+      "handle": "joey.volchko.dawgs",
+      "cid": "bafkreic2v24qx6gaa6o2nfoycvkrtd5pqlrnejo5tjf34gaqeujlbosale",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreic2v24qx6gaa6o2nfoycvkrtd5pqlrnejo5tjf34gaqeujlbosale",
+      "solanaTxHash": "5WwfaoGgDbE53K6nt8uU3GDgGJoQGGSyfsQniySmK1Fx1txAPfdnPNHwq4oyHzMsoXnTLQYpLW3vifR538weMZMF",
+      "explorerUrl": "https://solscan.io/tx/5WwfaoGgDbE53K6nt8uU3GDgGJoQGGSyfsQniySmK1Fx1txAPfdnPNHwq4oyHzMsoXnTLQYpLW3vifR538weMZMF"
+    },
+    {
+      "handle": "charlie.condon.dawgs",
+      "cid": "bafkreicorqofxj4k7y7srxhmkj3xppvbty6hlqtuqzpskqgb7ypsvmxxqi",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreicorqofxj4k7y7srxhmkj3xppvbty6hlqtuqzpskqgb7ypsvmxxqi",
+      "solanaTxHash": "5oPutzGiAPNNiwh39a2C9LaTM4sALE7R4NhhWbppxPKtBMti56Yp743pFR8EFCDU6oAAWeDThSKGUVu3zGgUGhtw",
+      "explorerUrl": "https://solscan.io/tx/5oPutzGiAPNNiwh39a2C9LaTM4sALE7R4NhhWbppxPKtBMti56Yp743pFR8EFCDU6oAAWeDThSKGUVu3zGgUGhtw"
+    },
+    {
+      "handle": "corey.collins.dawgs",
+      "cid": "bafkreibmqn2rz4kskqqgfqiyho6jfbuipudvculk2kpokzgi4tnazngqiq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreibmqn2rz4kskqqgfqiyho6jfbuipudvculk2kpokzgi4tnazngqiq",
+      "solanaTxHash": "5Rfxwavia2ocmuH2rEUd6kdBKEVtJRVjLFGr5NozrMpopXtyhNjW6AtvPf2AMKuBECjKxQbykiRocwqMo7JiY3Ag",
+      "explorerUrl": "https://solscan.io/tx/5Rfxwavia2ocmuH2rEUd6kdBKEVtJRVjLFGr5NozrMpopXtyhNjW6AtvPf2AMKuBECjKxQbykiRocwqMo7JiY3Ag"
+    },
+    {
+      "handle": "slate.alford.dawgs",
+      "cid": "bafkreignnjp4hq7duy5pgxuirdtnhbfncape6wq6nnqqphggmz6a76e37u",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreignnjp4hq7duy5pgxuirdtnhbfncape6wq6nnqqphggmz6a76e37u",
+      "solanaTxHash": "YWDenFHYK9viFmimDrvNUkjFtEMzmVZsAZPhSthQsuys7KAMBqbpFZuVnpoKEErsCsv4rXEFRT3DqUyqgTXr7Cq",
+      "explorerUrl": "https://solscan.io/tx/YWDenFHYK9viFmimDrvNUkjFtEMzmVZsAZPhSthQsuys7KAMBqbpFZuVnpoKEErsCsv4rXEFRT3DqUyqgTXr7Cq"
+    },
+    {
+      "handle": "armani.guzman.mountaineers",
+      "cid": "bafkreiafpxmfdud5ubz7t3g3b5pkblybyr7nnlu2dfgun27hn7pomlnte4",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiafpxmfdud5ubz7t3g3b5pkblybyr7nnlu2dfgun27hn7pomlnte4",
+      "solanaTxHash": "5qJBSU3rHzqVu79HP1HDLkBnKonjxwiXo6jnt9GCa7MMPKyEQVa2cNUQtXW1Y4PNGgsPzXQUQNRoMRtYvcTr4oM8",
+      "explorerUrl": "https://solscan.io/tx/5qJBSU3rHzqVu79HP1HDLkBnKonjxwiXo6jnt9GCa7MMPKyEQVa2cNUQtXW1Y4PNGgsPzXQUQNRoMRtYvcTr4oM8"
+    },
+    {
+      "handle": "tyrus.hall.mountaineers",
+      "cid": "bafkreihz6jxhcwl4jqeijcrpr3tgmpbxyftwf5uanpo6ph7skxzsiinhpm",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreihz6jxhcwl4jqeijcrpr3tgmpbxyftwf5uanpo6ph7skxzsiinhpm",
+      "solanaTxHash": "2Tax4XXqKDujBa539cTqM9FvrAuUBnYDQmr8cAXAzayvYrQyvfSx7ytCid5pfSDmDRCXZaE6GSydFWKt65nd5ayr",
+      "explorerUrl": "https://solscan.io/tx/2Tax4XXqKDujBa539cTqM9FvrAuUBnYDQmr8cAXAzayvYrQyvfSx7ytCid5pfSDmDRCXZaE6GSydFWKt65nd5ayr"
+    },
+    {
+      "handle": "ian.korn.mountaineers",
+      "cid": "bafkreiamzmfztgtrjkvwmludrmxyk2nlugnnjom7ufcf7tfecdexmyrmtu",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiamzmfztgtrjkvwmludrmxyk2nlugnnjom7ufcf7tfecdexmyrmtu",
+      "solanaTxHash": "2MYMLWErBqoS6BiSXseVP71KBYBiPAQKD7fEjpKRUGLCzVe746jXvqiANUP8fYUkSzmdV8Ti2jbLGWQBc9WPnb1",
+      "explorerUrl": "https://solscan.io/tx/2MYMLWErBqoS6BiSXseVP71KBYBiPAQKD7fEjpKRUGLCzVe746jXvqiANUP8fYUkSzmdV8Ti2jbLGWQBc9WPnb1"
+    },
+    {
+      "handle": "sean.smith.mountaineers",
+      "cid": "bafkreiedzlftzvqq6ohhshsrpq55ucyaymq5y2undznjnqldvaipmoyvhm",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiedzlftzvqq6ohhshsrpq55ucyaymq5y2undznjnqldvaipmoyvhm",
+      "solanaTxHash": "41E9PCHuuS8fswb6AVuj4AuERo68AbKJycyFR1JL18wJpFQv5PpnYo1RqDkx3kteDzXaLich8NFreUK45cfPtkr3",
+      "explorerUrl": "https://solscan.io/tx/41E9PCHuuS8fswb6AVuj4AuERo68AbKJycyFR1JL18wJpFQv5PpnYo1RqDkx3kteDzXaLich8NFreUK45cfPtkr3"
+    },
+    {
+      "handle": "chansen.cole.mountaineers",
+      "cid": "bafkreifvjq6vjmi7fuzwbzg7uxvgiyyqcpv5g7vvysv5naizelar43iofq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreifvjq6vjmi7fuzwbzg7uxvgiyyqcpv5g7vvysv5naizelar43iofq",
+      "solanaTxHash": "5zs1EG18goP5RV86TWV1aUHnFoDux9HgGHMoHBuEzWcXwFAuynS3oFU5C1YWVQVmSoDcdYsfEUfgbjy9rsMLQY8",
+      "explorerUrl": "https://solscan.io/tx/5zs1EG18goP5RV86TWV1aUHnFoDux9HgGHMoHBuEzWcXwFAuynS3oFU5C1YWVQVmSoDcdYsfEUfgbjy9rsMLQY8"
+    },
+    {
+      "handle": "ben.mcdougal.mountaineers",
+      "cid": "bafkreigqa7kesmmyoc54ey6mujke4eibptqyhxd5d5w2g64sxx3hpgvm4u",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreigqa7kesmmyoc54ey6mujke4eibptqyhxd5d5w2g64sxx3hpgvm4u",
+      "solanaTxHash": "5gycT8MPGpxmSJBrQvGhC7pwkn4HfgskDRL1xBYjCDCAhF9djbRfAz5bgZsAUUtpRSdTi5nzDf3Jd6yJVjATx7Sm",
+      "explorerUrl": "https://solscan.io/tx/5gycT8MPGpxmSJBrQvGhC7pwkn4HfgskDRL1xBYjCDCAhF9djbRfAz5bgZsAUUtpRSdTi5nzDf3Jd6yJVjATx7Sm"
+    },
+    {
+      "handle": "brock.wills.mountaineers",
+      "cid": "bafkreidxxy64pb2at2agvynxfenyx3okbcfd6d6o322fdyccaoyrfu7j7e",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreidxxy64pb2at2agvynxfenyx3okbcfd6d6o322fdyccaoyrfu7j7e",
+      "solanaTxHash": "5Z41R4Q3Xj6NPiPCDgvNS5orhkR7EEaJd9RtezUDaTTkwh64sAACVoNsd762Rw5F3Rv4vnsacAMQDfGN65NWN4Dr",
+      "explorerUrl": "https://solscan.io/tx/5Z41R4Q3Xj6NPiPCDgvNS5orhkR7EEaJd9RtezUDaTTkwh64sAACVoNsd762Rw5F3Rv4vnsacAMQDfGN65NWN4Dr"
+    },
+    {
+      "handle": "paul.schoenfeld.mountaineers",
+      "cid": "bafkreida55umigthctomuna6fqvgda7onjlo5jrpbfn4ztrt2ackdr66eq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreida55umigthctomuna6fqvgda7onjlo5jrpbfn4ztrt2ackdr66eq",
+      "solanaTxHash": "4jE62zHsd8gF3yRHXfLCjtPgc7xVVN9T76YZXGPDGYZfXEH6P4Je4916fQRAC9Dw7pxv9AMerZKT1B4euRSesfTF",
+      "explorerUrl": "https://solscan.io/tx/4jE62zHsd8gF3yRHXfLCjtPgc7xVVN9T76YZXGPDGYZfXEH6P4Je4916fQRAC9Dw7pxv9AMerZKT1B4euRSesfTF"
+    },
+    {
+      "handle": "brodie.kresser.mountaineers",
+      "cid": "bafkreicjb4gnm6xcvy7zz3lrs6gzouotaqh4ha5jl6shjl2jsqkmfzapna",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreicjb4gnm6xcvy7zz3lrs6gzouotaqh4ha5jl6shjl2jsqkmfzapna",
+      "solanaTxHash": "4qyzuW1ZZw1U7v73zM4wPf6vcpWVxQXk5scfseXd7JQiGnMf87JYvu3LYj9KvBqNWwvkfmZDL7GGXh2Q6hoA6BzZ",
+      "explorerUrl": "https://solscan.io/tx/4qyzuW1ZZw1U7v73zM4wPf6vcpWVxQXk5scfseXd7JQiGnMf87JYvu3LYj9KvBqNWwvkfmZDL7GGXh2Q6hoA6BzZ"
+    },
+    {
+      "handle": "jj.wetherholt.mountaineers",
+      "cid": "bafkreidhbcrt6t3j52c7etdcgxrzlk6ujl4g6uxaygrz36ml74horqjw3q",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreidhbcrt6t3j52c7etdcgxrzlk6ujl4g6uxaygrz36ml74horqjw3q",
+      "solanaTxHash": "tsWwGVLemUWJMPxafNaNetSaW3bxXvFUQ3C76PoqiThLQFBsd2pPXcbwKui5N3gM62tVJ4ERtEj58nNhC3oRkLD",
+      "explorerUrl": "https://solscan.io/tx/tsWwGVLemUWJMPxafNaNetSaW3bxXvFUQ3C76PoqiThLQFBsd2pPXcbwKui5N3gM62tVJ4ERtEj58nNhC3oRkLD"
+    },
+    {
+      "handle": "logan.sauve.mountaineers",
+      "cid": "bafkreihkybjtojr7wwy3hfg26k26qsezo6fe73qmfdq4x43xgqrmt2d6qi",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreihkybjtojr7wwy3hfg26k26qsezo6fe73qmfdq4x43xgqrmt2d6qi",
+      "solanaTxHash": "5HYGfc4AyQqjSuGeei1xUZDbyLiGj22ybxRkg5e2y8hBY4ynoQyF5NjDzQVwBtrepKq8cQNPmNfeyBRdWZxBi4Mo",
+      "explorerUrl": "https://solscan.io/tx/5HYGfc4AyQqjSuGeei1xUZDbyLiGj22ybxRkg5e2y8hBY4ynoQyF5NjDzQVwBtrepKq8cQNPmNfeyBRdWZxBi4Mo"
+    },
+    {
+      "handle": "jimmy.janicki.trojans",
+      "cid": "bafkreiaoqvjlfkvcv6ajntby4n7a6zazc6fzs6vask5odi3dzvjzvi2v2e",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiaoqvjlfkvcv6ajntby4n7a6zazc6fzs6vask5odi3dzvjzvi2v2e",
+      "solanaTxHash": "178o394QguFkDqHAsyc5Rz4xXaxbiydNbp5Y2zbPiPVWPdM9A6HrNJbH6oDrJWzFDex7YZx39XGjCNcXFmSp9Y1",
+      "explorerUrl": "https://solscan.io/tx/178o394QguFkDqHAsyc5Rz4xXaxbiydNbp5Y2zbPiPVWPdM9A6HrNJbH6oDrJWzFDex7YZx39XGjCNcXFmSp9Y1"
+    },
+    {
+      "handle": "aaron.piasecki.trojans",
+      "cid": "bafkreieswvgvb2zswmwnmmihlk4g6sijlj6bafghyi2b7nce3no5l32pqa",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreieswvgvb2zswmwnmmihlk4g6sijlj6bafghyi2b7nce3no5l32pqa",
+      "solanaTxHash": "5EUxCKhZaGH3qLpy6y9gTa9gtLRSCRDSeHJKQAoJBdiZyjgSeMPeWpwakVDDd8DbQCNJRKYCmMY4BS5oeZxthYwT",
+      "explorerUrl": "https://solscan.io/tx/5EUxCKhZaGH3qLpy6y9gTa9gtLRSCRDSeHJKQAoJBdiZyjgSeMPeWpwakVDDd8DbQCNJRKYCmMY4BS5oeZxthYwT"
+    },
+    {
+      "handle": "steven.meier.trojans",
+      "cid": "bafkreidw7bkvg4ffg3hsybzvag35tdv32mjtpopa6nlww4fn4whqlw44bi",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreidw7bkvg4ffg3hsybzvag35tdv32mjtpopa6nlww4fn4whqlw44bi",
+      "solanaTxHash": "5paqsj5b4gwBkWY1j2ZCTq1UkPR8Atk14nEmfTxUBEKjW8kUhq5zGJGkc7xJ3daupcqpSx6Pkz3NttLp1KAYJgyi",
+      "explorerUrl": "https://solscan.io/tx/5paqsj5b4gwBkWY1j2ZCTq1UkPR8Atk14nEmfTxUBEKjW8kUhq5zGJGkc7xJ3daupcqpSx6Pkz3NttLp1KAYJgyi"
+    },
+    {
+      "handle": "drew.nelson.trojans",
+      "cid": "bafkreiaaol6jnlgpbeyt3rwyl5kg6v7exfdyvgrhyxld7hcxo2o5icablq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiaaol6jnlgpbeyt3rwyl5kg6v7exfdyvgrhyxld7hcxo2o5icablq",
+      "solanaTxHash": "3bQZQ758UM1a8fVvU1ZRkEJa1fuYrPHkopgXPJVs7foGP8B8ZBFwcHJ1yJXAAWZ1ujQcr1gANMB5y678zdvMkhv",
+      "explorerUrl": "https://solscan.io/tx/3bQZQ758UM1a8fVvU1ZRkEJa1fuYrPHkopgXPJVs7foGP8B8ZBFwcHJ1yJXAAWZ1ujQcr1gANMB5y678zdvMkhv"
+    },
+    {
+      "handle": "blake.cavill.trojans",
+      "cid": "bafkreihce3fvnhgp5pyodp2nxcuy7qhk2p36aarowqs7hreirflqnydnuy",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreihce3fvnhgp5pyodp2nxcuy7qhk2p36aarowqs7hreirflqnydnuy",
+      "solanaTxHash": "m1hAMoqBgMQXWUoyWAJkb44d4p5ew1uKcAEwTYeaoSEa8Wo4SFYtgiJDFY59ekZAMXkyq4Q2TmphJyQTrh9hxL5",
+      "explorerUrl": "https://solscan.io/tx/m1hAMoqBgMQXWUoyWAJkb44d4p5ew1uKcAEwTYeaoSEa8Wo4SFYtgiJDFY59ekZAMXkyq4Q2TmphJyQTrh9hxL5"
+    },
+    {
+      "handle": "josh.pyne.trojans",
+      "cid": "bafkreiaruxl2fykp23amnwdv43oil53xptd2xfhcgis54tey3n4pfoq7ue",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiaruxl2fykp23amnwdv43oil53xptd2xfhcgis54tey3n4pfoq7ue",
+      "solanaTxHash": "2rbSqEjUvH9khEe6XRqFS66hPLvpExYMMGagHsr4J8RnMDbFjWXTFF5i1jFD25m1vJpd7WaBDJvbpQLw115YU7RL",
+      "explorerUrl": "https://solscan.io/tx/2rbSqEjUvH9khEe6XRqFS66hPLvpExYMMGagHsr4J8RnMDbFjWXTFF5i1jFD25m1vJpd7WaBDJvbpQLw115YU7RL"
+    },
+    {
+      "handle": "sean.darnell.trojans",
+      "cid": "bafkreidp32mmef2qhc3ut5vurjj4lipvgda4skf3hvvyjppfuo4jfmhb5y",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreidp32mmef2qhc3ut5vurjj4lipvgda4skf3hvvyjppfuo4jfmhb5y",
+      "solanaTxHash": "5vSVGk794ri1wT6c3MJSB6sBshSvZxnkj37baeLSC7jY1ZwTdMvFz4k6TuwmHkL6pnG7CrgcUmsTKNJF6PA6uEr4",
+      "explorerUrl": "https://solscan.io/tx/5vSVGk794ri1wT6c3MJSB6sBshSvZxnkj37baeLSC7jY1ZwTdMvFz4k6TuwmHkL6pnG7CrgcUmsTKNJF6PA6uEr4"
+    },
+    {
+      "handle": "jabe.boroff.trojans",
+      "cid": "bafkreiht54lpx2nebl56kx2ow5bynj2upyb4modmavdqhvofn2vksfjvcq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiht54lpx2nebl56kx2ow5bynj2upyb4modmavdqhvofn2vksfjvcq",
+      "solanaTxHash": "2Nk9AjvmaHvmqiJ2oncWXT3iTCN3ZrBNBeisyqunoAmQ5mybBoZZqxgHNSVnJwUt8APyjPKyykWfEBUNPjXJ5Jjv",
+      "explorerUrl": "https://solscan.io/tx/2Nk9AjvmaHvmqiJ2oncWXT3iTCN3ZrBNBeisyqunoAmQ5mybBoZZqxgHNSVnJwUt8APyjPKyykWfEBUNPjXJ5Jjv"
+    },
+    {
+      "handle": "luke.lyon.trojans",
+      "cid": "bafkreia4eyn2vzjm4azkxsv6keovfhmk4vayju4mocdgq3rgfxxhovwy7m",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreia4eyn2vzjm4azkxsv6keovfhmk4vayju4mocdgq3rgfxxhovwy7m",
+      "solanaTxHash": "3AurvKkruAPKowGXt6TRjwkv9Tj3vEGhaS5cYSaoDhFKXRv4dvn66cn4q6cJJcJv9ksU68JkXhfBwTZ2nioXTKvN",
+      "explorerUrl": "https://solscan.io/tx/3AurvKkruAPKowGXt6TRjwkv9Tj3vEGhaS5cYSaoDhFKXRv4dvn66cn4q6cJJcJv9ksU68JkXhfBwTZ2nioXTKvN"
+    },
+    {
+      "handle": "kole.myers.trojans",
+      "cid": "bafkreifvaqa2g6fwjnkxzq5ahgntinsalsv2e7d7gc6jxrz3q5mjq6bwyi",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreifvaqa2g6fwjnkxzq5ahgntinsalsv2e7d7gc6jxrz3q5mjq6bwyi",
+      "solanaTxHash": "3Bdy5CqsADqe1C4Ygw6ApxiUanFwGvwDq85Nrp9fYGsXsn2c5FqjJggJnr7oWGnJ8AmYaS7onn1T64DWpoa9FAx2",
+      "explorerUrl": "https://solscan.io/tx/3Bdy5CqsADqe1C4Ygw6ApxiUanFwGvwDq85Nrp9fYGsXsn2c5FqjJggJnr7oWGnJ8AmYaS7onn1T64DWpoa9FAx2"
+    },
+    {
+      "handle": "vance.honeycutt.tarheels",
+      "cid": "bafkreifbhsm4zpnliic7fgnod7d4f37jsptfac6tjcwvgbicnabdsn47uq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreifbhsm4zpnliic7fgnod7d4f37jsptfac6tjcwvgbicnabdsn47uq",
+      "solanaTxHash": "4xsJiRmuLhqq4UEXWBdNwScavYSfmiGT5mE9hCBHUPHfaYcNrz6PPoEQ3ZmN3KW6DX8uGUayCx2Kbdy8JhSg7kBt",
+      "explorerUrl": "https://solscan.io/tx/4xsJiRmuLhqq4UEXWBdNwScavYSfmiGT5mE9hCBHUPHfaYcNrz6PPoEQ3ZmN3KW6DX8uGUayCx2Kbdy8JhSg7kBt"
+    },
+    {
+      "handle": "jason.decaro.tarheels",
+      "cid": "bafkreielqyncxydrhkaybgequdks5fogpzgoigrgeo7webd5jodve2bbmq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreielqyncxydrhkaybgequdks5fogpzgoigrgeo7webd5jodve2bbmq",
+      "solanaTxHash": "ooPvNcf6R2T3QmN6TWim258osiYuYLEq54D11b7YXJWytN9YUr6pAAbLYinj3EKzUo9Njg3Za2g2Fo9FRf1R4hA",
+      "explorerUrl": "https://solscan.io/tx/ooPvNcf6R2T3QmN6TWim258osiYuYLEq54D11b7YXJWytN9YUr6pAAbLYinj3EKzUo9Njg3Za2g2Fo9FRf1R4hA"
+    },
+    {
+      "handle": "casey.cook.tarheels",
+      "cid": "bafkreiherxhjv42vnorazfkpbcqzudcyr2if2cs4mpnc2ld2yyibtizbwq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiherxhjv42vnorazfkpbcqzudcyr2if2cs4mpnc2ld2yyibtizbwq",
+      "solanaTxHash": "5iq1VW9n2tjBxfVUECZ7TJh3DWdarBpw1BtiAvR6ASr7Wf3KbQ5yQKAoU4Gh6X9BFqMJW5hEYAvat5DCZ9dCFeZw",
+      "explorerUrl": "https://solscan.io/tx/5iq1VW9n2tjBxfVUECZ7TJh3DWdarBpw1BtiAvR6ASr7Wf3KbQ5yQKAoU4Gh6X9BFqMJW5hEYAvat5DCZ9dCFeZw"
+    },
+    {
+      "handle": "parks.harber.tarheels",
+      "cid": "bafkreif37amoxjkbix2wmilcxr5wtjpywam3d2kq4mqeghw6sq3aqwu5sq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreif37amoxjkbix2wmilcxr5wtjpywam3d2kq4mqeghw6sq3aqwu5sq",
+      "solanaTxHash": "51Tbai5MyouUc2Q8E6KXjrqQ7ZJpV1DrK1gJumtGEAfc3T328teywYm2XpTseYeaoHjfJZ3LHoVtaTpxkVVdUry2",
+      "explorerUrl": "https://solscan.io/tx/51Tbai5MyouUc2Q8E6KXjrqQ7ZJpV1DrK1gJumtGEAfc3T328teywYm2XpTseYeaoHjfJZ3LHoVtaTpxkVVdUry2"
+    },
+    {
+      "handle": "luke.stevenson.tarheels",
+      "cid": "bafkreidprbkedsgt4xlfatfcjhouaypynkrdk5ufa534r6npjlshfsjcve",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreidprbkedsgt4xlfatfcjhouaypynkrdk5ufa534r6npjlshfsjcve",
+      "solanaTxHash": "3cwYTjSzVXvkRGQbtok2QhooNKQM244VSdJsE9w8iPcCpYtuof7ha1MfZAsqwJ3aiznRadLuBPQeNgMzS2eRforc",
+      "explorerUrl": "https://solscan.io/tx/3cwYTjSzVXvkRGQbtok2QhooNKQM244VSdJsE9w8iPcCpYtuof7ha1MfZAsqwJ3aiznRadLuBPQeNgMzS2eRforc"
+    },
+    {
+      "handle": "andrew.fischer.rebels",
+      "cid": "bafkreibgxyiees2fboldwbqi64jeuiwhjfb4cjowm2kpt7c62rxd5e6h2i",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreibgxyiees2fboldwbqi64jeuiwhjfb4cjowm2kpt7c62rxd5e6h2i",
+      "solanaTxHash": "x11GKuzjaUwGMiSPZuh4BqTVakRPyZ3NesaCEXqj2z3vGw5gRb1V4ZdDGdUM2a63mKb4LcRzfG72o2nzWy2hgGN",
+      "explorerUrl": "https://solscan.io/tx/x11GKuzjaUwGMiSPZuh4BqTVakRPyZ3NesaCEXqj2z3vGw5gRb1V4ZdDGdUM2a63mKb4LcRzfG72o2nzWy2hgGN"
+    },
+    {
+      "handle": "ethan.groff.rebels",
+      "cid": "bafkreiheaguchzyfy6qn6ndw7elh5vvtulavlxomkwb5foaxdgu5ed26ii",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiheaguchzyfy6qn6ndw7elh5vvtulavlxomkwb5foaxdgu5ed26ii",
+      "solanaTxHash": "63TH6LRC9gC6uBWLEs3wubRdJEN7K44Ai2vGpMX3t13VifhArjDdU9H7DyUj6XCbDSVAMNBk8EmXxLaDtmBLpg6W",
+      "explorerUrl": "https://solscan.io/tx/63TH6LRC9gC6uBWLEs3wubRdJEN7K44Ai2vGpMX3t13VifhArjDdU9H7DyUj6XCbDSVAMNBk8EmXxLaDtmBLpg6W"
+    },
+    {
+      "handle": "luke.hill.rebels",
+      "cid": "bafkreibi3psarjefxlbw4zui7gtulebi35vard4tm3wgzwyhienkacrasm",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreibi3psarjefxlbw4zui7gtulebi35vard4tm3wgzwyhienkacrasm",
+      "solanaTxHash": "gdZRygPSfAjbGLvmoh46AQD3iSoZL91KvUiEkcGqEQ6A68wDfDddsp3NUa4As2B58in4fQCbTEMAsaseSUTYQy2",
+      "explorerUrl": "https://solscan.io/tx/gdZRygPSfAjbGLvmoh46AQD3iSoZL91KvUiEkcGqEQ6A68wDfDddsp3NUa4As2B58in4fQCbTEMAsaseSUTYQy2"
+    },
+    {
+      "handle": "liam.doyle.rebels",
+      "cid": "bafkreic3ab2fzzpxvys4thqoqtywq7q6tdfcxwjr3i2nxtabywcgsl4rau",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreic3ab2fzzpxvys4thqoqtywq7q6tdfcxwjr3i2nxtabywcgsl4rau",
+      "solanaTxHash": "34aEFZzkQeH5aCKJRnJSeZ1Nj5J4a8aF8srQLNdibMjeyC2ExSXd1uuWd6MJiDNp66GenN7qRD7j6g9thCjBZBv2",
+      "explorerUrl": "https://solscan.io/tx/34aEFZzkQeH5aCKJRnJSeZ1Nj5J4a8aF8srQLNdibMjeyC2ExSXd1uuWd6MJiDNp66GenN7qRD7j6g9thCjBZBv2"
+    },
+    {
+      "handle": "gage.miller.tide",
+      "cid": "bafkreiag6gmnpknpggzpv4bmhyghjovxpxyczng5h5cq3urcttl4paanae",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiag6gmnpknpggzpv4bmhyghjovxpxyczng5h5cq3urcttl4paanae",
+      "solanaTxHash": "666bKL979HSxivX78LTKkGZXmg5CBMGPfuLDYsbmeB9Jzac6pvSwQakfNfGFhF7Us6YNuDy2eNfc2z9pnEXzanZz",
+      "explorerUrl": "https://solscan.io/tx/666bKL979HSxivX78LTKkGZXmg5CBMGPfuLDYsbmeB9Jzac6pvSwQakfNfGFhF7Us6YNuDy2eNfc2z9pnEXzanZz"
+    },
+    {
+      "handle": "tj.mccants.tide",
+      "cid": "bafkreiamxfv5iwjlkmztbrskfigwvi4vtkyr5emhmfrp3wt5ui5t5qvnwe",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiamxfv5iwjlkmztbrskfigwvi4vtkyr5emhmfrp3wt5ui5t5qvnwe",
+      "solanaTxHash": "47ddW8zDVuNnkfeY26iSPfabim9XDpQvvV7H8ch8KYdZYEwi7qU4nDRD8ATkGvXVuoqgf5MKg4y65BvGghaDeogH",
+      "explorerUrl": "https://solscan.io/tx/47ddW8zDVuNnkfeY26iSPfabim9XDpQvvV7H8ch8KYdZYEwi7qU4nDRD8ATkGvXVuoqgf5MKg4y65BvGghaDeogH"
+    },
+    {
+      "handle": "justin.lebron.tide",
+      "cid": "bafkreie3zkzxoe6twp3spldjttuyh2vt3fmybe3yhvmlbogtij6naq5wne",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreie3zkzxoe6twp3spldjttuyh2vt3fmybe3yhvmlbogtij6naq5wne",
+      "solanaTxHash": "fWNTW9dyJUbxXooxnrfwFBYn5hmyAGDqFZgcqha3v6AvpFrSkFUKFCkK8can5BdVYJJe93F672KAYjJS65GJug3",
+      "explorerUrl": "https://solscan.io/tx/fWNTW9dyJUbxXooxnrfwFBYn5hmyAGDqFZgcqha3v6AvpFrSkFUKFCkK8can5BdVYJJe93F672KAYjJS65GJug3"
+    },
+    {
+      "handle": "greg.farone.tide",
+      "cid": "bafkreiapoxpgtgn6lzjmx4ak6kkw5u75rlburzx543pit77iv344scfchy",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiapoxpgtgn6lzjmx4ak6kkw5u75rlburzx543pit77iv344scfchy",
+      "solanaTxHash": "2vw5zCVSfbEE6xAzfC7t3J1ixvPnfv74ezQ2SytEKYq6BwiyBFwrZw5dVFxSD9dadKoPLytapRKk7V9uC72cD1dr",
+      "explorerUrl": "https://solscan.io/tx/2vw5zCVSfbEE6xAzfC7t3J1ixvPnfv74ezQ2SytEKYq6BwiyBFwrZw5dVFxSD9dadKoPLytapRKk7V9uC72cD1dr"
+    },
+    {
+      "handle": "easton.carmichael.sooners",
+      "cid": "bafkreiahtxtmwdpi3hucybl3pfhlkxhyxkbwabi6umesavksnpkf725nbi",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiahtxtmwdpi3hucybl3pfhlkxhyxkbwabi6umesavksnpkf725nbi",
+      "solanaTxHash": "EBXHKwaZhovGnfcBWU4o9tRKLQNbWvibKd2yaptr2vz33aMvmWfGNFKdqT4HQeb5A7YgsMjD9PGf2EjZRXiGUoZ",
+      "explorerUrl": "https://solscan.io/tx/EBXHKwaZhovGnfcBWU4o9tRKLQNbWvibKd2yaptr2vz33aMvmWfGNFKdqT4HQeb5A7YgsMjD9PGf2EjZRXiGUoZ"
+    },
+    {
+      "handle": "bryce.madron.sooners",
+      "cid": "bafkreia3evssbtyntvc76mbydomkfaium4hqupzatgoi2qk7vh2en3m7lu",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreia3evssbtyntvc76mbydomkfaium4hqupzatgoi2qk7vh2en3m7lu",
+      "solanaTxHash": "5MW1fF6Ywb9ADP6F1umB5uPB25nccUcJQqgYHHAmSGayNEBbiXc254pcnna1AobmA1vzmf7vnG9gM1c5fdmWhov6",
+      "explorerUrl": "https://solscan.io/tx/5MW1fF6Ywb9ADP6F1umB5uPB25nccUcJQqgYHHAmSGayNEBbiXc254pcnna1AobmA1vzmf7vnG9gM1c5fdmWhov6"
+    },
+    {
+      "handle": "john.spikerman.sooners",
+      "cid": "bafkreideup276duqgqkhqsdjencemidlhqbyp6675qa55rkuvdwrg24h2y",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreideup276duqgqkhqsdjencemidlhqbyp6675qa55rkuvdwrg24h2y",
+      "solanaTxHash": "5t16oTKBE2bf4i2Wr3wrfs52uTECcG18xZDW5vxo5vycHUW3NZg6ZZrDZiHFaQLpDxVDw39NEJTjKJrhs3HtEfzK",
+      "explorerUrl": "https://solscan.io/tx/5t16oTKBE2bf4i2Wr3wrfs52uTECcG18xZDW5vxo5vycHUW3NZg6ZZrDZiHFaQLpDxVDw39NEJTjKJrhs3HtEfzK"
+    },
+    {
+      "handle": "kendall.pettis.sooners",
+      "cid": "bafkreibyehqgtc3roipovqduyrx4kwzcp5d6zujfxe7vyhcpknncs2ywtu",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreibyehqgtc3roipovqduyrx4kwzcp5d6zujfxe7vyhcpknncs2ywtu",
+      "solanaTxHash": "4WdhMTbgiZuWeLYpVGjfnM54vTiMp2HQcYzudhKDsv4D7bAwUwrtWQWodwKRGe92SmP4dqX2hyv6LQ8GwFjAUK9a",
+      "explorerUrl": "https://solscan.io/tx/4WdhMTbgiZuWeLYpVGjfnM54vTiMp2HQcYzudhKDsv4D7bAwUwrtWQWodwKRGe92SmP4dqX2hyv6LQ8GwFjAUK9a"
+    },
+    {
+      "handle": "jared.thomas.longhorns",
+      "cid": "bafkreidvbahv2kkrapiknxnjqsssjescqzbhw5h7glnn6urfbpwdejooc4",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreidvbahv2kkrapiknxnjqsssjescqzbhw5h7glnn6urfbpwdejooc4",
+      "solanaTxHash": "5So4rFMVBTjQgq6MqfsD5ENPFGuKb9AYV7cZ9dcbnppbX3QySGQbQdbAYs5zVC7sJvKx1maHxSHxE2vwqvA21JWd",
+      "explorerUrl": "https://solscan.io/tx/5So4rFMVBTjQgq6MqfsD5ENPFGuKb9AYV7cZ9dcbnppbX3QySGQbQdbAYs5zVC7sJvKx1maHxSHxE2vwqvA21JWd"
+    },
+    {
+      "handle": "jalin.flores.longhorns",
+      "cid": "bafkreienr7fcjlrcw3wvy7ag6nniigf44s2kg3pseaeopikcxhscj73wlu",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreienr7fcjlrcw3wvy7ag6nniigf44s2kg3pseaeopikcxhscj73wlu",
+      "solanaTxHash": "5VF4MbuLdqdG86btK3jr2Cp3ALmmS1nWwhESayaqE7SDdPaA7orS5yydZ2wsuYi77mYCQQ22t8xicQvg67PewEte",
+      "explorerUrl": "https://solscan.io/tx/5VF4MbuLdqdG86btK3jr2Cp3ALmmS1nWwhESayaqE7SDdPaA7orS5yydZ2wsuYi77mYCQQ22t8xicQvg67PewEte"
+    },
+    {
+      "handle": "max.belyeu.longhorns",
+      "cid": "bafkreibcvdlshrku5vzi7nj6yw4tpmloemkb3u7rfwbqrt6ggmwjode6dm",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreibcvdlshrku5vzi7nj6yw4tpmloemkb3u7rfwbqrt6ggmwjode6dm",
+      "solanaTxHash": "2gv4CrKFErF6JKA3Nzkr4a1QjAa1SCRiNk1pSL8uTn3tB1BNjA62sPviZXhxbzPs5erwyyVt6X2uWM7UBriq9kDj",
+      "explorerUrl": "https://solscan.io/tx/2gv4CrKFErF6JKA3Nzkr4a1QjAa1SCRiNk1pSL8uTn3tB1BNjA62sPviZXhxbzPs5erwyyVt6X2uWM7UBriq9kDj"
+    },
+    {
+      "handle": "lebarron.johnson.longhorns",
+      "cid": "bafkreib7kq2wc2ktb3pbqpfar2lokxcre6sgk5irsmkihfur5fdzkgordu",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreib7kq2wc2ktb3pbqpfar2lokxcre6sgk5irsmkihfur5fdzkgordu",
+      "solanaTxHash": "4tBVqWYcMmtabgae1wEV5Xgk3mL8Npmqm2b9YtTgQjuMx2bqxUbLD6cicP1MpMhMuDNMrUGEUN7dPkd4uYDh2EFY",
+      "explorerUrl": "https://solscan.io/tx/4tBVqWYcMmtabgae1wEV5Xgk3mL8Npmqm2b9YtTgQjuMx2bqxUbLD6cicP1MpMhMuDNMrUGEUN7dPkd4uYDh2EFY"
+    }
+  ],
+  "relics": [
+    {
+      "id": "m_wvu_guzman",
+      "cid": "bafkreib73wp62vtxmbnxabvsaniiprptigmtz5thwswbfxsz7p4justhyi",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreib73wp62vtxmbnxabvsaniiprptigmtz5thwswbfxsz7p4justhyi",
+      "solanaTxHash": "4Kr45L2G4jY63X4b2MqcfbUa4bKW7roeaJDnTUyJUV2z74CgLkKVX26djbCQG3SxU4aG1xo7jTMREyBg6d4XCJtc",
+      "explorerUrl": "https://solscan.io/tx/4Kr45L2G4jY63X4b2MqcfbUa4bKW7roeaJDnTUyJUV2z74CgLkKVX26djbCQG3SxU4aG1xo7jTMREyBg6d4XCJtc"
+    },
+    {
+      "id": "m_wvu_hall_single",
+      "cid": "bafkreihyilyorgd7v4xjumoi5yecucauxmlook6zaqfzoiqmlmyjp3c4ua",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreihyilyorgd7v4xjumoi5yecucauxmlook6zaqfzoiqmlmyjp3c4ua",
+      "solanaTxHash": "Xsc5Hd5RzTs4wVotgZgYfgTY65KhRPA2iVkkkxmGyvsiQKYhx1sPUjbrNttJWF7FtRU9e7ZmdD44esFMmgiaWX9",
+      "explorerUrl": "https://solscan.io/tx/Xsc5Hd5RzTs4wVotgZgYfgTY65KhRPA2iVkkkxmGyvsiQKYhx1sPUjbrNttJWF7FtRU9e7ZmdD44esFMmgiaWX9"
+    },
+    {
+      "id": "m_wvu_hall_double",
+      "cid": "bafkreif6dnw3ec2kvxoby5ufxux2llqacnmf3hftzteb26yamcc5w2tbue",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreif6dnw3ec2kvxoby5ufxux2llqacnmf3hftzteb26yamcc5w2tbue",
+      "solanaTxHash": "2GUCKs9NyQdxe48AiKtPkZXmHdKvszxdqRRS7Gxi5sGowdT8gPHanPJuGpoUGh8LMtbuapPkvFKLovnr5GwTzNEW",
+      "explorerUrl": "https://solscan.io/tx/2GUCKs9NyQdxe48AiKtPkZXmHdKvszxdqRRS7Gxi5sGowdT8gPHanPJuGpoUGh8LMtbuapPkvFKLovnr5GwTzNEW"
+    },
+    {
+      "id": "m_wvu_smith",
+      "cid": "bafkreif3rv3l4vm6ibnjdilcjrvvx3p36in6vbonzltw5r56h6eduw4mmq",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreif3rv3l4vm6ibnjdilcjrvvx3p36in6vbonzltw5r56h6eduw4mmq",
+      "solanaTxHash": "2iry3TmV1WqU6rXagR9CrizXZh4jT3Pw6W3y77npqsCSie7NZRL54qV1daw3C5kzVEVub2Q9RWVEgWS8GbK59NBQ",
+      "explorerUrl": "https://solscan.io/tx/2iry3TmV1WqU6rXagR9CrizXZh4jT3Pw6W3y77npqsCSie7NZRL54qV1daw3C5kzVEVub2Q9RWVEgWS8GbK59NBQ"
+    },
+    {
+      "id": "m_troy_janicki",
+      "cid": "bafkreiemhi3rgn7rhke5nuwlr2wccockc2gqnos6jn3fc34wn7copm3zeu",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiemhi3rgn7rhke5nuwlr2wccockc2gqnos6jn3fc34wn7copm3zeu",
+      "solanaTxHash": "59aPYF6VzP8jFUatgQpgJX27GQHXnt9UXsMKacqMf4YYBmNnif8Au28Dn7EQV6KCpXZsasiu1fApK5rbDPGn2eXs",
+      "explorerUrl": "https://solscan.io/tx/59aPYF6VzP8jFUatgQpgJX27GQHXnt9UXsMKacqMf4YYBmNnif8Au28Dn7EQV6KCpXZsasiu1fApK5rbDPGn2eXs"
+    },
+    {
+      "id": "m_wvu_korn",
+      "cid": "bafkreieupwlc5fmjcsjei27vxvqfgshcasclue75dkafyul7khlgxovk4u",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreieupwlc5fmjcsjei27vxvqfgshcasclue75dkafyul7khlgxovk4u",
+      "solanaTxHash": "FiAS3Qa8JSWwbNWmSdbx2qV5UAJZkQi4T74UA1Fi8FBJC4VQYoVMvAjRSCd3QdRMVkQieqdXRDq461RcW74Qq9w",
+      "explorerUrl": "https://solscan.io/tx/FiAS3Qa8JSWwbNWmSdbx2qV5UAJZkQi4T74UA1Fi8FBJC4VQYoVMvAjRSCd3QdRMVkQieqdXRDq461RcW74Qq9w"
+    },
+    {
+      "id": "m_wvu_mcdougal",
+      "cid": "bafkreiajx2tk7bvl73c2r3dkkbdkg3jjbr6romkjwrvqp7q7jtcgkmchxu",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreiajx2tk7bvl73c2r3dkkbdkg3jjbr6romkjwrvqp7q7jtcgkmchxu",
+      "solanaTxHash": "3n5YnAnjrBK9A1ZaGn2NYvxCNqN7PQuK95jETTTTVyaysHciBs1G4PKVwiQrPEFHicsAGTz4UpaKmS5SLnd78i7j",
+      "explorerUrl": "https://solscan.io/tx/3n5YnAnjrBK9A1ZaGn2NYvxCNqN7PQuK95jETTTTVyaysHciBs1G4PKVwiQrPEFHicsAGTz4UpaKmS5SLnd78i7j"
+    },
+    {
+      "id": "m_troy_darnell",
+      "cid": "bafkreih44hf66mp4al5vpkfujrhvjrc5ryzhwlt7h3mwru4ax6sv3ug5nm",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreih44hf66mp4al5vpkfujrhvjrc5ryzhwlt7h3mwru4ax6sv3ug5nm",
+      "solanaTxHash": "3LbRPaj7mnbmgDSznqUBCCiTusFJVdPcf87ZuQ33iv3WjG3Si2XfEDc6vMJTyySfdSzxXW3jkHEimaKuaWVuF5ND",
+      "explorerUrl": "https://solscan.io/tx/3LbRPaj7mnbmgDSznqUBCCiTusFJVdPcf87ZuQ33iv3WjG3Si2XfEDc6vMJTyySfdSzxXW3jkHEimaKuaWVuF5ND"
+    },
+    {
+      "id": "m_troy_boroff",
+      "cid": "bafkreidsqcienempimiawo3mieddcgfsyglhtenccmcf2usn6qcheri2o4",
+      "ipfsUrl": "https://gateway.pinata.cloud/ipfs/bafkreidsqcienempimiawo3mieddcgfsyglhtenccmcf2usn6qcheri2o4",
+      "solanaTxHash": "rF8tRKMfue6Sy9yDBpdKYcwzmD9FpduWeYAxgU2XCUct9gugfVqCfMLGV7crM2JtP5SeEQwP29iCyH1FQGUkayt",
+      "explorerUrl": "https://solscan.io/tx/rF8tRKMfue6Sy9yDBpdKYcwzmD9FpduWeYAxgU2XCUct9gugfVqCfMLGV7crM2JtP5SeEQwP29iCyH1FQGUkayt"
+    }
+  ],
+  "summary": {
+    "totalMinted": 65,
+    "totalFailed": 0,
+    "durationMs": 4027
+  }
+}

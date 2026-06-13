@@ -42,8 +42,17 @@ const navGroups = [
 ];
 
 export default function Nav() {
-  const pathname = usePathname();
-  if (pathname === "/namespaces/cockpit" || pathname === "/" || pathname === "/troptions" || pathname === "/troptionsinvestors" || pathname === "/registry-gateway") return null;
+  const pathname = usePathname() || "";
+  const isLegalRoute =
+    pathname === "/legacy-vault" ||
+    pathname.startsWith("/vault") ||
+    pathname.startsWith("/executor") ||
+    pathname === "/pricing" ||
+    pathname === "/onboard" ||
+    pathname === "/vault-explained" ||
+    pathname === "/lifetime";
+
+  if (!isLegalRoute) return null;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

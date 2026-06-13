@@ -43,24 +43,24 @@ const config: Config = {
           100: "#F7F0E6",
           200: "#EDE3D1",
           300: "#DED0B8",
-          400: "#C9B89A",
-          500: "#B09E82",
-          600: "#8C7D63",
-          700: "#6B5F49",
-          800: "#4A4234",
-          900: "#2D2820",
+          400: "#8C7D63", // Darkened for readability
+          500: "#6B5F49", // Darkened for readability
+          600: "#4A4234", // Darkened for readability
+          700: "#2D2820", // Darkened for readability
+          800: "#1E1912", // Darkened for readability
+          900: "#0E0C09", // Darkened for readability
         },
         estate: {
           50:  "#FBF8F4",
           100: "#F3EDE3",
           200: "#E4D9C6",
           300: "#CDBFA0",
-          400: "#B09A72",
-          500: "#8B7355",
-          600: "#6B5840",
-          700: "#4E4030",
-          800: "#342B20",
-          900: "#1E1912",
+          400: "#70614C", // Darkened for readability
+          500: "#54493A", // Darkened for readability
+          600: "#3D342A", // Darkened for readability
+          700: "#2B241D", // Darkened for readability
+          800: "#1A1612", // Darkened for readability
+          900: "#0F0D0A", // Darkened for readability
         },
         legacy: {
           gold:   "#C8900A",

@@ -583,7 +583,7 @@ export default function UnykornAiPortalClient() {
             avatar = "🧬";
             agentName = "ZK Proof Verifier";
             role = "Verification Swarm";
-          } else if (formattedQuery.includes("kevan") || formattedQuery.includes("burns")) {
+          } else if (formattedQuery.includes("architect") || formattedQuery.includes("founder")) {
             aiTitle = "AI Swarm Answer: Unykorn Platform Architect";
             avatar = "🏛️";
             agentName = "Unykorn Founder Agent";
@@ -2381,14 +2381,14 @@ export default function UnykornAiPortalClient() {
                           <p className={textMuted}>Local Workspace Source Directory Links:</p>
                           <div className="flex flex-wrap gap-2.5">
                             <Link
-                              href="file:///C:/Users/Kevan/.gemini/antigravity-ide/scratch/adk_build/legacy-vault-protocol/solana-anchor"
+                              href="/solana-anchor"
                               className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-slate-900/40 hover:bg-slate-900 px-3 py-1.5 font-mono text-[11px] transition-all hover:text-amber-500"
                             >
                               <span>solana-anchor/</span>
                               <ExternalLink className="h-3 w-3" />
                             </Link>
                             <Link
-                              href="file:///C:/Users/Kevan/.gemini/antigravity-ide/scratch/adk_build/legacy-vault-protocol/contracts"
+                              href="/contracts"
                               className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-slate-900/40 hover:bg-slate-900 px-3 py-1.5 font-mono text-[11px] transition-all hover:text-amber-500"
                             >
                               <span>contracts/</span>
