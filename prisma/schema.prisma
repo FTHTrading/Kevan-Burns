@@ -840,3 +840,111 @@ model BackgroundJob {
 // - FUCK_YOU_LEVEL: high level scaled extreme — max=10, full Warlord Heirloom + rugpull etc.
 // - NUCLEAR: generational scaled — unlimited + Immortal Heirloom + self-hosted + 100yr
 // See approved plan + heirloom/ for the normal vs high-level-scaled split (Heirloom persona + intake).
+
+// ──────────────────────────────────────────────────────────
+//  CWS / AIP-3 Dispute & Governance Models
+// ──────────────────────────────────────────────────────────
+
+model Relic {
+  id                     String   @id @default(cuid())
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  athleteNamespace       String
+  athleteWallet          String
+  universityNamespace    String
+  universityWallet       String
+  agentNamespace         String?
+  agentWallet            String?
+  brandNamespace         String?
+  brandWallet            String?
+
+  eventType              String
+  gameId                 String?
+  bracketStage           String?
+  metadataCid            String
+  solanaMintTxHash       String?
+
+  // The governance & conflict layers
+  dataOwnershipLayer     String   // ATHLETE | UNIVERSITY | BROADCASTER | PROTOCOL | DISPUTED
+  nilConflictFlag        Boolean  @default(false)
+  nilConflictNotes       String?
+
+  legacyVaultRedemption  Json?
+
+  ghostEditionId         String?
+  disputeVaultId         String?
+  protocolGangbangEditionId String?
+
+  // Relations
+  athleteId              String?
+  athlete                Athlete? @relation("AthleteRelics", fields: [athleteId], references: [id])
+
+  @@index([athleteNamespace])
+  @@index([universityNamespace])
+  @@index([nilConflictFlag])
+}
+
+model Athlete {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  namespace         String   @unique
+  wallet            String?
+  university        String?
+
+  badges            String[] @default([])
+  fractureTier      Int      @default(0) // conflict frequency progression counter
+
+  relics            Relic[]  @relation("AthleteRelics")
+
+  @@index([namespace])
+  @@index([wallet])
+}
+
+model DisputeVault {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  relicId           String
+  ghostEditionId    String?
+  status            String   // OPEN | RESOLVED | SLASHED
+
+  totalLockedValue  Float    @default(0)
+  participants      Json
+
+  resolutionProfile String?
+  votes             Json?
+  stakes            Json?
+
+  @@index([relicId])
+  @@index([status])
+}
+
+model StakeRecord {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+
+  vaultId           String
+  voterNamespace    String
+  stakedRelicId     String
+  voteOption        String
+
+  @@index([vaultId])
+  @@index([voterNamespace])
+}
+
+enum BadgeType {
+  ProtocolVictim
+  SerialProtocolVictim
+  RepeatedlyFucked
+}
+
+enum MarkerType {
+  TraumaEcho
+  SoulSnatched
+  InstitutionalMeat
+}
+
