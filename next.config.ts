@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
   },
 
   // Bundle only what's needed from large SDKs
-  serverExternalPackages: ["xrpl", "@stellar/stellar-sdk", "ethers", "nodemailer"],
+  // serverExternalPackages: ["xrpl", "@stellar/stellar-sdk", "ethers", "nodemailer"],
 
   // Compress responses
   compress: true,
@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
   // Disable source maps in production (reduces bundle size)
   productionBrowserSourceMaps: false,
 
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, nextRuntime }) => {
     if (isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -45,6 +45,12 @@ const nextConfig: NextConfig = {
       config.resolve.alias = {
         ...config.resolve.alias,
         nodemailer: false,
+      };
+    }
+    if (nextRuntime === "edge") {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "@prisma/client$": "@prisma/client/index-browser",
       };
     }
     return config;

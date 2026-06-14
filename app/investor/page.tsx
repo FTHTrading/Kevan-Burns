@@ -7,8 +7,11 @@ import {
   CheckCircle2, Clock, AlertTriangle, ChevronRight, Download, Send,
   RefreshCw, Layers, Cpu, Database, Award, ExternalLink, Info, Terminal, X,
   Coins, Sparkles, Building, ArrowRight, Activity, ArrowUpRight, Check, Eye, Plus, ArrowDown, ArrowUp, DollarSign,
-  Sun, Moon
+  Sun, Moon, Mail
 } from "lucide-react";
+
+import resolvedRoots from "../../scripts/resolved_mint_results.json";
+import tldMappings from "../../scripts/tld_mappings.json";
 
 // Types
 type ThemeType = "dark" | "light";
@@ -54,6 +57,80 @@ export default function TroptionsInvestorPage() {
     "[TimesFM] Model initialized. Standing by for inference run..."
   ]);
   const [timesfmData, setTimesfmData] = useState<number[]>([1800, 1805, 1812, 1810, 1818, 1825, 1822, 1835, 1840, 1855, 1850, 1868]);
+
+  // 75 Suffix Roots Registry States
+  const [regSearch, setRegSearch] = useState("");
+  const [regPage, setRegPage] = useState(1);
+  const [selectedRootDetail, setSelectedRootDetail] = useState<any | null>(null);
+
+  // ERC-4337 Onboarding Simulator States
+  const [simEmail, setSimEmail] = useState("");
+  const [simHandle, setSimHandle] = useState("");
+  const [simSuffix, setSimSuffix] = useState(".gold");
+  const [simStep, setSimStep] = useState(0); // 0 = idle, 1 = keys, 2 = userop, 3 = paymaster, 4 = deploy, 5 = done
+  const [simLogs, setSimLogs] = useState<string[]>([]);
+  const [simLoading, setSimLoading] = useState(false);
+  const [simResult, setSimResult] = useState<any | null>(null);
+
+  const startAaSimulation = () => {
+    if (!simEmail || !simHandle) return;
+    setSimLoading(true);
+    setSimStep(1);
+    setSimLogs(["[ERC-4337 Onboarding] Initializing zero-friction flow..."]);
+    setSimResult(null);
+    
+    setTimeout(() => {
+      setSimStep(2);
+      setSimLogs(prev => [
+        ...prev, 
+        "[HMAC-SHA256 Key Derivation] Generating deterministic seeds from email + handle...",
+        "[HMAC-SHA256 Key Derivation] Public keys generated for EVM, Solana, Stellar, and XRPL.",
+        `[HMAC-SHA256 Key Derivation] EVM Address: 0x65519e78${simHandle.substring(0, 4)}... (Zero seed phrase required)`
+      ]);
+      
+      setTimeout(() => {
+        setSimStep(3);
+        setSimLogs(prev => [
+          ...prev,
+          "[UserOperation construction] Building signed call data package...",
+          "[Bundler Relay] Submitting UserOperation to mempool...",
+          "[Paymaster Membrane] Sponsoring transaction gas via Unykorn Paymaster (Client gas cost: $0.00)"
+        ]);
+        
+        setTimeout(() => {
+          setSimStep(4);
+          setSimLogs(prev => [
+            ...prev,
+            "[ERC-6551 Tokenbound Account] Calling createAccount() on canonical Registry...",
+            `[ERC-6551 Tokenbound Account] Deploying smart account contract on Polygon Mainnet...`,
+            `[ERC-6551 Tokenbound Account] Attaching TBA to owner token ${simHandle}${simSuffix}...`
+          ]);
+          
+          setTimeout(() => {
+            // Generate realistic mock addresses for the result
+            const mockTba = ("0x" + Math.random().toString(16).substring(2, 42).padEnd(40, "0")).toLowerCase();
+            const mockSol = "37w" + Math.random().toString(36).substring(2, 10).padEnd(40, "a");
+            
+            setSimLogs(prev => [
+              ...prev,
+              "[Onboarding Complete] Smart Wallet deployed & registered successfully!",
+              `[Namespace Resolver] Mapped ${simHandle}${simSuffix} to TBA: ${mockTba}`
+            ]);
+            
+            setSimStep(5);
+            setSimResult({
+              email: simEmail,
+              namespace: `${simHandle}${simSuffix}`,
+              tbaAddress: mockTba,
+              solanaAddress: mockSol,
+              evmAddress: mockTba
+            });
+            setSimLoading(false);
+          }, 1500);
+        }, 1500);
+      }, 1500);
+    }, 1500);
+  };
 
   const runTimesfmInference = () => {
     setTimesfmLoading(true);
@@ -142,7 +219,7 @@ export default function TroptionsInvestorPage() {
             agentName: "NIL Compliance Agent",
             avatar: "🏃",
             role: "Sports Compliance Swarm",
-            opinion: `AIP-2 verified student-athlete namespace located. 50/50 royalty split is locked in creators array in metadata. Revenue routed directly to Zurich gold-backed fiduciary vaults.`
+            opinion: `AIP-2 verified student-athlete namespace located. 50/50 royalty split is locked in creators array in metadata. Revenue routed directly to Zurich reserve-backed fiduciary vaults.`
           });
           setSearching(false);
         }, 800);
@@ -271,6 +348,7 @@ export default function TroptionsInvestorPage() {
               <li><a href="#products" className={`hover:${textTitleClass} transition-colors`}>Products</a></li>
               <li><a href="#verticals" className={`hover:${textTitleClass} transition-colors`}>Verticals</a></li>
               <li><a href="#revenue" className={`hover:${textTitleClass} transition-colors`}>Revenue</a></li>
+              <li><a href="#diligence" className={`hover:${textTitleClass} transition-colors`}>Diligence</a></li>
               <li><a href="#scope" className={`hover:${textTitleClass} transition-colors`}>Scope</a></li>
             </ul>
           </nav>
@@ -637,7 +715,7 @@ export default function TroptionsInvestorPage() {
               { tag: "Payments", title: "x402 and Troptions Pay", desc: "x402 is framed as a protocol-level payment membrane using HTTP 402 as a live payment gate, while Troptions Pay acts as the user-facing multi-rail checkout surface across wallet, card, and chain options." },
               { tag: "Intelligence", title: "GMIIE and OSINT", desc: "GMIIE, blockchainfraud.org, and related data surfaces create the institutional intelligence layer, which supports both the operating system and paid data-access narratives." },
               { tag: "Partner expansion", title: "White-label and T-Build", desc: "The partner stack suggests a licensing pathway where institutions can deploy branded Troptions-powered infrastructure rather than building registry, wallet, or exchange components themselves." },
-              { tag: "Royalty Splits", title: "SFT Secondary Market Split (AIP-2)", desc: "NIL highlight sales automatically enforce a 50/50 royalty split routed directly to the athlete's gold-backed wealth vault and Unykorn reserves, unlocking a high-velocity sports digital collectible network." },
+              { tag: "Royalty Splits", title: "SFT Secondary Market Split (AIP-2)", desc: "NIL highlight sales automatically enforce a 50/50 royalty split routed directly to the athlete's reserve-backed wealth vault and Unykorn reserves, unlocking a high-velocity sports digital collectible network." },
               { tag: "Sports NIL RWA", title: "CWS Athlete Verification (AIP-2)", desc: "A sovereign athlete-onboarding gateway combining wallet binding, university email OTP validation, and Coach/SID clearance. Anchors cryptographic attestations on Solana Mainnet and Pins to IPFS, enforcing a 50/50 creator split in secondary sales." }
             ].map((prod) => (
               <article key={prod.title} className={`rounded-2xl border p-6 space-y-3 transition-colors ${surfaceClass}`}>
@@ -670,7 +748,7 @@ export default function TroptionsInvestorPage() {
               { title: "Banking rail", desc: "Institutional settlement through XRPL IOUs and gateway services, aimed at banks, credit unions, fintechs, and counterparties." },
               { title: "Estate rail", desc: "Legacy Vault, legal-chain workflows, and Ruby RWA create a direct-to-consumer and professional-services software business." },
               { title: "Liquidity rail", desc: "Automated market-making and routing infrastructure are partially live, so this vertical reads as active build rather than fully monetized today." },
-              { title: "Sports capital rail", desc: "Sports utility-token issuance, CWS athlete verification (AIP-2) proving layers, physical gold-backed reserves (Zurich safe vaults), and 50/50 on-chain splits for NIL highlights." },
+              { title: "Sports capital rail", desc: "Sports utility-token issuance, CWS athlete verification (AIP-2) proving layers, fiduciary reserve-backed reserves (Zurich safe vaults), and 50/50 on-chain splits for NIL highlights." },
               { title: "Trading rail", desc: "PASS API access, x402-gated intelligence SKUs, and internal exchange tooling form a recurring-access data and execution layer." },
               { title: "Partner integrations", desc: "Onboarding fees, white-label licensing, and developer build tooling support a B2B expansion model beyond direct product sales." }
             ].map((v) => (
@@ -704,7 +782,7 @@ export default function TroptionsInvestorPage() {
               { tag: "Enterprise deals", title: "Stablecoin gateway", desc: "The XRPL gateway is framed as custom institutional deal-closing rather than self-serve SaaS, so this revenue stream should be treated as enterprise pipeline." },
               { tag: "Per-request settlement", title: "x402 gateway", desc: "x402 creates transaction-level monetization through ATP settlements on Apostle Chain, which could become meaningful if payment-gated APIs scale." },
               { tag: "Licensing", title: "Partner and white-label", desc: "The partner stack suggests setup fees, branded deployments, and long-tail licensing economics for institutions that want infrastructure without internal build complexity." },
-              { tag: "Royalty Splits", title: "SFT Secondary Market Split (AIP-2)", desc: "NIL highlight sales automatically enforce a 50/50 royalty split routed directly to the athlete's gold-backed wealth vault and Unykorn reserves, unlocking a high-velocity sports digital collectible network." }
+              { tag: "Royalty Splits", title: "SFT Secondary Market Split (AIP-2)", desc: "NIL highlight sales automatically enforce a 50/50 royalty split routed directly to the athlete's reserve-backed wealth vault and Unykorn reserves, unlocking a high-velocity sports digital collectible network." }
             ].map((rev) => (
               <article key={rev.title} className={`rounded-2xl border p-6 space-y-3 transition-colors ${surfaceClass}`}>
                 <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${tagClass}`}>
@@ -726,6 +804,503 @@ export default function TroptionsInvestorPage() {
             </p>
           </div>
         </section>
+
+        {/* STRATEGIC DUE DILIGENCE & VALUATION PACKETS */}
+        <section id="diligence" className="pt-8 border-t border-dashed border-opacity-20 space-y-6">
+          <div className="space-y-2">
+            <div className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-[#4f98a3]" : "text-[#01696f]"}`}>
+              Diligence Assets
+            </div>
+            <h2 className={`text-3xl font-bold font-serif leading-tight ${textTitleClass}`}>
+              Strategic Due Diligence & Valuation Packets
+            </h2>
+            <p className={`text-sm ${textMutedClass} max-w-2xl`}>
+              Access and download the official protocol validation papers, valuation models, and strategic investor briefs generated for institutional review.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Executive One-Pager",
+                desc: "Strategic 1-page overview summarizing the core investment thesis, protocol utility, and growth vectors.",
+                file: "vc_one_pager.md",
+                size: "3.5 KB",
+                icon: FileText
+              },
+              {
+                title: "Valuation Normalization Model",
+                desc: "Economic breakdown normalizing asset pricing models and projecting growth multiplier tiers.",
+                file: "valuation_normalization_model.md",
+                size: "2.4 KB",
+                icon: Coins
+              },
+              {
+                title: "Cryptographic Truth Packet",
+                desc: "Technical attestation mapping off-chain valuation metrics directly to multi-chain cryptographic proofs.",
+                file: "cryptographic_truth_packet.md",
+                size: "2.8 KB",
+                icon: Shield
+              },
+              {
+                title: "10-Slide Pitch Outline",
+                desc: "Structured deck narrative designed for venture Capital partners and key strategic allocators.",
+                file: "investor_pitch_narrative.md",
+                size: "4.5 KB",
+                icon: Layers
+              },
+              {
+                title: "ZK & Regulatory Multipliers",
+                desc: "Analysis of compliance gates, Zero-Knowledge proofs, and premium valuation multiplier catalysts.",
+                file: "value_multipliers.md",
+                size: "3.1 KB",
+                icon: Lock
+              },
+              {
+                title: "Yield & Collateral Strategy",
+                desc: "Fiduciary custody design mapping real-world asset collateralization and treasury yield loops.",
+                file: "real_value_generation_model.md",
+                size: "2.3 KB",
+                icon: Building
+              },
+              {
+                title: "Valuation & Pitch Strategy",
+                desc: "Strategic brief explaining the Zero-Client Proof framework and comparable domain/namespace valuations.",
+                file: "investor_valuation_strategy.md",
+                size: "6.8 KB",
+                icon: Award
+              }
+            ].map((doc) => {
+              const DocIcon = doc.icon;
+              return (
+                <article key={doc.file} className={`rounded-2xl border p-6 flex flex-col justify-between transition-all hover:translate-y-[-2px] duration-300 ${surfaceClass} hover:shadow-md`}>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className={`p-2.5 rounded-xl ${tagClass}`}>
+                        <DocIcon className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">
+                        {doc.size}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className={`text-base font-bold ${textTitleClass}`}>{doc.title}</h3>
+                      <p className={`text-xs leading-relaxed ${textMutedClass} mt-1`}>{doc.desc}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 pt-5 mt-auto">
+                    <a
+                      href={`/docs/${doc.file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border ${borderClass} ${surfaceClass} hover:opacity-80 transition-all ${textTitleClass}`}
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      View
+                    </a>
+                    <a
+                      href={`/docs/${doc.file}`}
+                      download={doc.file}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${primaryClass}`}
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ERC-4337 & ERC-6551 CLIENT ONBOARDING SIMULATOR */}
+        <section id="onboarding" className="pt-8 border-t border-dashed border-opacity-20 space-y-6">
+          <div className="space-y-2">
+            <div className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-[#4f98a3]" : "text-[#01696f]"}`}>
+              Frictionless Client Gateway
+            </div>
+            <h2 className={`text-3xl font-bold font-serif leading-tight ${textTitleClass}`}>
+              ERC-4337 / ERC-6551 Account Abstraction Simulator
+            </h2>
+            <p className={`text-sm ${textMutedClass} max-w-2xl`}>
+              Demonstrates the zero-friction signup framework for end clients. No MetaMask, no seed phrases, and zero gas fees—completely sponsored by the Unykorn Paymaster.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            {/* Input Form Card */}
+            <div className={`lg:col-span-5 rounded-2xl border p-6 space-y-6 ${surfaceClass}`}>
+              <h3 className={`text-base font-bold ${textTitleClass}`}>Simulate 1-Click Registration</h3>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Client Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
+                    <input 
+                      type="email" 
+                      placeholder="e.g. client@fiduciary.com"
+                      value={simEmail}
+                      onChange={(e) => setSimEmail(e.target.value)}
+                      disabled={simLoading}
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs focus:outline-none border ${isDark ? "bg-[#090b10] border-slate-800 text-white focus:border-[#4f98a3]" : "bg-white border-slate-200 text-slate-900 focus:border-[#01696f]"}`}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Desired Handle</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. trust-gold"
+                      value={simHandle}
+                      onChange={(e) => setSimHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                      disabled={simLoading}
+                      className={`w-full px-3 py-2.5 rounded-xl text-xs focus:outline-none border font-mono ${isDark ? "bg-[#090b10] border-slate-800 text-white focus:border-[#4f98a3]" : "bg-white border-slate-200 text-slate-900 focus:border-[#01696f]"}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Root Suffix</label>
+                    <select
+                      value={simSuffix}
+                      onChange={(e) => setSimSuffix(e.target.value)}
+                      disabled={simLoading}
+                      className={`w-full px-3 py-2.5 rounded-xl text-xs focus:outline-none border font-mono cursor-pointer ${isDark ? "bg-[#090b10] border-slate-800 text-white focus:border-[#4f98a3]" : "bg-white border-slate-200 text-slate-900 focus:border-[#01696f]"}`}
+                    >
+                      <option value=".gold">.gold (Gold)</option>
+                      <option value=".estate">.estate (Trust)</option>
+                      <option value=".money">.money (Settlement)</option>
+                      <option value=".1">.1 (Resolver)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={startAaSimulation}
+                disabled={simLoading || !simEmail || !simHandle}
+                className={`w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all ${primaryClass} disabled:opacity-50`}
+              >
+                {simLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Executing Account Abstraction...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Trigger Account Creation
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Terminal Logs & Result Panel */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className={`rounded-2xl border p-5 font-mono text-xs overflow-hidden flex flex-col justify-between min-h-[240px] ${isDark ? "bg-[#090b10] border-slate-800 text-amber-500" : "bg-slate-950 border-slate-800 text-amber-400"}`}>
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <Terminal className="w-4 h-4 text-slate-400" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Abstraction Logs</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 flex-1 overflow-y-auto max-h-[160px] pr-2">
+                  {simStep === 0 && (
+                    <span className="text-slate-500 italic">Standing by. Enter client email and click "Trigger Account Creation" to run...</span>
+                  )}
+                  {simLogs.map((log, idx) => (
+                    <div key={idx} className="leading-relaxed whitespace-pre-wrap">
+                      {log}
+                    </div>
+                  ))}
+                  {simLoading && (
+                    <div className="flex items-center gap-1.5 mt-2 text-slate-400">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <span>Processing next block...</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {simResult && (
+                <div className={`rounded-2xl border p-5 space-y-3 animate-fadeIn ${surfaceClass}`}>
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span className="text-xs font-bold">Registration Successful & Sponsored!</span>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4 text-xs font-mono">
+                    <div className="space-y-1">
+                      <span className="text-[9px] uppercase font-bold text-slate-500 block">Sovereign Handle</span>
+                      <span className={`font-semibold ${textTitleClass}`}>{simResult.namespace}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[9px] uppercase font-bold text-slate-500 block">ERC-6551 Smart Wallet (TBA)</span>
+                      <span className={`font-semibold break-all ${textTitleClass}`}>{simResult.tbaAddress}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* 75 GENESIS SUFFIX ROOTS & TBA REGISTRY EXPLORER */}
+        <section id="roots-explorer" className="pt-8 border-t border-dashed border-opacity-20 space-y-6">
+          <div className="space-y-2 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-2">
+              <div className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-[#4f98a3]" : "text-[#01696f]"}`}>
+                On-Chain Registry Catalog
+              </div>
+              <h2 className={`text-3xl font-bold font-serif leading-tight ${textTitleClass}`}>
+                Genesis Suffix Roots & Tokenbound Accounts Registry
+              </h2>
+              <p className={`text-sm ${textMutedClass} max-w-2xl`}>
+                Full audit ledger of all 75 registered suffixes, their derived ERC-6551 Tokenbound Smart Wallets, and cross-chain anchors.
+              </p>
+            </div>
+            
+            {/* Search Input */}
+            <div className="relative w-full md:w-72 shrink-0">
+              <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search suffix (e.g. .gold)..."
+                value={regSearch}
+                onChange={(e) => {
+                  setRegSearch(e.target.value);
+                  setRegPage(1); // Reset page on search
+                }}
+                className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs focus:outline-none border ${isDark ? "bg-[#090b10] border-slate-800 text-white focus:border-[#4f98a3]" : "bg-white border-slate-200 text-slate-900 focus:border-[#01696f]"}`}
+              />
+            </div>
+          </div>
+
+          <div className={`rounded-2xl border overflow-x-auto ${surfaceClass}`}>
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-white/5 bg-slate-900 bg-opacity-35 text-slate-400 font-bold">
+                  <th className="p-4">Suffix</th>
+                  <th className="p-4">Asset Vault Description</th>
+                  <th className="p-4">EVM TBA Address</th>
+                  <th className="p-4">Solana Mint</th>
+                  <th className="p-4">Stellar Issuer</th>
+                  <th className="p-4 text-center">Audit</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {(() => {
+                  const filtered = resolvedRoots.filter((r: any) => 
+                    r.suffix.toLowerCase().includes(regSearch.toLowerCase())
+                  );
+                  const pageCount = Math.ceil(filtered.length / 10);
+                  const startIndex = (regPage - 1) * 10;
+                  const paginated = filtered.slice(startIndex, startIndex + 10);
+                  
+                  if (paginated.length === 0) {
+                    return (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-500 italic">
+                          No suffixes found matching your search.
+                        </td>
+                      </tr>
+                    );
+                  }
+                  
+                  return paginated.map((root) => {
+                    const suffix = root.suffix;
+                    const mapping = tldMappings[suffix as keyof typeof tldMappings] as any;
+                    const resolved = resolvedRoots.find((r: any) => r.suffix === suffix) as any;
+                    const tba = mapping?.tba || "No TBA Derived";
+                    const solanaMint = resolved?.solanaMint || "Underfunded Simulation Mode";
+                    const stellarIssuer = resolved?.stellarIssuer || "Underfunded Simulation Mode";
+                    
+                    return (
+                      <tr key={suffix} className="hover:bg-white/5 transition-colors">
+                        <td className="p-4 font-bold text-amber-500 font-mono">{suffix}</td>
+                        <td className="p-4 font-semibold text-slate-400 max-w-[200px] truncate">{mapping?.rwa || "Generic Resource Suffix"}</td>
+                        <td className="p-4 font-mono text-[11px] text-slate-400 select-all max-w-[120px] truncate" title={tba}>
+                          {tba}
+                        </td>
+                        <td className="p-4 font-mono text-[11px] text-slate-400 select-all max-w-[120px] truncate" title={solanaMint}>
+                          {solanaMint}
+                        </td>
+                        <td className="p-4 font-mono text-[11px] text-slate-400 select-all max-w-[120px] truncate" title={stellarIssuer}>
+                          {stellarIssuer}
+                        </td>
+                        <td className="p-4 text-center">
+                          <button
+                            onClick={() => setSelectedRootDetail({ ...root, tba, description: mapping?.rwa })}
+                            className={`px-3 py-1 rounded-lg border text-[10px] font-bold ${borderClass} ${surfaceClass} hover:opacity-85 transition-all ${textTitleClass}`}
+                          >
+                            Inspect
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Controls */}
+          {(() => {
+            const filtered = resolvedRoots.filter((r: any) => 
+              r.suffix.toLowerCase().includes(regSearch.toLowerCase())
+            );
+            const pageCount = Math.ceil(filtered.length / 10);
+            if (pageCount <= 1) return null;
+            
+            return (
+              <div className="flex items-center justify-between pt-4">
+                <span className="text-xs text-slate-500 font-semibold">
+                  Showing Page {regPage} of {pageCount} ({filtered.length} total entries)
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={regPage === 1}
+                    onClick={() => setRegPage(prev => Math.max(1, prev - 1))}
+                    className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all disabled:opacity-40 ${borderClass} ${surfaceClass} ${textTitleClass}`}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={regPage === pageCount}
+                    onClick={() => setRegPage(prev => Math.min(pageCount, prev + 1))}
+                    className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all disabled:opacity-40 ${borderClass} ${surfaceClass} ${textTitleClass}`}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </section>
+
+        {/* ROOT DETAILS MODAL / DRAWER */}
+        {selectedRootDetail && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
+            <div className={`max-w-2xl w-full rounded-3xl border p-6 md:p-8 space-y-6 shadow-2xl relative ${surfaceClass}`}>
+              <button 
+                onClick={() => setSelectedRootDetail(null)}
+                className={`absolute top-5 right-5 p-1.5 rounded-xl border ${borderClass} ${surfaceClass} hover:opacity-85 text-slate-400 hover:text-white transition-all`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest font-mono">On-Chain Entitlement Registry</span>
+                <h3 className={`text-2xl font-black ${textTitleClass}`}>
+                  Suffix {selectedRootDetail.suffix} Details
+                </h3>
+                <p className={`text-xs ${textMutedClass}`}>
+                  {selectedRootDetail.description || "Genesis root suffix deployed to anchor specific asset classes and decentralized wallets."}
+                </p>
+              </div>
+
+              <div className="space-y-4 text-xs font-mono">
+                <div className="space-y-1 pb-2 border-b border-white/5">
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Polygon Tokenbound Account (TBA)</span>
+                  <div className="flex items-center justify-between bg-slate-950/40 p-2.5 rounded-xl border border-white/5">
+                    <span className={`break-all ${textTitleClass}`}>{selectedRootDetail.tba}</span>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedRootDetail.tba);
+                      }}
+                      className="text-slate-500 hover:text-white shrink-0 ml-3"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1 pb-2 border-b border-white/5">
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Solana Mint Account</span>
+                  <div className="flex items-center justify-between bg-slate-950/40 p-2.5 rounded-xl border border-white/5">
+                    <span className={`break-all ${textTitleClass}`}>{selectedRootDetail.solanaMint || "Underfunded Simulation Mode"}</span>
+                    {selectedRootDetail.solanaMint && (
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedRootDetail.solanaMint);
+                        }}
+                        className="text-slate-500 hover:text-white shrink-0 ml-3"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-1 pb-2 border-b border-white/5">
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Stellar Issuer Account</span>
+                  <div className="flex items-center justify-between bg-slate-950/40 p-2.5 rounded-xl border border-white/5">
+                    <span className={`break-all ${textTitleClass}`}>{selectedRootDetail.stellarIssuer || "Underfunded Simulation Mode"}</span>
+                    {selectedRootDetail.stellarIssuer && (
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedRootDetail.stellarIssuer);
+                        }}
+                        className="text-slate-500 hover:text-white shrink-0 ml-3"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {selectedRootDetail.xrplTx && (
+                  <div className="space-y-1 pb-2 border-b border-white/5">
+                    <span className="text-[9px] uppercase font-bold text-slate-500 block">XRPL Anchoring Tx</span>
+                    <div className="flex items-center justify-between bg-slate-950/40 p-2.5 rounded-xl border border-white/5">
+                      <span className={`break-all ${textTitleClass}`}>{selectedRootDetail.xrplTx}</span>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedRootDetail.xrplTx);
+                        }}
+                        className="text-slate-500 hover:text-white shrink-0 ml-3"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {selectedRootDetail.metadataCID && (
+                  <div className="space-y-1">
+                    <span className="text-[9px] uppercase font-bold text-slate-500 block">IPFS Metadata CID</span>
+                    <div className="flex items-center justify-between bg-slate-950/40 p-2.5 rounded-xl border border-white/5">
+                      <span className={`break-all ${textTitleClass}`}>{selectedRootDetail.metadataCID}</span>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedRootDetail.metadataCID);
+                        }}
+                        className="text-slate-500 hover:text-white shrink-0 ml-3"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={() => setSelectedRootDetail(null)}
+                  className={`w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-sm ${primaryClass}`}
+                >
+                  Close Inspection
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* FULL PROJECT SCOPE SECTION */}
         <section id="scope" className="pt-8 border-t border-dashed border-opacity-20 space-y-6">

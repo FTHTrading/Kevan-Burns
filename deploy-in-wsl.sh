@@ -4,7 +4,9 @@ cd "$(dirname "$0")"
 echo "=== Cleaning ==="
 rm -rf .next .vercel .next/out .vercel/output .next/cache 2>/dev/null || true
 echo "=== pnpm install (with ignore-scripts bypass) ==="
-pnpm install --ignore-scripts
+# pnpm install --ignore-scripts
+echo "=== Generating Prisma Client ==="
+pnpm prisma generate
 echo "=== Pre-create .next/export/500.html to workaround WSL/Next.js rename ENOENT on shared FS ==="
 mkdir -p .next/export .next/server/pages
 echo "<!DOCTYPE html><html><body><h1>500 - Internal Server Error</h1></body></html>" > .next/export/500.html
@@ -27,8 +29,12 @@ curl -s -X PATCH "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/page
   -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
   -H "Content-Type: application/json" \
   --data '{"deployment_configs":{"production":{"compatibility_flags":["nodejs_compat"]},"preview":{"compatibility_flags":["nodejs_compat"]}}}' | cat
+echo "=== Running uncomment-edge-runtime.py ==="
+python3 scripts/uncomment-edge-runtime.py
 echo "=== Running @cloudflare/next-on-pages (full, it will handle build using scripts/build.mjs) ==="
 pnpm dlx @cloudflare/next-on-pages
+echo "=== Restoring commented-out edge runtime for local dev ==="
+python3 scripts/comment-edge-runtime.py
 echo "=== Verifying static assets (images/layout) in output ==="
 if [ -d ".vercel/output/static/images/legacy" ]; then
   echo "Found images dir with $(ls .vercel/output/static/images/legacy/ | wc -l) files (e.g. $(ls .vercel/output/static/images/legacy/ | head -3))"
@@ -99,6 +105,14 @@ curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/pages
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   --data '{"name":"kevan.unykorn.ai"}' | cat
+curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/pages/projects/$PROJECT/domains" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{"name":"list.unykorn.ai"}' | cat
+curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/pages/projects/$PROJECT/domains" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{"name":"investors.troptionsmint.com"}' | cat
 
 
 update_dns_record() {
@@ -131,6 +145,8 @@ update_dns_record "bc4d3d1b2fa6e1b52e1d3854bbaa691e" "vault" "vault.genesis402.c
 update_dns_record "40ce3ca38991756ee115a650cfea0d14" "registry" "registry.unykorn.ai" "troptions-unity-legacy-vault.pages.dev"
 update_dns_record "40ce3ca38991756ee115a650cfea0d14" "investors" "investors.unykorn.ai" "troptions-unity-legacy-vault.pages.dev"
 update_dns_record "40ce3ca38991756ee115a650cfea0d14" "kevan" "kevan.unykorn.ai" "troptions-unity-legacy-vault.pages.dev"
+update_dns_record "40ce3ca38991756ee115a650cfea0d14" "list" "list.unykorn.ai" "troptions-unity-legacy-vault.pages.dev"
+update_dns_record "b5df82b6556421e070b8a277a0d3dd78" "investors" "investors.troptionsmint.com" "troptions-unity-legacy-vault.pages.dev"
 
 echo "=== DNS Records updated (may take minutes to propagate + CF validation). ==="
 echo "=== FULL AUTOMATED DEPLOY + DNS COMPLETE ==="
